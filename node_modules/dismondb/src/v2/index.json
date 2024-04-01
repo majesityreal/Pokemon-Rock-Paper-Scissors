@@ -1,0 +1,110 @@
+{
+   "normal": {
+      "name": "Normal",
+      "noEffect": "Ghost",
+      "noVerEffect": "Rock, Steel",
+      "supEffect": "None"
+   },
+   "fire": {
+      "name": "Fire",
+      "noEffect": "None",
+      "noVerEffect": "Fire, Water, Rock, Dragon",
+      "supEffect": "Grass, Ice, Bug, Steel"
+   },
+   "water": {
+      "name": "Water",
+      "noEffect": "None",
+      "noVerEffect": "Water, Grass, Dragon",
+      "supEffect": "Fire, Ground, Rock"
+   },
+   "electric": {
+      "name": "Electric",
+      "noEffect": "Ground",
+      "noVerEffect": "Electric, Grass, Dragon",
+      "supEffect": "Water, Ground, Rock"
+   },
+   "grass": {
+      "name": "Grass",
+      "noEffect": "None",
+      "noVerEffect": "Fire, Grass, Poison, Flying, Bug, Dragon, Steel",
+      "supEffect": "Water, Ground, Rock"
+   },
+   "ice": {
+      "name": "Ice",
+      "noEffect": "None",
+      "noVerEffect": "Fire, Water, Ice, Steel",
+      "supEffect": "Grass, Ground, Flying, Dragon"
+   },
+   "fighting": {
+      "name": "Fighting",
+      "noEffect": "Ghost",
+      "noVerEffect": "Poison, Flying, Psychic, Bug, Fairy",
+      "supEffect": "Normal, Ice, Rock, Dark, Steel"
+   },
+   "poison": {
+      "name": "Poison",
+      "noEffect": "Steel",
+      "noVerEffect": "Poison, Ground, Rock, Ghost",
+      "supEffect": "Grass, Fairy"
+   },
+   "ground": {
+      "name": "Ground",
+      "noEffect": "Flying",
+      "noVerEffect": "Grass, Bug",
+      "supEffect": "Fire, Electric, Poison, Rock, Steel"
+   },
+   "flying": {
+      "name": "Flying",
+      "noEffect": "None",
+      "noVerEffect": "Electric, Rock, Steel",
+      "supEffect": "Grass, Fighting, Bug"
+   },
+   "psychic": {
+      "name": "Psychic",
+      "noEffect": "Dark",
+      "noVerEffect": "Psychic, Steel",
+      "supEffect": "Fighting, Poison"
+   },
+   "bug": {
+      "name": "Bug",
+      "noEffect": "None",
+      "noVerEffect": "Fire, Fighting, Poison, Flying, Ghost, Steel, Fairy",
+      "supEffect": "Grass, Psychic, Dragon"
+   },
+   "rock": {
+      "name": "Rock",
+      "noEffect": "None",
+      "noVerEffect": "Fighting, Ground, Steel",
+      "supEffect": "Fire, Ice, Flying, Bug"
+   },
+   "ghost": {
+      "name": "Ghost",
+      "noEffect": "Normal",
+      "noVerEffect": "Dark",
+     "supEffect": "Psychic, Ghost"
+   },
+   "dragon": {
+      "name": "Dragon",
+      "noEffect": "Fairy",
+      "noVerEffect": "Steel",
+      "supEffect": "Dragon"
+   },
+   "dark": {
+      "name": "Dark",
+      "noEffect": "None",
+      "noVerEffect": "Dark, Fairy",
+      "supEffect": "Psychic, Ghost"
+   },
+   "steel": {
+      "name": "Steel",
+      "noEffect": "None",
+      "noVerEffect": "Fire, Water, Electric, Steel",
+      "supEffect": "Ice, Rock, Fairy"
+   },
+   "fairy": {
+      "name": "Fairy",
+      "noEffect": "None",
+      "noVerEffect": "Fire, Poison, Steel",
+      "supEffect": "Fighting, Dragon, Dark"
+   }
+}

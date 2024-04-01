@@ -1,0 +1,1604 @@
+{
+	"normal": {
+		"name": {
+			"en": "Normal",
+			"ja": "ノーマル"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/5/57/TeraGem_Normal.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/c/cb/Normal_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/9/9a/NormalIC_Tera.png"
+		},
+		"counters": {
+			"moves": 200,
+			"pokemon": {
+				"total": 149,
+				"singleType": 79,
+				"dualType": 70,
+				"gen1": 22,
+				"gen2": 15,
+				"gen3": 18,
+				"gen4": 17,
+				"gen5": 18,
+				"gen6": 8,
+				"gen7": 12,
+				"gen8": 8,
+				"gen9": 14
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 75.87,
+					"attack": 73.76,
+					"defense": 60.81,
+					"spAttack": 58.50,
+					"spDefense": 64.70,
+					"speed": 71.20,
+					"total": 404.84
+				},
+				"fullyEvolved": {
+					"hp": 88.12,
+					"attack": 88.96,
+					"defense": 74.29,
+					"spAttack": 71.64,
+					"spDefense": 79.13,
+					"speed": 84.13,
+					"total": 486.27
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "Ghost",
+					"notVeryEffective": "Rock",
+					"superEffective": "None"
+				},
+				"defence": {
+					"noEffect": "Ghost",
+					"notVeryEffective": "None",
+					"superEffective": "Fighting"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "Ghost",
+					"notVeryEffective": "Rock, Steel",
+					"superEffective": "None"
+				},
+				"defence": {
+					"noEffect": "Ghost",
+					"notVeryEffective": "None",
+					"superEffective": "Fighting"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "Ghost",
+					"notVeryEffective": "Rock, Steel",
+					"superEffective": "None"
+				},
+				"defence": {
+					"noEffect": "Ghost",
+					"notVeryEffective": "None",
+					"superEffective": "Fighting"
+				}
+			}
+		}
+	},
+	"fire": {
+		"name": {
+			"en": "Fire",
+			"ja": "ほのおタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/9/94/TeraGem_Fire.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/4/48/Fire_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/a/a2/FireIC_SV.png"
+		},
+		"counters": {
+			"moves": 47,
+			"pokemon": {
+				"total": 95,
+				"singleType": 37,
+				"dualType": 58,
+				"gen1": 12,
+				"gen2": 10,
+				"gen3": 6,
+				"gen4": 5,
+				"gen5": 15,
+				"gen6": 8,
+				"gen7": 9,
+				"gen8": 7,
+				"gen9": 9
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 68.80,
+					"attack": 82.55,
+					"defense": 68.5,
+					"spAttack": 86.83,
+					"spDefense": 70.85,
+					"speed": 73.80,
+					"total": 451.33
+				},
+				"fullyEvolved": {
+					"hp": 81.42,
+					"attack": 98.71,
+					"defense": 84.85,
+					"spAttack": 105.48,
+					"spDefense": 85.65,
+					"speed": 83.81,
+					"total": 539.92
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Rock. Dragon",
+					"superEffective": "Grass, Ice, Bug"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Grass, Bug",
+					"superEffective": "Water, Ground, Rock"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Rock, Dragon",
+					"superEffective": "Grass, Ice, Bug, Steel"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Grass, Ice, Bug, Steel",
+					"superEffective": "Water, Ground, Rock"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Rock, Dragon",
+					"superEffective": "Grass, Ice, Bug, Steel"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Grass, Ice, Bug, Steel, Fairy",
+					"superEffective": "Water, Ground, Rock"
+				}
+			}
+		}
+	},
+	"water": {
+		"name": {
+			"en": "Water",
+			"ja": "みずタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/9/97/TeraGem_Water.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/5/5e/Water_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/d/de/WaterIC_SV.png"
+		},
+		"counters": {
+			"moves": 52,
+			"pokemon": {
+				"total": 172,
+				"singleType": 81,
+				"dualType": 91,
+				"gen1": 32,
+				"gen2": 18,
+				"gen3": 28,
+				"gen4": 14,
+				"gen5": 17,
+				"gen6": 9,
+				"gen7": 14,
+				"gen8": 11,
+				"gen9": 12
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 69.64,
+					"attack": 74.72,
+					"defense": 74.89,
+					"spAttack": 73.43,
+					"spDefense": 71.39,
+					"speed": 64.90,
+					"total": 426.99
+				},
+				"fullyEvolved": {
+					"hp": 83.85,
+					"attack": 90.90,
+					"defense": 90.10,
+					"spAttack": 88.67,
+					"spDefense": 87.06,
+					"speed": 73.17,
+					"total": 513.75
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Water, Grass, Dragon",
+					"superEffective": "Water, Ground, Rock"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Ice",
+					"superEffective": "Electric, Grass"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Water, Grass, Dragon",
+					"superEffective": "Fire, Ground, Rock"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Ice, Steel",
+					"superEffective": "Electric, Grass"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Water, Grass, Dragon",
+					"superEffective": "Fire, Ground, Rock"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Ice, Steel",
+					"superEffective": "Electric, Grass"
+				}
+			}
+		}
+	},
+	"electric": {
+		"name": {
+			"en": "Electric",
+			"ja": "でんきタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/d/d4/TeraGem_Electric.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/7/75/Electric_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/7/77/ElectricIC_SV.png"
+		},
+		"counters": {
+			"moves": 47,
+			"pokemon": {
+				"total": 86,
+				"singleType": 37,
+				"dualType": 49,
+				"gen1": 9,
+				"gen2": 8,
+				"gen3": 4,
+				"gen4": 7,
+				"gen5": 11,
+				"gen6": 3,
+				"gen7": 6,
+				"gen8": 9,
+				"gen9": 11
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 64.06,
+					"attack": 74.84,
+					"defense": 69.56,
+					"spAttack": 86.93,
+					"spDefense": 71.37,
+					"speed": 80.21,
+					"total": 446.97
+				},
+				"fullyEvolved": {
+					"hp": 72.26,
+					"attack": 83.48,
+					"defense": 77.80,
+					"spAttack": 100.37,
+					"spDefense": 82.11,
+					"speed": 90.11,
+					"total": 506.13
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "Ground",
+					"notVeryEffective": "Electric, Grass, Dragon",
+					"superEffective": "Water, Flying"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Electric, Flying",
+					"superEffective": "Ground"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "Ground",
+					"notVeryEffective": "Electric, Grass, Dragon",
+					"superEffective": "Water, Flying"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Electric, Flying, Steel",
+					"superEffective": "Ground"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "Ground",
+					"notVeryEffective": "Electric, Grass, Dragon",
+					"superEffective": "Water, Flying"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Electric, Flying, Steel",
+					"superEffective": "Ground"
+				}
+			}
+		}
+	},
+	"grass": {
+		"name": {
+			"en": "Grass",
+			"ja": "くさタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/c/cd/TeraGem_Grass.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/1/1b/Grass_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/7/7b/GrassIC_SV.png"
+		},
+		"counters": {
+			"moves": 59,
+			"pokemon": {
+				"total": 137,
+				"singleType": 46,
+				"dualType": 91,
+				"gen1": 14,
+				"gen2": 10,
+				"gen3": 18,
+				"gen4": 14,
+				"gen5": 20,
+				"gen6": 9,
+				"gen7": 13,
+				"gen8": 10,
+				"gen9": 14
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 66.22,
+					"attack": 75.53,
+					"defense": 74.10,
+					"spAttack": 71.90,
+					"spDefense": 71.38,
+					"speed": 59.40,
+					"total": 418.53
+				},
+				"fullyEvolved": {
+					"hp": 79.31,
+					"attack": 94.54,
+					"defense": 88.85,
+					"spAttack": 87.80,
+					"spDefense": 84.97,
+					"speed": 71.75,
+					"total": 507.22
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Grass, Poison, Flying, Bug, Dragon",
+					"superEffective": "Water, Ground, Rock"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Water, Electric, Grass, Ground",
+					"superEffective": "Fire, Ice, Poison, Flying, Bug"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Gras, Poison, Flying, Dragon, Steel",
+					"superEffective": "Water, Ground, Rock"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Water, Electric, Grass, Ground",
+					"superEffective": "Fire, Ice, Poison, Flying, Bug"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Grass, Poison, Flying, Bug, Dragon, Steel",
+					"superEffective": "Water, Ground, Rock"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Water, Electric, Grass, Ground",
+					"superEffective": "Fire, Ice, Poison, Flying, Bug"
+				}
+			}
+		}
+	},
+	"ice": {
+		"name": {
+			"en": "Ice",
+			"ja": "こおりタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/a/a3/TeraGem_Ice.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/7/70/Ice_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/1/13/IceIC_SV.png"
+		},
+		"counters": {
+			"moves": 33,
+			"pokemon": {
+				"total": 65,
+				"singleType": 22,
+				"dualType": 43,
+				"gen1": 5,
+				"gen2": 5,
+				"gen3": 6,
+				"gen4": 6,
+				"gen5": 7,
+				"gen6": 4,
+				"gen7": 1,
+				"gen8": 7,
+				"gen9": 7
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 77.11,
+					"attack": 83.69,
+					"defense": 75.55,
+					"spAttack": 76.38,
+					"spDefense": 76.27,
+					"speed": 68.82,
+					"total": 457.82
+				},
+				"fullyEvolved": {
+					"hp": 86.73,
+					"attack": 94.78,
+					"defense": 85.95,
+					"spAttack": 87.43,
+					"spDefense": 86.41,
+					"speed": 77.11,
+					"total": 518.41
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Water, Ice",
+					"superEffective": "Grass, Ground, Flying, Dragon"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Ice",
+					"superEffective": "Fire, Fighting, Rock"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Ice, Steel",
+					"superEffective": "Grass, Ground, Flying, Dragon"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Ice",
+					"superEffective": "Fire, Fighting, Rock, Steel"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Ice, Steel",
+					"superEffective": "Grass, Ground, Flying, Dragon"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Ice",
+					"superEffective": "Fire, Fighting, Rock, Steel"
+				}
+			}
+		}
+	},
+	"fighting": {
+		"name": {
+			"en": "Fighting",
+			"ja": "かくとうタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/3/3b/TeraGem_Fighting.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/6/68/Fighting_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/0/0f/FightingIC_SV.png"
+		},
+		"counters": {
+			"moves": 56,
+			"pokemon": {
+				"total": 91,
+				"singleType": 30,
+				"dualType": 61,
+				"gen1": 8,
+				"gen2": 3,
+				"gen3": 7,
+				"gen4": 7,
+				"gen5": 15,
+				"gen6": 4,
+				"gen7": 10,
+				"gen8": 8,
+				"gen9": 1
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 75.64,
+					"attack": 107.31,
+					"defense": 77.5,
+					"spAttack": 66.14,
+					"spDefense": 72.25,
+					"speed": 77.08,
+					"total": 475.92
+				},
+				"fullyEvolved": {
+					"hp": 83.22,
+					"attack": 120.64,
+					"defense": 87.28,
+					"spAttack": 74.08,
+					"spDefense": 82.25,
+					"speed": 88.22,
+					"total": 535.70
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "Ghost",
+					"notVeryEffective": "Poison, Flying, Psychic, Bug",
+					"superEffective": "Normal, Ice, Rock"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Bug, Rock",
+					"superEffective": "Flying, Psychic"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "Ghost",
+					"notVeryEffective": "Poison, Flying, Poison, Bug",
+					"superEffective": "Normal, ice, Rock, Dark, Steel"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Bug, Rock, Dark",
+					"superEffective": "Flying, Psychic"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "Ghost",
+					"notVeryEffective": "Poison, Flying, Psychic, Bug, Fairy",
+					"superEffective": "Normal, Ice, Rock, Dark, Steel"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Bug, Rock, Dark",
+					"superEffective": "Flying, Psychic, Fairy"
+				}
+			}
+		}
+	},
+	"poison": {
+		"name": {
+			"en": "Poison",
+			"ja": "どくタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/1/16/TeraGem_Poison.png",
+			"symbol": "https://bulbapedia.bulbagarden.net/wiki/File:Poison_icon_LA.png",
+			"icon": "https://bulbapedia.bulbagarden.net/wiki/File:PoisonIC_SV.png"
+		},
+		"counters": {
+			"moves": 35,
+			"pokemon": {
+				"total": 92,
+				"singleType": 16,
+				"dualType": 76,
+				"gen1": 33,
+				"gen2": 4,
+				"gen3": 5,
+				"gen4": 8,
+				"gen5": 7,
+				"gen6": 2,
+				"gen7": 6,
+				"gen8": 5,
+				"gen9": 8
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 67.55,
+					"attack": 71.86,
+					"defense": 67.96,
+					"spAttack": 71.45,
+					"spDefense": 70.92,
+					"speed": 66.26,
+					"total": 416
+				},
+				"fullyEvolved": {
+					"hp": 83.05,
+					"attack": 87.54,
+					"defense": 82.87,
+					"spAttack": 88.10,
+					"spDefense": 89.56,
+					"speed": 81.72,
+					"total": 512.84
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Poison, Ground, Rock, Ghost",
+					"superEffective": "Grass, Bug"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Grass, Fighting, Poison",
+					"superEffective": "Ground, Psychic, Bug"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "Steel",
+					"notVeryEffective": "Poison, Ground, Rock, Ghost",
+					"superEffective": "Grass"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Grass, Fighting, Poison, Bug",
+					"superEffective": "Ground, Psychic"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "Steel",
+					"notVeryEffective": "Poison, Ground, Rock, Ghost",
+					"superEffective": "Grass, Fairy"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Grass, Fighting, Poison, Bug, Fairy",
+					"superEffective": "Ground, Psychic"
+				}
+			}
+		}
+	},
+	"ground": {
+		"name": {
+			"en": "Ground",
+			"ja": "じめんタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/8/8b/TeraGem_Ground.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/4/45/Ground_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/f/f8/GroundIC_SV.png"
+		},
+		"counters": {
+			"moves": 31,
+			"pokemon": {
+				"total": 89,
+				"singleType": 17,
+				"dualType": 72,
+				"gen1": 14,
+				"gen2": 10,
+				"gen3": 13,
+				"gen4": 10,
+				"gen5": 11,
+				"gen6": 2,
+				"gen7": 4,
+				"gen8": 4,
+				"gen9": 7
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 75.23,
+					"attack": 91.64,
+					"defense": 86.53,
+					"spAttack": 59.86,
+					"spDefense": 65.04,
+					"speed": 57.83,
+					"total": 436.13
+				},
+				"fullyEvolved": {
+					"hp": 89.67,
+					"attack": 108.02,
+					"defense": 100.69,
+					"spAttack": 73.89,
+					"spDefense": 79.11,
+					"speed": 64.91,
+					"total": 516.29
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "Flying",
+					"notVeryEffective": "Grass, Bug",
+					"superEffective": "Fire, Electric, Poison, Rock"
+				},
+				"defence": {
+					"noEffect": "Electric",
+					"notVeryEffective": "Poison, Rock",
+					"superEffective": "Water, Grass, Ice"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "Flying",
+					"notVeryEffective": "Grass, Bug",
+					"superEffective": "Fire, Electric, Poison, Rock, Steel"
+				},
+				"defence": {
+					"noEffect": "Electric",
+					"notVeryEffective": "Poison, Rock",
+					"superEffective": "Water, Grass, Ice"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "Flying",
+					"notVeryEffective": "Grass, Bug",
+					"superEffective": "Fire, Electric, Poison, Rock, Steel"
+				},
+				"defence": {
+					"noEffect": "Electric",
+					"notVeryEffective": "Poison, Rock",
+					"superEffective": "Water, Grass, Ice"
+				}
+			}
+		}
+	},
+	"flying": {
+		"name": {
+			"en": "Flying",
+			"ja": "ひこうタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/5/5a/TeraGem_Flying.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/d/de/Flying_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/d/d7/FlyingIC_SV.png"
+		},
+		"counters": {
+			"moves": 31,
+			"pokemon": {
+				"total": 132,
+				"singleType": 4,
+				"dualType": 128,
+				"gen1": 19,
+				"gen2": 19,
+				"gen3": 12,
+				"gen4": 14,
+				"gen5": 18,
+				"gen6": 8,
+				"gen7": 8,
+				"gen8": 5,
+				"gen9": 7
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 71.59,
+					"attack": 80.25,
+					"defense": 68.32,
+					"spAttack": 76.21,
+					"spDefense": 70.95,
+					"speed": 85.15,
+					"total": 452.47
+				},
+				"fullyEvolved": {
+					"hp": 80.90,
+					"attack": 91.91,
+					"defense": 78.35,
+					"spAttack": 91.18,
+					"spDefense": 81.05,
+					"speed": 94.56,
+					"total": 517.95
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Electric, Rock",
+					"superEffective": "Grass, Fighting, Bug"
+				},
+				"defence": {
+					"noEffect": "Ground",
+					"notVeryEffective": "Grass, Fighting, Bug",
+					"superEffective": "Electric, Ice, Rock"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Electric, Rock, Steel",
+					"superEffective": "Grass, Fighting, Bug"
+				},
+				"defence": {
+					"noEffect": "Ground",
+					"notVeryEffective": "Grass, Fighting, Bug",
+					"superEffective": "Electric, Ice, Rock"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Electric, Rock, Steel",
+					"superEffective": "Grass, Fighting, Bug"
+				},
+				"defence": {
+					"noEffect": "Ground",
+					"notVeryEffective": "Grass, Fighting, Bug",
+					"superEffective": "Electric, Ice, Rock"
+				}
+			}
+		}
+	},
+	"psychic": {
+		"name": {
+			"en": "Psychic",
+			"ja": "エスパータイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/c/c6/TeraGem_Psychic.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/4/45/Psychic_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/9/96/PsychicIC_SV.png"
+		},
+		"counters": {
+			"moves": 77,
+			"pokemon": {
+				"total": 130,
+				"singleType": 47,
+				"dualType": 83,
+				"gen1": 14,
+				"gen2": 11,
+				"gen3": 21,
+				"gen4": 10,
+				"gen5": 15,
+				"gen6": 6,
+				"gen7": 8,
+				"gen8": 9,
+				"gen9": 7
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 71.13,
+					"attack": 73.39,
+					"defense": 74.45,
+					"spAttack": 93.07,
+					"spDefense": 86.34,
+					"speed": 74.62,
+					"total": 473
+				},
+				"fullyEvolved": {
+					"hp": 82.38,
+					"attack": 90.78,
+					"defense": 86.14,
+					"spAttack": 110.28,
+					"spDefense": 99.51,
+					"speed": 89.01,
+					"total": 558.1
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Psychic",
+					"superEffective": "Fighting, Poison"
+				},
+				"defence": {
+					"noEffect": "Ghost",
+					"notVeryEffective": "Fighting, Psychic",
+					"superEffective": "Bug"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "Dark",
+					"notVeryEffective": "Psychic, Steel",
+					"superEffective": "Fighting, Poison"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fighting, Psychic",
+					"superEffective": "Bug, Ghost, Dark"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "Dark",
+					"notVeryEffective": "Psychic, Steel",
+					"superEffective": "Fighting, Poison"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fighting, Psychic",
+					"superEffective": "Bug, Ghost, Dark"
+				}
+			}
+		}
+	},
+	"bug": {
+		"name": {
+			"en": "Bug",
+			"ja": "むしタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/b/be/TeraGem_Bug.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/2/26/Bug_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/d/d1/BugIC_SV.png"
+		},
+		"counters": {
+			"moves": 34,
+			"pokemon": {
+				"total": 100,
+				"singleType": 25,
+				"dualType": 75,
+				"gen1": 12,
+				"gen2": 10,
+				"gen3": 14,
+				"gen4": 9,
+				"gen5": 18,
+				"gen6": 4,
+				"gen7": 11,
+				"gen8": 8,
+				"gen9": 7
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 57.06,
+					"attack": 71.89,
+					"defense": 71.11,
+					"spAttack": 56.74,
+					"spDefense": 65.78,
+					"speed": 61.92,
+					"total": 384.50
+				},
+				"fullyEvolved": {
+					"hp": 67.69,
+					"attack": 90.59,
+					"defense": 83.98,
+					"spAttack": 72.49,
+					"spDefense": 81.73,
+					"speed": 75.24,
+					"total": 471.72
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Fighting, Flying, Ghost",
+					"superEffective": "Grass, Poison, Psychic"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Grass, Fighting, Ground",
+					"superEffective": "Fire, Poison, Flying, Rock"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Fighting, Poison, Flying, Ghost, Steel",
+					"superEffective": "Grass, Psychic, Dark"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Grass, Fighting, Ground",
+					"superEffective": "Fire, Flying, Rock"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Fighting, Poison, Flying, Ghost, Steel, Fairy",
+					"superEffective": "Grass, Psychic, Dark"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Flying, Rock",
+					"superEffective": "None"
+				}
+			}
+		}
+	},
+	"rock": {
+		"name": {
+			"en": "Rock",
+			"ja": "いわタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/e/ea/TeraGem_Rock.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/8/85/Rock_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/3/32/RockIC_SV.png"
+		},
+		"counters": {
+			"moves": 25,
+			"pokemon": {
+				"total": 86,
+				"singleType": 20,
+				"dualType": 66,
+				"gen1": 11,
+				"gen2": 7,
+				"gen3": 12,
+				"gen4": 7,
+				"gen5": 10,
+				"gen6": 8,
+				"gen7": 5,
+				"gen8": 6,
+				"gen9": 7
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 68.03,
+					"attack": 91.12,
+					"defense": 104.24,
+					"spAttack": 59.81,
+					"spDefense": 72.58,
+					"speed": 53.69,
+					"total": 449.47
+				},
+				"fullyEvolved": {
+					"hp": 77.84,
+					"attack": 101.75,
+					"defense": 114.70,
+					"spAttack": 70,
+					"spDefense": 98.34,
+					"speed": 63.27,
+					"total": 525.90
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fighting, Flying",
+					"superEffective": "Fire, Ice, Flying, Bug"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Normal, Fire, Poison, Flying",
+					"superEffective": "Water, Grass, Fighting, Ground"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fighting, Ground, Steel",
+					"superEffective": "Fire, Ice, Flying, Bug"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Normal, Fire, Poison, Flying",
+					"superEffective": "Water, Grass, Fighting, Ground, Steel"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fighting, Ground, Steel",
+					"superEffective": "Fire, Ice, Flying, Bug"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Normal, Fire, Poison, Flying",
+					"superEffective": "Water, Grass, Fighting, Ground, Steel"
+				}
+			}
+		}
+	},
+	"ghost": {
+		"name": {
+			"en": "Ghost",
+			"ja": "ゴーストタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/8/87/TeraGem_Ghost.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/b/b5/Ghost_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/2/2c/GhostIC_SV.png"
+		},
+		"counters": {
+			"moves": 34,
+			"pokemon": {
+				"total": 84,
+				"singleType": 19,
+				"dualType": 65,
+				"gen1": 3,
+				"gen2": 1,
+				"gen3": 6,
+				"gen4": 8,
+				"gen5": 9,
+				"gen6": 8,
+				"gen7": 8,
+				"gen8": 9,
+				"gen9": 10
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 63.54,
+					"attack": 79.03,
+					"defense": 80.04,
+					"spAttack": 80.84,
+					"spDefense": 78.55,
+					"speed": 63.21,
+					"total": 445.21
+				},
+				"fullyEvolved": {
+					"hp": 73.46,
+					"attack": 92.44,
+					"defense": 88.49,
+					"spAttack": 94.66,
+					"spDefense": 90.80,
+					"speed": 73.80,
+					"total": 513.65
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "Normal, Psychic",
+					"notVeryEffective": "None",
+					"superEffective": "Ghost"
+				},
+				"defence": {
+					"noEffect": "Normal, Fighting",
+					"notVeryEffective": "Poison, Bug",
+					"superEffective": "Ghost"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "Normal",
+					"notVeryEffective": "Dark, Steel",
+					"superEffective": "Psychic, Ghost"
+				},
+				"defence": {
+					"noEffect": "Normal, Fighting",
+					"notVeryEffective": "Poison, Bug",
+					"superEffective": "Ghost, Dark"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "Normal",
+					"notVeryEffective": "Dark",
+					"superEffective": "Psychic, Ghost"
+				},
+				"defence": {
+					"noEffect": "Normal, Fighting",
+					"notVeryEffective": "Poison, Bug",
+					"superEffective": "Ghost, Dark"
+				}
+			}
+		}
+	},
+	"dragon": {
+		"name": {
+			"en": "Dragon",
+			"ja": "ドラゴンタイプ"
+		},
+		"genAdded": 1,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/2/2c/TeraGem_Dragon.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/2/28/Dragon_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/7/7f/DragonIC_SV.png"
+		},
+		"counters": {
+			"moves": 29,
+			"pokemon": {
+				"total": 85,
+				"singleType": 13,
+				"dualType": 72,
+				"gen1": 3,
+				"gen2": 1,
+				"gen3": 9,
+				"gen4": 6,
+				"gen5": 10,
+				"gen6": 9,
+				"gen7": 7,
+				"gen8": 11,
+				"gen9": 8
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 88.24,
+					"attack": 102.70,
+					"defense": 89.80,
+					"spAttack": 97.90,
+					"spDefense": 85.90,
+					"speed": 82.44,
+					"total": 546.98
+				},
+				"fullyEvolved": {
+					"hp": 101.84,
+					"attack": 114.43,
+					"defense": 101.59,
+					"spAttack": 116.33,
+					"spDefense": 98.65,
+					"speed": 92.20,
+					"total": 625.04
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "None",
+					"superEffective": "Dragon"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Electric, Grass",
+					"superEffective": "Ice, Dragon"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Steel",
+					"superEffective": "Dragon"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Electric, Grass",
+					"superEffective": "ice, Dragon"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "Fairy",
+					"notVeryEffective": "Steel",
+					"superEffective": "Dragon"
+				},
+				"defence": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Electric, Grass",
+					"superEffective": "Ice, Dragon, Fairy"
+				}
+			}
+		}
+	},
+	"dark": {
+		"name": {
+			"en": "Dark",
+			"ja": "あくタイプ"
+		},
+		"genAdded": 2,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/6/66/TeraGem_Dark.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/7/7f/Dark_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/3/30/DarkIC_SV.png"
+		},
+		"counters": {
+			"moves": 53,
+			"pokemon": {
+				"total": 89,
+				"singleType": 16,
+				"dualType": 73,
+				"gen1": 0,
+				"gen2": 6,
+				"gen3": 10,
+				"gen4": 7,
+				"gen5": 16,
+				"gen6": 5,
+				"gen7": 2,
+				"gen8": 10,
+				"gen9": 15
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 72.59,
+					"attack": 92.25,
+					"defense": 68.24,
+					"spAttack": 74.32,
+					"spDefense": 68.25,
+					"speed": 76.14,
+					"total": 451.79
+				},
+				"fullyEvolved": {
+					"hp": 85.16,
+					"attack": 109.78,
+					"defense": 82.36,
+					"spAttack": 89.60,
+					"spDefense": 81.69,
+					"speed": 84.56,
+					"total": 533.15
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "Didn't Exist",
+					"notVeryEffective": "Didn't Exist",
+					"superEffective": "Didn't Exist"
+				},
+				"defence": {
+					"noEffect": "Didn't Exist",
+					"notVeryEffective": "Didn't Exist",
+					"superEffective": "Didn't Exist"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fighting, Dark, Steel",
+					"superEffective": "Psychic, Ghost"
+				},
+				"defence": {
+					"noEffect": "Psychic",
+					"notVeryEffective": "Ghost, Dark",
+					"superEffective": "Fighting, Bug"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fighting, Dark, Fairy",
+					"superEffective": "Psychic, Ghost"
+				},
+				"defence": {
+					"noEffect": "Psychic",
+					"notVeryEffective": "Ghost, Dark",
+					"superEffective": "Fighting, Bug, Fairy"
+				}
+			}
+		}
+	},
+	"steel": {
+		"name": {
+			"en": "Steel",
+			"ja": "はがねタイプ"
+		},
+		"genAdded": 2,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/0/0a/TeraGem_Steel.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/f/f9/Steel_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/b/b8/SteelIC_SV.png"
+		},
+		"counters": {
+			"moves": 37,
+			"pokemon": {
+				"total": 83,
+				"singleType": 12,
+				"dualType": 71,
+				"gen1": 0,
+				"gen2": 4,
+				"gen3": 9,
+				"gen4": 10,
+				"gen5": 12,
+				"gen6": 5,
+				"gen7": 8,
+				"gen8": 6,
+				"gen9": 9
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 68.32,
+					"attack": 96.70,
+					"defense": 110.28,
+					"spAttack": 70.11,
+					"spDefense": 79.01,
+					"speed": 60.44,
+					"total": 484.86
+				},
+				"fullyEvolved": {
+					"hp": 78.47,
+					"attack": 111.08,
+					"defense": 122.88,
+					"spAttack": 80.43,
+					"spDefense": 90.31,
+					"speed": 69.14,
+					"total": 552.31
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "Didn't Exist",
+					"notVeryEffective": "Didn't Exist",
+					"superEffective": "Didn't Exist"
+				},
+				"defence": {
+					"noEffect": "Didn't Exist",
+					"notVeryEffective": "Didn't Exist",
+					"superEffective": "Didn't Exist"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Electric, Steel",
+					"superEffective": "Ice, Rock"
+				},
+				"defence": {
+					"noEffect": "Poison",
+					"notVeryEffective": "Normal, Grass, Ice, Flying, Psychic, Bug, Rock, Ghost, Dragon, Dark, Steel",
+					"superEffective": "Fire, Fighting, Ground"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Water, Electric, Steel",
+					"superEffective": "Ice, Rock, Fairy"
+				},
+				"defence": {
+					"noEffect": "Poison",
+					"notVeryEffective": "Normal, Grass, ice, Flying, Psychic, Bug, Rock, Dragon, Fairy",
+					"superEffective": "Fire, Fighting, Ground"
+				}
+			}
+		}
+	},
+	"fairy": {
+		"name": {
+			"en": "Fairy",
+			"ja": "フェアリータイプ"
+		},
+		"genAdded": 6,
+		"images": {
+			"tera": "https://archives.bulbagarden.net/media/upload/b/b0/TeraGem_Fairy.png",
+			"symbol": "https://archives.bulbagarden.net/media/upload/b/b1/Fairy_icon_LA.png",
+			"icon": "https://archives.bulbagarden.net/media/upload/c/c6/FairyIC_SV.png"
+		},
+		"counters": {
+			"moves": 33,
+			"pokemon": {
+				"total": 73,
+				"singleType": 21,
+				"dualType": 52,
+				"gen1": 0,
+				"gen2": 0,
+				"gen3": 0,
+				"gen4": 0,
+				"gen5": 0,
+				"gen6": 35,
+				"gen7": 12,
+				"gen8": 8,
+				"gen9": 8
+			}
+		},
+		"stats": {
+			"average": {
+				"overall": {
+					"hp": 67.47,
+					"attack": 68.69,
+					"defense": 73.63,
+					"spAttack": 81.41,
+					"spDefense": 86.47,
+					"speed": 64.89,
+					"total": 442.56
+				},
+				"fullyEvolved": {
+					"hp": 75.22,
+					"attack": 85.51,
+					"defense": 89.24,
+					"spAttack": 96.22,
+					"spDefense": 101.20,
+					"speed": 77.88,
+					"total": 525.27
+				}
+			}
+		},
+		"typemaps": {
+			"gen1": {
+				"attack": {
+					"noEffect": "Didn't Exist",
+					"notVeryEffective": "Didn't Exist",
+					"superEffective": "Didn't Exist"
+				},
+				"defence": {
+					"noEffect": "Didn't Exist",
+					"notVeryEffective": "Didn't Exist",
+					"superEffective": "Didn't Exist"
+				}
+			},
+			"gen2": {
+				"attack": {
+					"noEffect": "Didn't Exist",
+					"notVeryEffective": "Didn't Exist",
+					"superEffective": "Didn't Exist"
+				},
+				"defence": {
+					"noEffect": "Didn't Exist",
+					"notVeryEffective": "Didn't Exist",
+					"superEffective": "Didn't Exist"
+				}
+			},
+			"gen6": {
+				"attack": {
+					"noEffect": "None",
+					"notVeryEffective": "Fire, Poison, Steel",
+					"superEffective": "Fighting, Dragon, Dark"
+				},
+				"defence": {
+					"noEffect": "Dragon",
+					"notVeryEffective": "Fighting, Bug, Dark",
+					"superEffective": "Poison, Steel"
+				}
+			}
+		}
+	}
+}

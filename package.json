@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "dismondb": "^4.0.4",
+    "express": "^4.19.1",
+    "tailwindcss": "^3.4.1"
+  }
+}
