@@ -10,11 +10,39 @@ nav {
     text-align: center;
 }
 
-.button-container {
+/* .button-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Adjust columns as needed */
+    grid-template-columns: repeat(3, 1fr); /* Adjust columns as needed 
     gap: 20px;
     padding: 20px;
+} */
+
+/* **********************************************************
+PLAYER TYPE BUTTONS
+********************************************************** */
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Key changes */
+    gap: 20px;
+    padding: 20px;
+}
+
+@media (min-width: 1100px) { /* Adjust breakpoint as needed */
+    .button-container {
+        grid-template-columns: repeat(9, minmax(100px, 1fr)); 
+    }
+}
+
+@media (min-width: 740px) and (max-width: 1100px) { /* Adjust breakpoint as needed */
+    .button-container {
+        grid-template-columns: repeat(6, minmax(100px, 1fr)); 
+    }
+}
+
+@media (max-width: 450px) { /* Adjust breakpoint as needed */
+    .button-container {
+        grid-template-columns: repeat(2, minmax(100px, 1fr)); 
+    }
 }
 
 .type-button {
@@ -24,4 +52,30 @@ nav {
     padding: 15px 30px;
     text-transform: uppercase;
     cursor: pointer;
+    width: 100%; /* Make button take up full cell width */
+}
+
+.type-button:hover { 
+    background-color: #ddd;  /* Adjust as desired */
+    filter: brightness(80%); /* Slightly darken on hover */
+}
+
+.type-button.selected {
+    box-shadow: 0px 0px 0px 4px black, 0px 0px 10px 6px rgba(0, 0, 0, 0.3); /* Border and example highlight */
+
+}
+
+/* **********************************************************
+SUBMIT BUTTON
+********************************************************** */
+
+.submit-container {
+    display: grid;
+}
+
+.submit-container button {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 400px;
+    width: 100%; /* Make button take up full cell width */
 }

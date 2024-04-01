@@ -13,7 +13,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, hostname, () => {
-    console.log(`Server running at http://<span class="math-inline">\{hostname\}\:</span>{port}/`);
+    console.log(`Server running at http://${hostname}:${port}/`);
 });
 
 const fireType = pokeTypes.typedex("Fire", 4);
