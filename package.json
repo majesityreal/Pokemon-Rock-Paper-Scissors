@@ -2,6 +2,7 @@
   "dependencies": {
     "dismondb": "^4.0.4",
     "express": "^4.19.1",
+    "socket.io": "^4.7.5",
     "tailwindcss": "^3.4.1"
   }
 }
