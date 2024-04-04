@@ -7,6 +7,7 @@ const port = 3000;
 const server = http.createServer(app);
 const {Server} = require('socket.io');
 const io = new Server(server);
+const pokeTypes = require('dismondb'); // pokemon type chart calc library
 
 const rooms = {}; // these are the rooms that currently have games open
 
@@ -81,9 +82,48 @@ function declareWinner(roomUniqueId) {
   let p1Choice = rooms[roomUniqueId].p1Choice;
   let p2Choice = rooms[roomUniqueId].p2Choice;
   let winner = null;
+  let netScore = 0; // if positive p1 wins, if negative p2 wins
 
-  // This is what does the type chart!!!
+  // This is what does the type chart calculations!!!
   console.log("p1 chose: " + p1Choice + " and p2 chose: " + p2Choice);
+  // TODO - if "None", then pick a random available type!!!!!!!
+
+  const p1Type = pokeTypes.typedex(p1Choice, 4); // 4 is the typeDex API version.
+  const p2Type = pokeTypes.typedex(p2Choice, 4); // 4 is the typeDex API version.
+
+  // check p1 attacking onto p2 defending
+  console.log(p1Type.typemaps.gen6.attack);
+  console.log(p2Type.typemaps.gen6.attack);
+  if (p1Type.typemaps.gen6.attack.noEffect.includes(p2Choice)) { // p1 no effect on p2
+    netScore -= 2;
+  }
+  if (p1Type.typemaps.gen6.attack.notVeryEffective.includes(p2Choice)) { // p1 not very effective on p2
+    netScore -= 1;
+  }
+  if (p1Type.typemaps.gen6.attack.superEffective.includes(p2Choice)) { // p1 super effective on p2
+    netScore += 1;
+  }
+  // p2 attacking p1 defending
+  if (p2Type.typemaps.gen6.attack.noEffect.includes(p1Choice)) { // p2 no effect on p1
+    netScore += 2;
+  }
+  if (p2Type.typemaps.gen6.attack.notVeryEffective.includes(p1Choice)) { // p2 not very effective on p1
+    netScore += 1;
+  }
+  if (p2Type.typemaps.gen6.attack.superEffective.includes(p1Choice)) { // p2 super effective on p1
+    netScore -= 1;
+  }
+
+  console.log("net score: " + netScore); // TODO - tiebreaker could be by how badly you were beaten (i.e. if you attack with fighting against ghost, you lose by 2 rather than by 1)
+  if (netScore > 0) {
+      console.log("player 1 wins!")
+  }
+  else if (netScore < 0) {
+      console.log("player 2 wins!")
+  }
+  else {
+      console.log("It is a tie!")
+  }
 
 }
 
