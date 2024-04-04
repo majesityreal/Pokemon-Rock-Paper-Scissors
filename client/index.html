@@ -20,12 +20,22 @@
         <button onclick="joinGame()">Join Game</button>
     </div>
 
-    <div id="gamePlay" style="display: none;"> 
+    <div id="gamePlay"> 
         <div id="waitingArea">
 
         </div>
-        <div id="gameArea">
+        <div id="gameArea" style="display: none;">
+            <div>Your choice: </div>
             <div class="button-container">
+            </div>
+            <div class="submit-container">
+                <button class="submit-button" onclick="submitChoice()">Submit</button>
+            </div>
+
+            <div>Opponent:</div>
+            <div id="player2Choice">
+                <p id="opponentState">Waiting for Opponent</p>
+
             </div>
         </div>
         <div id="winnerArea">

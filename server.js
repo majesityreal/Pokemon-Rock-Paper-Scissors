@@ -46,17 +46,46 @@ io.on('connection', (socket) => {
 
     socket.on('joinGame', (data) => {
       if (rooms[data.roomUniqueId] != null) {
+        console.log('server received joinGame from console! ' + data.roomUniqueId)
         socket.join(data.roomUniqueId); // joining incoming request to the same room (roomUniqueId should already exist)
         socket.to(data.roomUniqueId).emit('playersConnected', {}); // when t he two players join we can say they are connected
         socket.emit("playersConnected");
       }
-      const roomUniqueId = makeid(10);
-      rooms[roomUniqueId] = {};
-      socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
-      socket.emit("newGame", {roomUniqueId: roomUniqueId}); // server returning newGame with data
     })
 
+    socket.on('p1Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
+        let typeChosen = data.typeChosen;
+        rooms[data.roomUniqueId].p1Choice = typeChosen;
+
+        socket.to(data.roomUniqueId).emit('p1Choice', {typeChosen : typeChosen});
+
+        if(rooms[data.roomUniqueId].p2Choice != null) {
+          declareWinner(data.roomUniqueId);
+      }
+    });
+
+    socket.on('p2Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
+      let typeChosen = data.typeChosen;
+      rooms[data.roomUniqueId].p2Choice = typeChosen;
+
+      socket.to(data.roomUniqueId).emit('p2Choice', {typeChosen : typeChosen});
+
+      if(rooms[data.roomUniqueId].p1Choice != null) {
+        declareWinner(data.roomUniqueId);
+    }
+  });
+
 })
+
+function declareWinner(roomUniqueId) {
+  let p1Choice = rooms[roomUniqueId].p1Choice;
+  let p2Choice = rooms[roomUniqueId].p2Choice;
+  let winner = null;
+
+  // This is what does the type chart!!!
+  console.log("p1 chose: " + p1Choice + " and p2 chose: " + p2Choice);
+
+}
 
 server.listen(port, () => {
   console.log(`Server listening on port ${port}`);

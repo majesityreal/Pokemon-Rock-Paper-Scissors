@@ -1,3 +1,4 @@
+let typeChosen = "None"; // defaulting to None, exporting it for use in client.js. chosenType is used by sendChoice()
 const buttonContainer = document.querySelector('.button-container');
 const pokemonTypes = [
     'Normal', 'Fire', 'Water', 'Grass', 'Electric', 'Ice',
@@ -39,6 +40,11 @@ pokemonTypes.forEach(type => {
     buttonContainer.appendChild(button);
 });
 
+function sendChoice(type) {
+    console.log("Type button pressed: " + type);
+    typeChosen = type;
+}
+
 buttonContainer.addEventListener('click', (event) => {
     // Remove 'selected' class from any other buttons
     buttonContainer.querySelectorAll('.selected').forEach(button => {
@@ -46,15 +52,22 @@ buttonContainer.addEventListener('click', (event) => {
     });
 
     // Add 'selected' class to the clicked button
-    event.target.classList.add('selected'); 
+    event.target.classList.add('selected'); // TODO - this event listener activates for even the blank space. Could be inefficient
+    if (event.target.textContent.length < 9) {
+        sendChoice(event.target.textContent);
+    }
+    else { // if it is longer, we just send 'None' to server
+        sendChoice("None");
+    }
 });
 
-typeButtons = buttonContainer.querySelectorAll('.type-button');
-typeButtons.forEach(typeButton => {
-    typeButton.addEventListener('click', (event) => {
-        console.log("Type button pressed: " + typeButton.textContent);
-    })
-});
+// do not need this anymore. This was to add listener for each button being clicked.
+// typeButtons = buttonContainer.querySelectorAll('.type-button');
+// typeButtons.forEach(typeButton => {
+//     typeButton.addEventListener('click', (event) => {
+//         sendChoice(typeButton.textContent);
+//     })
+// });
 
 // function adjustButtonColumns() {
 //     const buttonContainer = document.querySelector('.button-container');
