@@ -21,6 +21,15 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'client', 'index.html'));
 });
 
+// Route with a gameId parameter
+app.get('/game/:gameId', (req, res) => {
+    console.log("routing to game with an id");
+    const gameId = req.params.gameId;
+    console.log("the id is: " + gameId);
+    // Here you can handle different logic based on the roomId
+    res.sendFile(path.join(__dirname, 'client', 'in-game.html'));
+});
+
 io.on('connection', (socket) => {
     console.log('a user has connected');
     socket.on('disconnect', () => {
@@ -30,6 +39,7 @@ io.on('connection', (socket) => {
     socket.on('createGame', () => {
       const roomUniqueId = makeid(10);
       rooms[roomUniqueId] = {};
+      console.log("room id created: " + roomUniqueId)
       socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
       socket.emit("newGame", {roomUniqueId: roomUniqueId}); // server returning newGame with data
     })
