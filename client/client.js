@@ -61,19 +61,93 @@ socket.on('p2Choice', () => {
 })
 
 socket.on('matchResults', (data) => { // when both players have made their choice
-    console.log("received match results socket emmision");
+    console.log("match results data: " + data);
+    console.log("winner: " + data.winner);
     if (player1) {
         showOpponentsChoice(data.p2Choice);
     }
     else if (!player1) {
         showOpponentsChoice(data.p1Choice);
     }
+    displayWhoWon(data.winner);
+    // create play again button
+    const playAgainButton = document.createElement('button');
+    playAgainButton.textContent = "Play Again";
+    document.getElementById("gameArea").appendChild(playAgainButton);
+    const timerNumber = document.createElement("h1");
+    timerNumber.id = "timerNumber";
+    document.getElementById("timerDisplay").appendChild(timerNumber);
 });
 
+socket.on('timer', (data) => {
+    console.log("timer socket with time: " + data.time);
+    document.getElementById("timerNumber").innerHTML = data.time;
+});
+
+socket.on('restartGame', (data) => {
+    console.log("received restartGame: ");
+    // TODO - everything that restarts the game
+    // clear the gameArea, replace with default content in script.js
+    var gameArea = document.getElementById("gameArea");
+    gameArea.innerHTML = defaultGameArea;
+    // now we have to add the button to game area
+    const buttonContainer = document.querySelector('.button-container');
+    // Creates buttons for all the types remaining for the next game
+    console.log("types reamin: " + data.typesRemaining)
+    data.typesRemaining.forEach(type => {
+        createTypeButton(type, buttonContainer);
+    });
+    buttonContainer.addEventListener('click', (event) => {
+        // Remove 'selected' class from any other buttons
+        buttonContainer.querySelectorAll('.selected').forEach(button => {
+            button.classList.remove('selected');
+        });
+    
+        // Add 'selected' class to the clicked button
+        event.target.classList.add('selected'); // TODO - this event listener activates for even the blank space. Could be inefficient
+        if (event.target.textContent.length < 9) {
+            sendChoice(event.target.textContent);
+        }
+        else { // if it is longer, we just send 'None' to server
+            sendChoice("None");
+        }
+    });
+});
 function showOpponentsChoice(type) {
     console.log("type " + type);
     var divToShowResult = document.getElementById("otherPlayerChoice");
     createTypeButton(type, divToShowResult);
+}
+
+function displayWhoWon(whoWon) {
+    console.log("=-= =-=");
+    console.log("who won: " + whoWon);
+    console.log("I am player 1? " + player1);
+    var textUpdate = document.getElementById("gameStatusUpdate");
+    if (whoWon == "tie") {
+        textUpdate.innerHTML = "It was a tie!"
+        textUpdate.style.color = "black";
+    }
+    else if (player1) {
+        if (whoWon == "p1") {
+            textUpdate.innerHTML = "You won!"
+            textUpdate.style.color = "green";
+        }
+        else {
+            textUpdate.innerHTML = "You lost!"
+            textUpdate.style.color = "red";
+        }
+    }
+    else if (!player1) {
+        if (whoWon == "p2") {
+            textUpdate.innerHTML = "You won!"
+            textUpdate.style.color = "green";
+        }
+        else {
+            textUpdate.innerHTML = "You lost!"
+            textUpdate.style.color = "red";
+        }
+    }
 }
 
 function showOpponentMadeAChoice() {

@@ -26,6 +26,15 @@ const colors = {
 	fairy: '#D685AD',
 };
 
+var defaultGameArea = '<div>Your choice: </div>\
+<div class="button-container"></div>\
+<div class="submit-container">\
+    <button class="submit-button" onclick="submitChoice()">Submit</button>\
+</div>\
+<div>Opponent:</div>\
+<p id="opponentState">Waiting for Opponent</p>\
+<div id="otherPlayerChoice" class="button-container"></div>';
+
 // Creates buttons for all the types
 pokemonTypes.forEach(type => {
     createTypeButton(type, buttonContainer);

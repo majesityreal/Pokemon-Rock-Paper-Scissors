@@ -27,7 +27,8 @@ const pokeTypes = require('dismondb'); // pokemon type chart calc library
 const { randomInt } = require('crypto');
 
 // rooms which contain each active game
-// each room object has attributes: (str)p1Choice, (str)p2Choice, (str[])typesRemaining, (int)p1Wins, (int)p2Wins
+// each room object has attributes: 
+// (str)p1Choice, (str)p2Choice, (str[])typesRemaining, (int)p1Wins, (int)p2Wins
 const rooms = {};
 const pokemonTypes = [
   'Normal', 'Fire', 'Water', 'Grass', 'Electric', 'Ice',
@@ -136,23 +137,25 @@ function declareRoundWinner(roomUniqueId, socket) {
   console.log("net score: " + netScore); // TODO - tiebreaker could be by how badly you were beaten (i.e. if you attack with fighting against ghost, you lose by 2 rather than by 1)
   if (netScore > 0) {
       console.log("player 1 wins!");
-      winner = "Player1";
+      winner = "p1";
   }
   else if (netScore < 0) {
       console.log("player 2 wins!");
-      winner = "Player2";
+      winner = "p2";
   }
   else {
       console.log("It is a tie!");
-      winner = "Tie";
+      winner = "tie";
   }
-
+  console.log("winner: " + winner)
   // display to both clients the results!
   // we need both of these to send to both clients (.to() sends to other one, plain emit() sends to one we received from)
   socket.to(roomUniqueId).emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice});
   socket.emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice});
   
   // TODO Prep for next round or end the session
+  displayCountdown(3, socket, roomUniqueId);
+
 }
 
 server.listen(port, () => {
@@ -169,6 +172,23 @@ function makeid(length) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
+}
+
+// Function to display countdown timer
+function displayCountdown(amountOfTime, socket, roomUniqueId) {
+  let count = amountOfTime;
+  const countdownInterval = setInterval(() => {
+      console.log(`Game restart in ${count} seconds...`);
+      // Send countdown to clients
+      socket.to(roomUniqueId).emit('timer', {time: count});
+      socket.emit('timer', {time: count});
+
+      count--;
+      if (count < 0) {
+          clearInterval(countdownInterval);
+          restartGame(socket, roomUniqueId);
+      }
+  }, 1000);
 }
 
 // helper function to do type calcs
@@ -199,4 +219,13 @@ function typeCalcs(p1Choice, p2Choice) {
     netScore -= 1;
   }
   return netScore;
+}
+
+function restartGame(socket, roomUniqueId) {
+  console.log("game restarted!");
+  const currRoom = rooms[roomUniqueId];
+  console.log("types remain: " + currRoom.typesRemaining);
+  const dataToEmit = { typesRemaining: currRoom.typesRemaining, p1Wins: currRoom.p1Wins, p2Wins: currRoom.p2Wins }
+  socket.to(roomUniqueId).emit('restartGame', dataToEmit); // TODO - put in some data here
+  socket.emit('restartGame', dataToEmit);
 }
