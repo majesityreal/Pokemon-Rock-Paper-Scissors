@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokemon Type Buttons</title>
-    <link rel="stylesheet" href="style.css"> 
+    <!-- <link rel="stylesheet" href="style.css">  -->
+    <link href="./style.css" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
     <nav>
         <h1>Pokemon Types</h1>
     </nav>
+
+    <h1 class="text-3xl font-bold underline" id="gameStatusUpdate">
+        Hello world!
+    </h1>
     
     <div id="lobbyButtons">
         <button onclick="createGame()">Create Game</button>
@@ -20,9 +25,7 @@
     </div>
 
     <div id="gamePlay"> 
-        <div id="waitingArea">
-
-        </div>
+        <div id="waitingArea"></div> <!-- This displays text when waiting for someone else to join -->
         <div id="gameArea" style="display: none;">
             <div>Your choice: </div>
             <div class="button-container">
@@ -32,9 +35,8 @@
             </div>
 
             <div>Opponent:</div>
-            <div id="player2Choice">
-                <p id="opponentState">Waiting for Opponent</p>
-
+            <p id="opponentState">Waiting for Opponent</p>
+            <div id="otherPlayerChoice" class="button-container">
             </div>
         </div>
         <div id="winnerArea">

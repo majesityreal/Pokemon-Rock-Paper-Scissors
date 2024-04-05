@@ -28,17 +28,19 @@ const colors = {
 
 // Creates buttons for all the types
 pokemonTypes.forEach(type => {
+    createTypeButton(type, buttonContainer);
+});
+// parentObject is what we append the button to
+function createTypeButton(type, parentObject) {
     const button = document.createElement('button');
     button.classList.add('type-button');
     button.textContent = type;
-    
     const color = colors[type.toLowerCase()]; // changing background color of button according to its type
     if (color) {
         button.style.backgroundColor = color;
     }
-
-    buttonContainer.appendChild(button);
-});
+    parentObject.appendChild(button);
+}
 
 function sendChoice(type) {
     console.log("Type button pressed: " + type);
