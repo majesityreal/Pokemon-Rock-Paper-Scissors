@@ -51,6 +51,16 @@ function createTypeButton(type, parentObject) {
     parentObject.appendChild(button);
 }
 
+function createDeadTypeButton(type, parentObject) { // Buggandea Greece, buggadeez nuts
+    const button = document.createElement('button');
+    button.classList.add('type-button');
+    button.textContent = type;
+    button.style.backgroundColor = '#d3d3d3';
+    button.style.color = '#808080'; // text color
+    button.disabled = true;
+    parentObject.appendChild(button);
+}
+
 function sendChoice(type) {
     console.log("Type button pressed: " + type);
     typeChosen = type;

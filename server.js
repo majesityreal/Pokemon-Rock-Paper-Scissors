@@ -12,6 +12,10 @@ setTimeout(myFunction, 2000, firstParam, secondParam);
 
 Stylizing stuff
 
+// FIXES
+// if you don't pick anything, it does not display the random pick on your client end (opponent works)
+// random function grabs any type, not types remaining
+
 */
 
 const express = require('express');
@@ -65,13 +69,12 @@ io.on('connection', (socket) => {
     socket.on('createGame', () => {
       const roomUniqueId = makeid(10);
       rooms[roomUniqueId] = {};
-      rooms[roomUniqueId].typesRemaining = pokemonTypes // instantiating room vars here
+      rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
       rooms[roomUniqueId].p1Wins = 0
       rooms[roomUniqueId].p2Wins = 0
       console.log("room id created: " + roomUniqueId)
       socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
       socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
-      console.log("room types: " + rooms[roomUniqueId].typesRemaining);
     })
 
     socket.on('joinGame', (data) => {
@@ -106,7 +109,11 @@ io.on('connection', (socket) => {
       if(rooms[data.roomUniqueId].p1Choice != null) {
         declareRoundWinner(data.roomUniqueId, socket);
     }
-  });
+    });
+
+    socket.on('printRoomsInfo', () => {
+      printObjectProperties(rooms);
+    });
 
 })
 
@@ -136,12 +143,12 @@ function declareRoundWinner(roomUniqueId, socket) {
   let netScore = typeCalcs(p1Choice, p2Choice);
   console.log("net score: " + netScore); // TODO - tiebreaker could be by how badly you were beaten (i.e. if you attack with fighting against ghost, you lose by 2 rather than by 1)
   if (netScore > 0) {
-      console.log("player 1 wins!");
+      rooms[roomUniqueId].p1Wins += 1;
       winner = "p1";
   }
   else if (netScore < 0) {
-      console.log("player 2 wins!");
-      winner = "p2";
+    rooms[roomUniqueId].p2Wins += 1;
+    winner = "p2";
   }
   else {
       console.log("It is a tie!");
@@ -152,9 +159,9 @@ function declareRoundWinner(roomUniqueId, socket) {
   // we need both of these to send to both clients (.to() sends to other one, plain emit() sends to one we received from)
   socket.to(roomUniqueId).emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice});
   socket.emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice});
-  
+  // Loop through each room in the rooms object
   // TODO Prep for next round or end the session
-  displayCountdown(3, socket, roomUniqueId);
+  countdownAndRestartGame(3, socket, roomUniqueId);
 
 }
 
@@ -175,10 +182,9 @@ function makeid(length) {
 }
 
 // Function to display countdown timer
-function displayCountdown(amountOfTime, socket, roomUniqueId) {
+function countdownAndRestartGame(amountOfTime, socket, roomUniqueId) {
   let count = amountOfTime;
   const countdownInterval = setInterval(() => {
-      console.log(`Game restart in ${count} seconds...`);
       // Send countdown to clients
       socket.to(roomUniqueId).emit('timer', {time: count});
       socket.emit('timer', {time: count});
@@ -222,10 +228,32 @@ function typeCalcs(p1Choice, p2Choice) {
 }
 
 function restartGame(socket, roomUniqueId) {
-  console.log("game restarted!");
+  console.log("game restarted! room id: " + roomUniqueId);
   const currRoom = rooms[roomUniqueId];
   console.log("types remain: " + currRoom.typesRemaining);
+  // increment who won?
+
+  const p1Index = currRoom.typesRemaining.indexOf(currRoom.p1Choice);
+  if (p1Index !== -1) { currRoom.typesRemaining.splice(p1Index, 1); }
+  const p2Index = currRoom.typesRemaining.indexOf(currRoom.p2Choice);
+  if (p2Index !== -1) { currRoom.typesRemaining.splice(p2Index, 1); }
+
+  // clear p1 and p2 choices
+  currRoom.p1Choice = null;
+  currRoom.p2Choice = null;
+
   const dataToEmit = { typesRemaining: currRoom.typesRemaining, p1Wins: currRoom.p1Wins, p2Wins: currRoom.p2Wins }
   socket.to(roomUniqueId).emit('restartGame', dataToEmit); // TODO - put in some data here
   socket.emit('restartGame', dataToEmit);
+}
+
+function printObjectProperties(obj, indentation = '') {
+  for (let key in obj) {
+      if (typeof obj[key] === 'object' && obj[key] !== null) {
+          console.log(indentation + key + ": ");
+          printObjectProperties(obj[key], indentation + '  ');
+      } else {
+          console.log(indentation + key + ": " + obj[key]);
+      }
+  }
 }

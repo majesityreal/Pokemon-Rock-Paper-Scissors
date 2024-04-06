@@ -93,9 +93,13 @@ socket.on('restartGame', (data) => {
     // now we have to add the button to game area
     const buttonContainer = document.querySelector('.button-container');
     // Creates buttons for all the types remaining for the next game
-    console.log("types reamin: " + data.typesRemaining)
-    data.typesRemaining.forEach(type => {
-        createTypeButton(type, buttonContainer);
+    pokemonTypes.forEach(type => {
+        if (data.typesRemaining.includes(type)) {
+            createTypeButton(type, buttonContainer);
+        }
+        else {
+            createDeadTypeButton(type, buttonContainer);
+        }
     });
     buttonContainer.addEventListener('click', (event) => {
         // Remove 'selected' class from any other buttons
@@ -172,4 +176,8 @@ function submitChoice() {
     document.querySelector('.submit-button').style.display = 'none';
     // TODO - other stuff to handle the choice (disable click event listener, query for opponent choice, etc)
     hasSubmittedChoice = true;
+}
+
+function printRoomsInfo() {
+    socket.emit('printRoomsInfo');
 }
