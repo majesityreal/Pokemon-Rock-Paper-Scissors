@@ -2,6 +2,7 @@
   "dependencies": {
     "dismondb": "^4.0.4",
     "express": "^4.19.1",
+    "nodemon": "^3.1.0",
     "socket.io": "^4.7.5",
     "timesync": "^1.0.11"
   },

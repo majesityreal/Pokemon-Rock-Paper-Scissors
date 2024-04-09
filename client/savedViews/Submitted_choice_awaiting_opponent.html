@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!-- saved from url=(0022)http://127.0.0.1:3000/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Type Buttons</title>
+    <!-- <link rel="stylesheet" href="style.css">  -->
+    <link href="./Submitted_choice_awaiting_opponent_files/style.css" rel="stylesheet">
+    <script src="./Submitted_choice_awaiting_opponent_files/socket.io.js"></script>
+</head>
+<body>
+    <nav>
+        <h1>Pokemon Types</h1>
+    </nav>
+
+    <h1 class="text-3xl font-bold underline" id="gameStatusUpdate" style="color: black;">It was a tie!</h1>
+    <h2 id="gameScore">Your score: 1 Opponents score: 0</h2>
+    <button onclick="printRoomsInfo()">Print rooms info</button>
+
+    
+    <div id="lobbyButtons" style="display: none;">
+        <button onclick="createGame()">Create Game</button>
+        <div>or</div>
+        <input type="text" name="" id="roomUniqueId">
+        <button onclick="joinGame()">Join Game</button>
+    </div>
+
+    <div id="gamePlay" style="display: block;"> 
+        <div id="waitingArea" style="display: none;">Waiting for opponent to join room code: Wht1VwaOCj. Share it with someone so they can join!<button class="btn btn-primary py-2 my-2" style="display: block;">Copy Code</button></div> <!-- This displays text when waiting for someone else to join -->
+        <div id="gameArea" style="display: block;"><div>Your choice: </div><div class="button-container selected"><button class="type-button" disabled="" style="background-color: rgb(211, 211, 211); color: rgb(128, 128, 128); display: none;">Normal</button><button class="type-button" style="background-color: rgb(238, 129, 48); display: none;">Fire</button><button class="type-button" style="background-color: rgb(99, 144, 240); display: none;">Water</button><button class="type-button" style="background-color: rgb(122, 199, 76); display: none;">Grass</button><button class="type-button" style="background-color: rgb(247, 208, 44); display: none;">Electric</button><button class="type-button" style="background-color: rgb(150, 217, 214); display: none;">Ice</button><button class="type-button" disabled="" style="background-color: rgb(211, 211, 211); color: rgb(128, 128, 128); display: none;">Fighting</button><button class="type-button" style="background-color: rgb(163, 62, 161); display: none;">Poison</button><button class="type-button" style="background-color: rgb(226, 191, 101); display: none;">Ground</button><button class="type-button selected" style="background-color: rgb(169, 143, 243);">Flying</button><button class="type-button" style="background-color: rgb(249, 85, 135); display: none;">Psychic</button><button class="type-button" style="background-color: rgb(166, 185, 26); display: none;">Bug</button><button class="type-button" style="background-color: rgb(182, 161, 54); display: none;">Rock</button><button class="type-button" style="background-color: rgb(115, 87, 151); display: none;">Ghost</button><button class="type-button" style="background-color: rgb(111, 53, 252); display: none;">Dragon</button><button class="type-button" disabled="" style="background-color: rgb(211, 211, 211); color: rgb(128, 128, 128); display: none;">Dark</button><button class="type-button" disabled="" style="background-color: rgb(211, 211, 211); color: rgb(128, 128, 128); display: none;">Steel</button><button class="type-button" style="background-color: rgb(214, 133, 173); display: none;">Fairy</button></div><div class="submit-container">    <button class="submit-button" onclick="submitChoice()" style="display: none;">Submit</button></div><div>Opponent:</div><p id="opponentState">Waiting for Opponent</p><div id="otherPlayerChoice" class="button-container"></div></div>
+        <div id="winnerArea">
+            
+        </div>
+        <div id="timerDisplay">
+
+        <h1 id="timerNumber">0</h1><h1 id="timerNumber"></h1></div>
+    </div>
+    <!-- These have to go at the end so they can get access to the html doc -->
+    <script src="./Submitted_choice_awaiting_opponent_files/script.js"></script>
+    <script src="./Submitted_choice_awaiting_opponent_files/client.js"></script>
+
+
+</body></html>

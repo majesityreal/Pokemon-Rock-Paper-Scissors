@@ -1,20 +1,23 @@
 /*
 npx tailwindcss -i ./client/style.css -o ./client/stylePlusTailwind.css --watch
 
-TODO on flight! (Since no wifi)
+OVERALL TODO
+Stylizing stuff - make it look nicer
+Declare a round winner after 3 (or X wins). If there is no winner after all the types have been chosen,
+  tie it and do ELO based on tie
 
-Make multiple rounds. Store previous type choices in array and prevent them again
-Keep track of who won
+Accounts. People can create accounts, this is only for the ELO system.
+ELO system.
 
-Timer? How to do synrconous stuff
-// runs after 2 seconds
-setTimeout(myFunction, 2000, firstParam, secondParam);
+// socket.io generates a socket.id every time it connects. so that is unique!
+// give the client a new thing
+Lobbies
+  When creating lobbies, can make private or public. Private means only by direct code can you join
+  Public you can be joined from quickmatch. Quickmatch pairs you up with an open lobby.
 
-Stylizing stuff
-
-// FIXES
+// KNOWN BUGS
 // if you don't pick anything, it does not display the random pick on your client end (opponent works)
-// random function grabs any type, not types remaining
+// random function grabs any type, NEEDS TO BE FROM types remaining
 
 */
 
@@ -64,6 +67,21 @@ io.on('connection', (socket) => {
     console.log('a user has connected');
     socket.on('disconnect', () => {
       console.log('user disconnected');
+      // Iterate through rooms the player was in and call 'leaveRoom' logic
+      console.log(socket.id);
+      // Find the room the player was in
+      const roomId = Object.keys(socket.rooms).find(roomId => roomId !== socket.id);
+      console.log("room is " + roomId);
+      if (roomId && rooms[roomId]) {
+        // Remove the player from the room
+        rooms[roomId] = rooms[roomId].filter(playerId => playerId !== socket.id);
+        // Check if the room is empty
+        if (rooms[roomId].length === 0) {
+          // Delete the room
+          delete rooms[roomId];
+          console.log(`Room ${roomId} deleted because it became empty.`);
+        }
+    }
     })
 
     socket.on('createGame', () => {
@@ -157,8 +175,8 @@ function declareRoundWinner(roomUniqueId, socket) {
   console.log("winner: " + winner)
   // display to both clients the results!
   // we need both of these to send to both clients (.to() sends to other one, plain emit() sends to one we received from)
-  socket.to(roomUniqueId).emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice});
-  socket.emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice});
+  socket.to(roomUniqueId).emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
+  socket.emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
   // Loop through each room in the rooms object
   // TODO Prep for next round or end the session
   countdownAndRestartGame(3, socket, roomUniqueId);
