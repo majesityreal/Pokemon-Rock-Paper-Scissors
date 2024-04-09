@@ -65,12 +65,12 @@ app.get('/game/:gameId', (req, res) => {
 
 io.on('connection', (socket) => {
     console.log('a user has connected');
-    socket.on('disconnect', () => {
+    socket.on('disconnect', () => { // TODO - work on disconnect features
       console.log('user disconnected');
       // Iterate through rooms the player was in and call 'leaveRoom' logic
       console.log(socket.id);
       // Find the room the player was in
-      const roomId = Object.keys(socket.rooms).find(roomId => roomId !== socket.id);
+      const roomId = Object.keys(socket.rooms).find(roomId => roomId == socket.id);
       console.log("room is " + roomId);
       if (roomId && rooms[roomId]) {
         // Remove the player from the room
