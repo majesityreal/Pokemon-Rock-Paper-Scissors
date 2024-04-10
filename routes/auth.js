@@ -1,43 +1,14 @@
 const path = require('path');
-var express = require('express');
-var passport = require('passport');
-var LocalStrategy = require('passport-local');
 var crypto = require('crypto');
 var db = require('../database');
-const User = require('../database')
+const User = require("../models/User")
+
+var express = require('express');
+const router = express.Router();
 
 var logger = require('morgan');
 var session = require('express-session');
 
-// Configure Passport.js
-passport.use(new LocalStrategy(function verify(username, password, done) {
-    User.findOne({ username: username }, function(err, user) {
-        if (err) { return done(err); }
-        if (!user) { return done(null, false, { message: 'Incorrect username.' }); }
-
-        crypto.pbkdf2(password, user.salt, 310000, 32, 'sha256', function(err, hashedPassword) { // password checking by salting and hashing
-            if (err) { return cb(err); }
-            if (!crypto.timingSafeEqual(user.hashed_password, hashedPassword)) {
-              return done(null, false, { message: 'Incorrect username or password.' });
-            }
-            return done(null, user); // if here, it worked
-          });
-    });
-}));
-
-passport.serializeUser(function(user, cb) {
-    process.nextTick(function() {
-      cb(null, { id: user.id, username: user.username });
-    });
-});
-  
-passport.deserializeUser(function(user, cb) {
-    process.nextTick(function() {
-        return cb(null, user);
-    });
-});
-
-var router = express.Router();
 
 const loginFilePath = path.join(__dirname, '../client/login.html');
 const signupFilePath = path.join(__dirname, '../client/signup.html');
@@ -57,12 +28,11 @@ router.get('/signup', function(req, res, next) {
 
 // *******
 // Login route
-router.post('/login',
-    passport.authenticate('local', {
-        successRedirect: '/dashboard',
-        failureRedirect: '/login-failure'
-    })
-);
+router.post('/login', (req, res) => {
+    console.log(req.body);
+    credentialsAreValid()
+
+});
 
 // Protected dashboard route
 router.get('/dashboard', isAuthenticated, (req, res) => {
@@ -81,44 +51,69 @@ router.get('/login-failure', (req, res) => {
 });
 
 // Signup route
-router.post('/signup', (req, res) => {
-    console.log(req)
-    console.log(req.body);
-    const { username, password } = req.body;
+router.post('/signup', async (req, res) => {
+    try {
+        const salt = crypto.randomBytes(16).toString('hex'); // Generate salt
+        const hashedPassword = await new Promise((resolve, reject) => {
+          crypto.pbkdf2(req.body.password, salt, 310000, 32, 'sha256', (err, derivedKey) => {
+            if (err) reject(err); 
+            resolve(derivedKey.toString('hex')); // Convert to hex
+          });
+        });
     
-    // Check if the username already exists
-    User.findOne({ username: username }, (err, existingUser) => {
-        if (err) {
-            return res.status(500).send('Error occurred while checking username existence.');
-        }
-        if (existingUser) {
-            return res.status(400).send('Username already exists.');
-        }
-
-        // Create a new user
-        const newUser = new User({
-            username: username,
-            password: password
+        const user = new User({
+          username: req.body.username,
+          password: hashedPassword,
         });
-
-        // Save the new user to the database
-        newUser.save((err) => {
-            if (err) {
-                return res.status(500).send('Error occurred while creating user.');
-            }
-            res.redirect('/login'); // Redirect to login page after successful signup
-        });
-    });
+    
+        await user.save(); // Save user to MongoDB
+    
+        // ... your login logic here ...
+        res.redirect('/');
+      } catch (err) {
+        console.log(err); 
+      }
 });
+
+router.post('/register', (req, res) => {
+    console.log(req.body);
+ });
 
 // *******
 
 // Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
+    if (req.session.userId) {
+      next();
+    } else {
+      res.redirect('/login');
     }
-    res.redirect('/login');
-}
+  }
+
+
+
+// auth.js
+exports.register = async (req, res, next) => {
+    const { username, password } = req.body
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password less than 6 characters" })
+    }
+    try {
+      await User.create({
+        username,
+        password,
+      }).then(user =>
+        res.status(200).json({
+          message: "User successfully created",
+          user,
+        })
+      )
+    } catch (err) {
+      res.status(401).json({
+        message: "User not successful created",
+        error: error.mesage,
+      })
+    }
+  }
 
 module.exports = router;

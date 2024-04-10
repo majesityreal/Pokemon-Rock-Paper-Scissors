@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const User = require("./models/User")
 
 // Connect to MongoDB
 async function connectToDatabase() {
@@ -12,14 +13,6 @@ async function connectToDatabase() {
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-// Define User schema
-const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true }
-});
-// Create a User model
-const User = mongoose.model('User', userSchema); // this binds the schema to a database. Now we can use User as a constructor
 
 // Function to create a new user
 async function createUser(username, password) {
@@ -36,6 +29,5 @@ async function createUser(username, password) {
 connectToDatabase()
     .catch(console.error);
 
-module.exports = User; // Export the User model
 module.exports = db;
 module.exports = { connectToDatabase }

@@ -5,11 +5,10 @@ const server = http.createServer(app); // create server from the app
 const path = require('path');
 const mongoose = require('mongoose');
 const db = require('./database');
-var passport = require('passport');
 var session = require('express-session');
 
-var authRouter = require('./routes/auth');
-app.use('/', authRouter); // making the app use everything in our auth.js file which contains authentication routes
+const authRouter = require('./routes/auth'); // the auth router
+
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 
@@ -18,11 +17,15 @@ app.use(express.static(path.join(__dirname, 'client')));
 
 // Express middleware setup
 app.use(express.urlencoded({ extended: true }));
-app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }));
-app.use(passport.initialize());
-app.use(passport.session());
-// Parse JSON bodies (as sent by API clients)
-app.use(express.json());
+app.use(session({ // this is what establishes the session
+  secret: 'your_strong_secret_here', // Used for signing the session ID cookie
+  resave: false, // Don't resave unchanged sessions
+  saveUninitialized: false, // Don't save new sessions that have no data
+  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // Session expires in 1 week 
+}));
+app.use(express.json()); // Parse JSON bodies (as sent by API clients)
+// my middleware setup
+app.use('/auth', authRouter); // Mount the auth router at a specific path
 
 // here we just need to tell the server to listen, the other .js files handle some of the routes
 server.listen(3000, () => {
@@ -31,4 +34,8 @@ server.listen(3000, () => {
 
 console.log("Hello World!");
 
-module.exports = app;
+app.post('/test', (req, res, next) => {
+  console.log(req.body)
+})
+
+module.exports = app; // this is so other files can control app settings and add routes
