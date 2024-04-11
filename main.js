@@ -1,13 +1,17 @@
 const http = require('http');
 const express = require('express')
+const cookieParser = require('cookie-parser')
 const app = express();
+app.use(cookieParser()); // it is very important it is in this order. Must use cookieParser() before creating the server!!!
 const server = http.createServer(app); // create server from the app
 const path = require('path');
 const mongoose = require('mongoose');
 const db = require('./database');
 var session = require('express-session');
 
-const authRouter = require('./routes/auth'); // the auth router
+const { authRouter, adminAuth, userAuth } = require("./routes/auth.js");
+app.get("/admin", adminAuth, (req, res) => res.send("Admin Route"));
+app.get("/basic", userAuth, (req, res) => res.send("User Route"));
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
