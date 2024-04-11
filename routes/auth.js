@@ -6,9 +6,8 @@ const User = require("../models/User")
 var express = require('express');
 const router = express.Router();
 
-var logger = require('morgan');
-var session = require('express-session');
-
+const jwt = require('jsonwebtoken')
+const jwtSecret = 'fea3a3cdf4dcd9c419e91f511ecea42f5be175b9de3203e9970826a9795c769ee0fd27'
 
 const loginFilePath = path.join(__dirname, '../client/login.html');
 const signupFilePath = path.join(__dirname, '../client/signup.html');
@@ -29,9 +28,27 @@ router.get('/signup', function(req, res, next) {
 // *******
 // Login route
 router.post('/login', (req, res) => {
-    console.log(req.body);
-    credentialsAreValid()
+    const { username, password } = req.body
+    // Check if username and password is provided
+    if (!username || !password) {
+      return res.status(400).json({
+        message: "Username or Password not present",
+      })
+    }
 
+    
+
+    checkCredentialsForLogin(req.body.username, req.body.password).then((user) => {
+      console.log('user outside method: ' + user);
+      if (user == false) {
+        console.log("though shalln't enter!!");
+      }
+      else {
+        console.log('though are entering i guess');
+      }
+    });
+
+    res.redirect('/');
 });
 
 // Protected dashboard route
@@ -53,23 +70,52 @@ router.get('/login-failure', (req, res) => {
 // Signup route
 router.post('/signup', async (req, res) => {
     try {
-        const salt = crypto.randomBytes(16).toString('hex'); // Generate salt
-        const hashedPassword = await new Promise((resolve, reject) => {
-          crypto.pbkdf2(req.body.password, salt, 310000, 32, 'sha256', (err, derivedKey) => {
+        const { username, password } = req.body
+        if (!username || !password) {
+          return res.status(400).json({
+            message: "Username or Password not present",
+          })
+        }
+        if (password.length < 6) {
+          return res.status(400).json({ message: "Password less than 6 characters" })
+        }
+        const salt = crypto.randomBytes(4).toString('hex'); // Generate salt
+        // chain of creating the user
+        await new Promise((resolve, reject) => {
+          crypto.pbkdf2(password, salt, 310000, 16, 'sha256', (err, derivedKey) => {
             if (err) reject(err); 
             resolve(derivedKey.toString('hex')); // Convert to hex
           });
+        }).then(async (hash) => {
+          await User.create({ // automatically saves user when you call it like this
+            username: username,
+            password: hash,
+            salt: salt
+          }).then((user) => { // putting cookie into user's browser
+            const maxAge = 24 * 60 * 60;
+            const token = jwt.sign( // jwt sign function takes three params 1: payload/data 2: jwtSecret 3: how long token will last
+              { id: user._id, username, role: user.role }, // 1
+              jwtSecret, // 2
+              { expiresIn: maxAge, } // 3: 24hrs in sec
+            );
+            res.cookie("jwt", token, { // send generated token as a cookie to the client
+              httpOnly: true,
+              maxAge: maxAge * 1000, // 24hrs in ms
+            });
+            res.status(201).json({
+              message: "User successfully created",
+              user: user._id,
+            });
+          });
+        }).catch((error) => {
+          res.status(400).json({
+            message: "User not successful created",
+            error: error.message,
+          })
         });
-    
-        const user = new User({
-          username: req.body.username,
-          password: hashedPassword,
-        });
-    
-        await user.save(); // Save user to MongoDB
-    
-        // ... your login logic here ...
+        // remaining login logic here:
         res.redirect('/');
+
       } catch (err) {
         console.log(err); 
       }
@@ -78,6 +124,10 @@ router.post('/signup', async (req, res) => {
 router.post('/register', (req, res) => {
     console.log(req.body);
  });
+
+ router.get('/profile', isAuthenticated, (req, res) => {
+    // ...
+  });
 
 // *******
 
@@ -88,7 +138,47 @@ function isAuthenticated(req, res, next) {
     } else {
       res.redirect('/login');
     }
+}
+
+async function checkCredentialsForLogin(username, password) {
+    try {
+      console.log("Finding user " + username)
+      // 1. Find the user by username
+      const user = await User.findOne({ username })
+      if (!user || user == null) {
+        console.log('EMERGENCY MEETING NO USER FOUND')
+        return false;
+      }
+      // 2. Hash the incoming password with the stored salt
+      // we are wrapping crypto up with a promise to keep the chain of async
+      await new Promise((resolve, reject) => {
+        crypto.pbkdf2(password, user.salt, 310000, 16, 'sha256', (err, derivedKey) => {
+          if (err) reject(err); 
+          resolve(derivedKey.toString('hex')); // Convert to hex
+        });
+      }).then((hashedPassword) => {
+          if (hashedPassword == user.password) { // 3. Compare the hashed password with the stored one
+            console.log("'tis a match!");
+            return user;
+          }
+          else { return false; }
+        });
+      // do extra signup stuff here?
+    } catch (err) {  // Handle errors gracefully and with inner peace
+      console.log("error checking credentials: " + err);
+      return false;
+    }
   }
+
+function hashPassword(password, salt, callback) {
+  crypto.pbkdf2(password, salt, 310000, 16, 'sha256', (err, derivedKey) => {
+    if (err) {
+      callback(err);  // Pass the error to the callback
+    } else {
+      callback(null, derivedKey.toString('hex')); // Pass null as the error, and the hashed password 
+    }
+  });
+}
 
 
 

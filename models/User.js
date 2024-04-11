@@ -16,6 +16,10 @@ const UserSchema = new Mongoose.Schema({
     default: "Basic",
     required: true,
   },
+  salt: {
+    type: String,
+    required: true
+  }
 })
 
 // Create a User model
