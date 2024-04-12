@@ -20,19 +20,19 @@ Lobbies
 // random function grabs any type, NEEDS TO BE FROM types remaining
 
 */
-
+// main node.js server functionalitys
+const http = require('http')
 const express = require('express');
 const app = express();
-const path = require('path');
-const http = require('http')
-const port = 3000;
 // the socket.io stuff
 const server = http.createServer(app);
 const {Server} = require('socket.io');
 const io = new Server(server);
+const path = require('path');
+// extra stuff added to
 const pokeTypes = require('dismondb'); // pokemon type chart calc library
 const { randomInt } = require('crypto');
-
+const port = 3000;
 // rooms which contain each active game
 // each room object has attributes: 
 // (str)p1Choice, (str)p2Choice, (str[])typesRemaining, (int)p1Wins, (int)p2Wins

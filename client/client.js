@@ -195,3 +195,13 @@ function submitChoice() {
 function printRoomsInfo() {
     socket.emit('printRoomsInfo');
 }
+
+function changeStylesheet() {
+    var stylesheetLink = document.getElementById('stylesheet')
+    if (stylesheetLink.href == "http://127.0.0.1:3000/style.css") {
+        stylesheetLink.href = "http://127.0.0.1:3000/stylePlusTailwind.css"
+    }
+    else {
+        stylesheetLink.href = "http://127.0.0.1:3000/style.css"
+    }
+}
