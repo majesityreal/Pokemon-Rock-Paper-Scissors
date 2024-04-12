@@ -14,9 +14,9 @@ const db = require('./database');
 var session = require('express-session');
 
 const jwt = require('jsonwebtoken')
-
+// adminAuth = function which ensures user is admin, userAuth same for user
 const { authRouter, adminAuth, userAuth } = require("./routes/auth.js");
-app.get("/admin", adminAuth, (req, res) => res.send("Admin Route"));
+app.get("/admin", adminAuth, (req, res) => res.send("Admin Route")); //
 app.get("/basic", userAuth, (req, res) => res.send("User Route"));
 
 
