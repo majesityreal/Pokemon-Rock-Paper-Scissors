@@ -7,19 +7,18 @@ var express = require('express');
 const router = express.Router();
 
 const jwt = require('jsonwebtoken')
-const jwtSecret = 'fea3a3cdf4dcd9c419e91f511ecea42f5be175b9de3203e9970826a9795c769ee0fd27'
 
-const loginFilePath = path.join(__dirname, '../client/login.html');
-const signupFilePath = path.join(__dirname, '../client/signup.html');
+const loginFilePath = path.join('login.ejs');
+const signupFilePath = path.join(__dirname, 'signup.ejs');
 
 const cookieMaxAge = 24 * 60 * 60; // 24 hours in seconds
 
 router.get('/login', function(req, res, next) {
-    res.sendFile(loginFilePath);
+    res.render(loginFilePath);
 });
 
 router.get('/signup', function(req, res, next) {
-    res.sendFile(signupFilePath);
+    res.render(signupFilePath);
 });
 
 // *******
@@ -36,20 +35,15 @@ router.post('/login', (req, res) => {
     }    
     checkCredentialsForLogin(username, password).then((user) => {
       if (user == false || user == null) {
-        return res.status(400).json({
-          message: "Something went wrong, refresh the page and please try again.",
-          error: "Something went wrong in login process",
-        });
+        res.render('login', { errorMessage: "Something went wrong in login process, refresh and try again" })
       }
       if (user.status == 400) {
-        return res.status(400).json({ // this happens if user not found or password is incorrect
-          message: user.message,
-        })
+        res.render('login', { errorMessage: user.message })
       }
       else {
           const token = jwt.sign(
             { id: user._id, username, role: user.role },
-            jwtSecret,
+            process.env.JWT_SECRET,
             {
               expiresIn: cookieMaxAge, // 3hrs in sec
             }
@@ -58,10 +52,7 @@ router.post('/login', (req, res) => {
             httpOnly: true,
             maxAge: cookieMaxAge * 1000, // 3hrs in ms
           });
-          return res.status(201).json({
-            message: "User successfully Logged in",
-            user: user._id,
-          });
+          res.redirect('/');
       }
     });
     // res.redirect('/'); // if you call res.redirect, it sends headers to the client before the promise is finished!!!!! this took me 30 minutes to debug OOF!!
@@ -109,7 +100,7 @@ router.post('/signup', async (req, res) => {
           }).then((user) => { // putting cookie into user's browser
             const token = jwt.sign( // jwt sign function takes three params 1: payload/data 2: jwtSecret 3: how long token will last
               { id: user._id, username, role: user.role }, // 1
-              jwtSecret, // 2
+              process.env.JWT_SECRET, // 2
               { expiresIn: cookieMaxAge, } // 3: 24hrs in sec
             );
             res.cookie("jwt", token, { // send generated token as a cookie to the client
@@ -160,7 +151,6 @@ async function checkCredentialsForLogin(username, password) {
       // 1. Find the user by username
       const user = await User.findOne({ username })
       if (!user || user == null) {
-        console.log('EMERGENCY MEETING NO USER FOUND')
         return {status: 400, message: 'Username not found'};
       }
       // 2. Hash the incoming password with the stored salt
@@ -186,7 +176,7 @@ async function checkCredentialsForLogin(username, password) {
 var adminAuth = (req, res, next) => {
   const token = req.cookies.jwt
   if (token) {
-    jwt.verify(token, jwtSecret, (err, decodedToken) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
       if (err) {
         return res.status(401).json({ message: "Not authorized" })
       } else {
@@ -196,7 +186,7 @@ var adminAuth = (req, res, next) => {
           next()
         }
       }
-    })
+    });
   } else {
     return res
       .status(401)
@@ -212,7 +202,7 @@ var userAuth = (req, res, next) => {
   }
   const token = req.cookies.jwt
   if (token) {
-    jwt.verify(token, jwtSecret, (err, decodedToken) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
       if (err) {
         return res.status(401).json({ message: "Not authorized" })
       } else {
@@ -222,7 +212,7 @@ var userAuth = (req, res, next) => {
           next()
         }
       }
-    })
+    });
   } else {
     return res
       .status(401)

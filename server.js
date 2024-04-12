@@ -20,7 +20,7 @@ Lobbies
 // random function grabs any type, NEEDS TO BE FROM types remaining
 
 */
-
+console.log("SERFVER.JS IS BEING CALLED!!!!!");
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -51,16 +51,17 @@ app.use('/socket.io', express.static(__dirname + '/node_modules/socket.io/client
 
 // Default route 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client', 'index.html'));
+    res.render('index');
 });
 
+// ADDME - not implemented yet, just here to show the :gameId operator, having variables in the URL
 // Route with a gameId parameter
 app.get('/game/:gameId', (req, res) => {
     console.log("routing to game with an id");
     const gameId = req.params.gameId;
     console.log("the id is: " + gameId);
     // Here you can handle different logic based on the roomId
-    res.sendFile(path.join(__dirname, 'client', 'in-game.html'));
+    res.render('in-game');
 });
 
 io.on('connection', (socket) => {

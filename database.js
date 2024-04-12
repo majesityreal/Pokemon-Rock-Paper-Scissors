@@ -4,7 +4,7 @@ const User = require("./models/User")
 // Connect to MongoDB
 async function connectToDatabase() {
     try {
-        await mongoose.connect('mongodb+srv://carsonic:!Aulani1084@pokemonrps.j0m63k8.mongodb.net/?retryWrites=true&w=majority&appName=PokemonRPS');
+        await mongoose.connect(process.env.MONGODB_URL);
         console.log("Connected to MongoDB");
     } catch (error) {
         console.error('Error connecting to MongoDB: ', error);

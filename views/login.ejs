@@ -1,5 +1,11 @@
 <h1>Sign in</h1>
-<form action="/auth/login" method="post">
+<form action="/auth/login" method="post" id="loginForm">
+    <section>
+        <p id="errorMessage"></p>
+        <% if (typeof errorMessage !== 'undefined') { %>
+            <p style="color: red;"><%= errorMessage %></p>
+        <% } %>
+    </section>
     <section>
         <label for="username">Username</label>
         <input id="username" name="username" type="text" autocomplete="username" required autofocus>

@@ -1,0 +1,11 @@
+<nav>
+    <h1>Pokemon Types</h1>
+    <% if (typeof username !== 'undefined') { %>
+
+     <p><%- username %> </p>
+     <button onclick="logout()">Log out</button>
+    <% } else {%>
+        <button onclick="login()">Log in</button>
+    <% } %>
+     
+</nav>
