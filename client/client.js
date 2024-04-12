@@ -204,4 +204,11 @@ function changeStylesheet() {
     else {
         stylesheetLink.href = "http://127.0.0.1:3000/style.css"
     }
+
+    function login() {
+    console.log("login!!");
+}
+
+function logout() {
+    console.log("logout!!");
 }

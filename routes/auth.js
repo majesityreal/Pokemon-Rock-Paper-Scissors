@@ -7,48 +7,55 @@ var express = require('express');
 const router = express.Router();
 
 const jwt = require('jsonwebtoken')
-const jwtSecret = 'fea3a3cdf4dcd9c419e91f511ecea42f5be175b9de3203e9970826a9795c769ee0fd27'
 
-const loginFilePath = path.join(__dirname, '../client/login.html');
-const signupFilePath = path.join(__dirname, '../client/signup.html');
+const loginFilePath = path.join('login.ejs');
+const signupFilePath = path.join(__dirname, 'signup.ejs');
+
+const cookieMaxAge = 24 * 60 * 60; // 24 hours in seconds
 
 router.get('/login', function(req, res, next) {
-    res.sendFile(loginFilePath);
+    res.render(loginFilePath);
 });
 
 router.get('/signup', function(req, res, next) {
-    res.sendFile(signupFilePath);
+    res.render(signupFilePath);
 });
-
-// router.post('/login/password', passport.authenticate('local', {
-//     successRedirect: '/test',
-//     failureRedirect: '/login'
-//   }));
 
 // *******
 // Login route
 router.post('/login', (req, res) => {
+  
     const { username, password } = req.body
     // Check if username and password is provided
     if (!username || !password) {
+      console.log('did the thing')
       return res.status(400).json({
         message: "Username or Password not present",
       })
-    }
-
-    
-
-    checkCredentialsForLogin(req.body.username, req.body.password).then((user) => {
-      console.log('user outside method: ' + user);
-      if (user == false) {
-        console.log("though shalln't enter!!");
+    }    
+    checkCredentialsForLogin(username, password).then((user) => {
+      if (user == false || user == null) {
+        res.render('login', { errorMessage: "Something went wrong in login process, refresh and try again" })
+      }
+      if (user.status == 400) {
+        res.render('login', { errorMessage: user.message })
       }
       else {
-        console.log('though are entering i guess');
+          const token = jwt.sign(
+            { id: user._id, username, role: user.role },
+            process.env.JWT_SECRET,
+            {
+              expiresIn: cookieMaxAge, // 3hrs in sec
+            }
+          );
+          res.cookie("jwt", token, {
+            httpOnly: true,
+            maxAge: cookieMaxAge * 1000, // 3hrs in ms
+          });
+          res.redirect('/');
       }
     });
-
-    res.redirect('/');
+    // res.redirect('/'); // if you call res.redirect, it sends headers to the client before the promise is finished!!!!! this took me 30 minutes to debug OOF!!
 });
 
 // Protected dashboard route
@@ -56,11 +63,10 @@ router.get('/dashboard', isAuthenticated, (req, res) => {
     res.send('Welcome to the dashboard');
 });
 
-// Logout route
-router.get('/logout', (req, res) => {
-    req.logout();
-    res.redirect('/login');
-});
+router.get("/logout", (req, res) => {
+  res.cookie("jwt", "", { maxAge: "1" })
+  res.redirect("/")
+})
 
 // Login failure route
 router.get('/login-failure', (req, res) => {
@@ -92,15 +98,14 @@ router.post('/signup', async (req, res) => {
             password: hash,
             salt: salt
           }).then((user) => { // putting cookie into user's browser
-            const maxAge = 24 * 60 * 60;
             const token = jwt.sign( // jwt sign function takes three params 1: payload/data 2: jwtSecret 3: how long token will last
               { id: user._id, username, role: user.role }, // 1
-              jwtSecret, // 2
-              { expiresIn: maxAge, } // 3: 24hrs in sec
+              process.env.JWT_SECRET, // 2
+              { expiresIn: cookieMaxAge, } // 3: 24hrs in sec
             );
             res.cookie("jwt", token, { // send generated token as a cookie to the client
               httpOnly: true,
-              maxAge: maxAge * 1000, // 24hrs in ms
+              maxAge: cookieMaxAge * 1000, // 24hrs in ms
             });
             res.status(201).json({
               message: "User successfully created",
@@ -146,22 +151,20 @@ async function checkCredentialsForLogin(username, password) {
       // 1. Find the user by username
       const user = await User.findOne({ username })
       if (!user || user == null) {
-        console.log('EMERGENCY MEETING NO USER FOUND')
-        return false;
+        return {status: 400, message: 'Username not found'};
       }
       // 2. Hash the incoming password with the stored salt
       // we are wrapping crypto up with a promise to keep the chain of async
-      await new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         crypto.pbkdf2(password, user.salt, 310000, 16, 'sha256', (err, derivedKey) => {
           if (err) reject(err); 
           resolve(derivedKey.toString('hex')); // Convert to hex
         });
       }).then((hashedPassword) => {
           if (hashedPassword == user.password) { // 3. Compare the hashed password with the stored one
-            console.log("'tis a match!");
             return user;
           }
-          else { return false; }
+          else { return {status: 400, message: 'Incorrect password'}; }
         });
       // do extra signup stuff here?
     } catch (err) {  // Handle errors gracefully and with inner peace
@@ -170,40 +173,53 @@ async function checkCredentialsForLogin(username, password) {
     }
   }
 
-function hashPassword(password, salt, callback) {
-  crypto.pbkdf2(password, salt, 310000, 16, 'sha256', (err, derivedKey) => {
-    if (err) {
-      callback(err);  // Pass the error to the callback
-    } else {
-      callback(null, derivedKey.toString('hex')); // Pass null as the error, and the hashed password 
-    }
-  });
+var adminAuth = (req, res, next) => {
+  const token = req.cookies.jwt
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+      if (err) {
+        return res.status(401).json({ message: "Not authorized" })
+      } else {
+        if (decodedToken.role !== "admin") {
+          return res.status(401).json({ message: "Not authorized" })
+        } else {
+          next()
+        }
+      }
+    });
+  } else {
+    return res
+      .status(401)
+      .json({ message: "Not authorized, token not available" })
+  }
 }
 
-
-
-// auth.js
-exports.register = async (req, res, next) => {
-    const { username, password } = req.body
-    if (password.length < 6) {
-      return res.status(400).json({ message: "Password less than 6 characters" })
-    }
-    try {
-      await User.create({
-        username,
-        password,
-      }).then(user =>
-        res.status(200).json({
-          message: "User successfully created",
-          user,
-        })
-      )
-    } catch (err) {
-      res.status(401).json({
-        message: "User not successful created",
-        error: error.mesage,
+var userAuth = (req, res, next) => {
+  if (req.cookies == null) {
+    return res.status(401).json({
+       message: "You have no cookies with you" 
       })
-    }
   }
+  const token = req.cookies.jwt
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+      if (err) {
+        return res.status(401).json({ message: "Not authorized" })
+      } else {
+        if (decodedToken.role !== "Basic") {
+          return res.status(401).json({ message: "Not authorized" })
+        } else {
+          next()
+        }
+      }
+    });
+  } else {
+    return res
+      .status(401)
+      .json({ message: "Not authorized, token not available" })
+  }
+}
 
-module.exports = router;
+module.exports = { 
+  authRouter: router, adminAuth: adminAuth, userAuth: userAuth,
+};
