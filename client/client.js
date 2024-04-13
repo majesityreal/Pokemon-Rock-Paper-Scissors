@@ -207,9 +207,34 @@ function changeStylesheet() {
 }
 
 function login() {
-    console.log("login!!");
+    document.getElementById('login-modal').classList.remove('hidden');
+    // Close the login modal when clicking anywhere on the page
+    // Add the event listener for closing on outside click
+    window.addEventListener('click', loginOutsideClickListener);
 }
+
+function closeLogin() {
+    document.getElementById('login-modal').classList.add('hidden');
+    window.removeEventListener('click', loginOutsideClickListener);
+
+}
+
+function loginOutsideClickListener(event) {
+    const modal = document.getElementById('login-modal');
+    if (event.target === modal) {
+      closeLogin();
+    }
+  }
 
 function logout() {
     console.log("logout!!");
 }
+
+function openSignup() {
+    document.getElementById('login-modal').classList.add('hidden');
+    document.getElementById('signup-modal').classList.remove('hidden');
+  }
+  
+  function closeSignup() {
+    document.getElementById('signup-modal').classList.add('hidden');
+  }

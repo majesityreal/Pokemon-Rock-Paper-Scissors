@@ -1,4 +1,6 @@
-
+### Known Bugs:
+Login form has extra margins on left and right side. It is 3 nested <div> and that is likely why.
+Issue bc if you click outside login popup, it closes it unless you click on these horizontal margins. Cannot figure out how to fix, minor bug as it does not significantly impact functionality
 
 # Future developer:
 #### VSCode

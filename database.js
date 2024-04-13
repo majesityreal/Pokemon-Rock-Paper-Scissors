@@ -12,7 +12,10 @@ async function connectToDatabase() {
 }
 
 const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.on('error', () => {
+    console.error.bind(console, 'MongoDB connection error:')
+    return; // FIXME we return, before it was throwing a double error so it might be connecting twice?
+});
 
 // Function to create a new user
 async function createUser(username, password) {
@@ -26,8 +29,8 @@ async function createUser(username, password) {
 }
 
 // Connect to the database
-connectToDatabase()
-    .catch(console.error);
+// connectToDatabase()
+//     .catch(console.error);
 
 module.exports = db;
 module.exports = { connectToDatabase }

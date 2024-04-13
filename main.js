@@ -5,23 +5,29 @@ const cookieParser = require('cookie-parser')
 const app = express();
 app.use(cookieParser()); // it is very important it is in this order. Must use cookieParser() before creating the server!!!
 app.set('view engine', 'ejs'); // Set EJS as the view engine
-const server = http.createServer(app); // create server from the app
+const httpServer = http.createServer(app); // create server from the app
 const {Server} = require('socket.io');
-const io = new Server(server);
+const io = new Server(httpServer);
+console.log("requiring socket");
+module.exports = {io: io}; // exporting it here
+const socket = require('./socket');
+console.log("ending require socket");
+
 const path = require('path');
 const mongoose = require('mongoose');
 const db = require('./database');
 var session = require('express-session');
 
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 // adminAuth = function which ensures user is admin, userAuth same for user
 const { authRouter, adminAuth, userAuth } = require("./routes/auth.js");
 app.get("/admin", adminAuth, (req, res) => res.send("Admin Route")); //
 app.get("/basic", userAuth, (req, res) => res.send("User Route"));
 
-
 // Serve static files from the 'client' directory
 app.use(express.static(path.join(__dirname, 'client')));
+// Serve static files from the 'node_modules' directory
+app.use('/socket.io', express.static(__dirname + '/node_modules/socket.io/client-dist'));
 
 // Express middleware setup
 app.use(express.urlencoded({ extended: true }));
@@ -36,7 +42,7 @@ app.use(express.json()); // Parse JSON bodies (as sent by API clients)
 app.use('/auth', authRouter); // Mount the auth router at a specific path
 
 // here we just need to tell the server to listen, the other .js files handle some of the routes
-server.listen(3000, () => {
+httpServer.listen(3000, () => {
     console.log(`Server listening on port ${3000}`);
   });
 
@@ -61,9 +67,4 @@ app.get('/', (req, res) => {
   
 });
 
-// Example route to render an EJS template
-app.get('/test', (req, res) => {
-  res.render('index', { title: 'Express App' }); // Render 'index.ejs' with a title variable
-});
-
-module.exports = app; // this is so other files can control app settings and add routes
+module.exports = {app: app, httpServer: httpServer, io: io}; // this is so other files can control app settings and add routes

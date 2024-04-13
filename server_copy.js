@@ -25,6 +25,7 @@ const http = require('http')
 console.log("SERFVER.JS IS BEING CALLED!!!!!");
 const express = require('express');
 const app = express();
+app.set('view engine', 'ejs'); // Set EJS as the view engine
 // the socket.io stuff
 const server = http.createServer(app);
 const {Server} = require('socket.io');
