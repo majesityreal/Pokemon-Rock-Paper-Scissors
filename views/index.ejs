@@ -16,40 +16,49 @@
         
     </login>
 
-    <h1 class="text-3xl font-bold underline" id="gameStatusUpdate">
-        Hello world!
-    </h1>
-    <h2 id="gameScore"> </h2>
-    <button onclick="printRoomsInfo()">Print rooms info</button>
-    <button onclick="changeStylesheet()">Change stylesheet</button>
+    <button onclick="printRoomsInfo()" class="btn">Print rooms info</button>
+    <button onclick="changeStylesheet()" class="btn">Change stylesheet</button>
+    <button onclick="location.href = 'http://127.0.0.1:3000/ingame'" class="btn">InGame View</button>
 
     
-    <div id="lobbyButtons" class="max-w-md mx-auto bg-slate-300 rounded-xl shadow-lg items-center space-x-4 my-4 py-4">
+    <div id="lobbyArea" class="max-w-md mx-auto bg-slate-200 rounded-xl shadow-lg items-center space-x-4 my-4 py-4">
         <div></div>
-        <button onclick="createGame()" class="btn btn-blue">Create Game</button>
+        <button onclick="createGame()" class="btn btn-primary">Create Game</button>
         <div>or</div>
-        <button onclick="joinGame()" class="btn btn-blue">Join Game</button>
+        <button onclick="joinGame()" class="btn btn-primary">Join Game</button>
         <input type="text" name="" id="roomUniqueId" class="border border-slate-200"/>
     </div>
 
-    <div id="gamePlay"> 
+    <div id="gamePlay">
         <div id="waitingArea"></div> <!-- This displays text when waiting for someone else to join -->
+        <h1 class="text-3xl font-bold underline" id="gameWhoWonRoundText">Enjoy the game!</h1>
+        <h2 id="gameScore"> </h2>
         <div id="gameArea" style="display: none;">
             <div>Your choice: </div>
             <div class="button-container">
             </div>
             <div class="submit-container">
-                <button class="submit-button" onclick="submitChoice()">Submit</button>
+                <button class="submit-button btn btn-pikachu" onclick="submitChoice()">Submit</button>
+            </div>
+            <div class="flex flex-col max-w-md mx-auto my-4 bg-slate-300 items-center">
+                <p class="text-3xl font-bold">Opponent:</p>
+                <p id="opponentState" class="text-center">Waiting for Opponent</p>
+                <div> <!-- This is a div to hold the other div in, otherwise it overlaps the flex container-->
+                  
+                </div>
             </div>
 
-            <div>Opponent:</div>
-            <p id="opponentState">Waiting for Opponent</p>
-            <div id="otherPlayerChoice" class="button-container">
+        </div>
+        <div id="roundWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto" style="display: none;"> <!-- changes from 'hidden' to 'flex' when displayed! -->
+            <div class="choice1 w-1/2 p-4">
+              <p class="font-bold text-center sm:text-2xl text-lg">Your choice:</p>
+              <div id="yourChoice" class=""></div> <!--shows YOUR choice at end of match-->
             </div>
-        </div>
-        <div id="winnerArea">
-            
-        </div>
+            <div class="choice2 w-1/2 p-4">
+              <p class="font-bold text-center sm:text-2xl text-lg">Opponent's choice:</p>
+              <div id="otherPlayerChoice" class=""></div> <!--shows the other player's choice at end of match-->
+            </div>
+          </div>
         <div id="timerDisplay">
 
         </div>

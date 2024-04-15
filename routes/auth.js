@@ -1,12 +1,12 @@
-const path = require('path');
-var crypto = require('crypto');
-var db = require('../database');
-const User = require("../models/User")
-
 var express = require('express');
 const router = express.Router();
 
+const path = require('path');
+var crypto = require('crypto');
 const jwt = require('jsonwebtoken')
+
+var db = require('../database');
+const User = require("../models/User")
 
 const loginFilePath = path.join('login.ejs');
 const signupFilePath = path.join(__dirname, 'signup.ejs');
@@ -24,7 +24,6 @@ router.get('/signup', function(req, res, next) {
 // *******
 // Login route
 router.post('/login', (req, res) => {
-  
     const { username, password } = req.body
     // Check if username and password is provided
     if (!username || !password) {
@@ -52,15 +51,10 @@ router.post('/login', (req, res) => {
             httpOnly: true,
             maxAge: cookieMaxAge * 1000, // 3hrs in ms
           });
-          res.redirect('/');
+          res.redirect('/'); // TODO - fix this redirect
       }
     });
     // res.redirect('/'); // if you call res.redirect, it sends headers to the client before the promise is finished!!!!! this took me 30 minutes to debug OOF!!
-});
-
-// Protected dashboard route
-router.get('/dashboard', isAuthenticated, (req, res) => {
-    res.send('Welcome to the dashboard');
 });
 
 router.get("/logout", (req, res) => {
@@ -130,20 +124,7 @@ router.post('/register', (req, res) => {
     console.log(req.body);
  });
 
- router.get('/profile', isAuthenticated, (req, res) => {
-    // ...
-  });
-
 // *******
-
-// Middleware to check if user is authenticated
-function isAuthenticated(req, res, next) {
-    if (req.session.userId) {
-      next();
-    } else {
-      res.redirect('/login');
-    }
-}
 
 async function checkCredentialsForLogin(username, password) {
     try {
@@ -195,6 +176,37 @@ var adminAuth = (req, res, next) => {
 }
 
 var userAuth = (req, res, next) => {
+  if (req.cookies == null) {
+    return res.status(401).json({
+       message: "You have no cookies with you" 
+      })
+  }
+  const token = req.cookies.jwt
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+      if (err) {
+        return res.status(401).json({ message: "Not authorized" })
+      } else {
+        if (decodedToken.role !== "Basic") {
+          return res.status(401).json({ message: "Not authorized" })
+        } else {
+          next()
+        }
+      }
+    });
+  } else {
+    return res
+      .status(401)
+      .json({ message: "Not authorized, token not available" })
+  }
+}
+
+router.get('/profile', userAuth, (req, res) => {
+  console.log('my profile being called!');
+  // ...
+});
+
+var getUsername = (req, res, next) => {
   if (req.cookies == null) {
     return res.status(401).json({
        message: "You have no cookies with you" 

@@ -36,11 +36,11 @@ PLAYER TYPE BUTTONS
 
 @media (min-width: 1200px) { /* Adjust breakpoint as needed */
     .button-container {
-        grid-template-columns: repeat(9, minmax(100px, 1fr)); 
+        grid-template-columns: repeat(6, minmax(100px, 1fr)); 
     }
 }
 
-@media (min-width: 740px) and (max-width: 1200px) { /* Adjust breakpoint as needed */
+@media (min-width: 850px) and (max-width: 1200px) { /* Adjust breakpoint as needed */
     .button-container {
         grid-template-columns: repeat(6, minmax(100px, 1fr)); 
     }
@@ -60,6 +60,7 @@ PLAYER TYPE BUTTONS
     text-transform: uppercase;
     cursor: pointer;
     width: 100%; /* Make button take up full cell width */
+    font-weight: 700;
 }
 
 .type-button:hover { 
@@ -73,8 +74,15 @@ PLAYER TYPE BUTTONS
 }
 
 /* **********************************************************
-SUBMIT BUTTON
+SUBMIT BUTTON + OTHER BUTTONS
 ********************************************************** */
+/* default buttons with TailwindCSS*/
+.btn {
+    @apply font-bold py-2 px-4 rounded bg-red-500 text-white;
+}
+.btn:hover {
+    @apply bg-slate-900;
+}
 
 .submit-container {
     display: grid;
@@ -83,25 +91,32 @@ SUBMIT BUTTON
 .submit-container button {
     margin-left: auto;
     margin-right: auto;
-    max-width: 400px;
+    max-width: 200px;
     width: 100%; /* Make button take up full cell width */
+}
+
+.btn-pikachu {
+    background-color: #F4DC26;
+} .btn-pikachu::before {
+    content: "🔴\00a0\00a0\00a0";
+} .btn-pikachu::after {
+    content: "\00a0\00a0\00a0🔴";
+} .btn-pikachu:hover {
+    background-color: #d1ba0e
 }
 
 /* **********************************************************
 BUTTONS - tailwind customization
 ********************************************************** */
-.btn {
-    @apply font-bold py-2 px-4 rounded;
-}
 .btn-slate {
     @apply bg-slate-700 text-white;
 }
 .btn-slate:hover {
     @apply bg-slate-900;
 }
-.btn-blue {
+.btn-primary {
     @apply bg-blue-500 text-white;
 }
-.btn-blue:hover {
+.btn-primary:hover {
     @apply bg-blue-700;
 }

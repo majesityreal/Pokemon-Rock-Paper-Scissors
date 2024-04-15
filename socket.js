@@ -36,8 +36,8 @@ const pokemonTypes = [
   'Normal', 'Fire', 'Water', 'Grass', 'Electric', 'Ice',
   'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
   'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
-]; // constant used to start the rooms
-
+]; // constant used between rounds timer
+const timeBetweenRounds = 100;
 
 // ADDME - not implemented yet, just here to show the :gameId operator, having variables in the URL
 // Route with a gameId parameter
@@ -50,6 +50,7 @@ const pokemonTypes = [
 // });
 
 io.on('connection', (socket) => {
+    console.log('=-= =-= =-=');
     console.log('a user has connected');
     socket.on('disconnect', () => { // TODO - work on disconnect features
       console.log('user disconnected');
@@ -118,7 +119,6 @@ io.on('connection', (socket) => {
     socket.on('printRoomsInfo', () => {
       printObjectProperties(rooms);
     });
-
 })
 
 function declareRoundWinner(roomUniqueId, socket) {
@@ -165,7 +165,7 @@ function declareRoundWinner(roomUniqueId, socket) {
   socket.emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
   // Loop through each room in the rooms object
   // TODO Prep for next round or end the session
-  countdownAndRestartGame(3, socket, roomUniqueId);
+  countdownAndRestartGame(timeBetweenRounds, socket, roomUniqueId);
 
 }
 
@@ -257,3 +257,5 @@ function printObjectProperties(obj, indentation = '') {
       }
   }
 }
+
+module.exports = { rooms: rooms };

@@ -23,28 +23,28 @@
         </div>
       </div>
 
-    <h1 class="text-3xl font-bold underline" id="gameStatusUpdate">
+    <h1 class="text-3xl font-bold underline" id="gameWhoWonRoundText">
         Hello world!
     </h1>
     <h2 id="gameScore"> </h2>
     <button onclick="printRoomsInfo()">Print rooms info</button>
 
     
-    <div id="lobbyButtons">
+    <div id="lobbyArea">
         <button onclick="createGame()">Create Game</button>
         <div>or</div>
         <input type="text" name="" id="roomUniqueId"/>
         <button onclick="joinGame()">Join Game</button>
     </div>
 
-    <div id="gamePlay"> 
+    <div id="gameArea"> 
         <div id="waitingArea"></div> <!-- This displays text when waiting for someone else to join -->
         <div id="gameArea" style="display: none;">
             <div>Your choice: </div>
             <div class="button-container">
             </div>
             <div class="submit-container">
-                <button class="submit-button" onclick="submitChoice()">Submit</button>
+                <button class="submit-button btn btn-pikachu" onclick="submitChoice()">Submit</button>
             </div>
 
             <div>Opponent:</div>

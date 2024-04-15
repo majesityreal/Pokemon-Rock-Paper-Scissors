@@ -21,8 +21,14 @@ var session = require('express-session');
 const jwt = require('jsonwebtoken');
 // adminAuth = function which ensures user is admin, userAuth same for user
 const { authRouter, adminAuth, userAuth } = require("./routes/auth.js");
+const { gameRouter } = require("./routes/game.js");
+
 app.get("/admin", adminAuth, (req, res) => res.send("Admin Route")); //
 app.get("/basic", userAuth, (req, res) => res.send("User Route"));
+// Protected dashboard route
+app.get('/dashboard', userAuth, (req, res) => {
+  res.send('Welcome to the dashboard');
+});
 
 // Serve static files from the 'client' directory
 app.use(express.static(path.join(__dirname, 'client')));
@@ -39,7 +45,9 @@ app.use(session({ // this is what establishes the session
 }));
 app.use(express.json()); // Parse JSON bodies (as sent by API clients)
 // my middleware setup
+// routers in different files
 app.use('/auth', authRouter); // Mount the auth router at a specific path
+app.use('/game', gameRouter);
 
 // here we just need to tell the server to listen, the other .js files handle some of the routes
 httpServer.listen(3000, () => {
@@ -65,6 +73,10 @@ app.get('/', (req, res) => {
     res.render('index');
   }
   
+});
+
+app.get('/ingame', (req, res) => {
+  res.render('InGameView');
 });
 
 module.exports = {app: app, httpServer: httpServer, io: io}; // this is so other files can control app settings and add routes

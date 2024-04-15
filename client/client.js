@@ -5,6 +5,10 @@ let roomUniqueId = null;
 let player1 = false;
 let hasSubmittedChoice = false;
 
+// chunk of HTML where type buttons are with the submit button
+var ingameMakingChoice = document.getElementById('gameArea');
+var ingameDisplayRoundWinner = document.getElementById('roundWinnerArea');
+
 function createGame() {
     player1 = true;
     console.log('creating game on client.js end!');
@@ -20,7 +24,7 @@ function joinGame() {
 socket.on('newGame', (data) => {
     roomUniqueId = data.roomUniqueId;
 
-    document.getElementById('lobbyButtons').style.display = 'none';
+    hide(document.getElementById('lobbyArea'));
     document.getElementById('gamePlay').style.display = 'block';
 
     let copyButton = document.createElement('button');
@@ -41,9 +45,9 @@ socket.on('newGame', (data) => {
 
 socket.on('playersConnected', () => {
     console.log("received playersConnected socket");
-    document.getElementById('lobbyButtons').style.display = 'none';
-    document.getElementById('waitingArea').style.display = 'none';
-    document.getElementById('gameArea').style.display = 'block';
+    hide(document.getElementById('lobbyArea'));
+    hide(document.getElementById('waitingArea'));
+    ingameMakingChoice.style.display = 'block';
 });
 
 socket.on('p1Choice', () => {
@@ -63,18 +67,23 @@ socket.on('p2Choice', () => {
 socket.on('matchResults', (data) => { // when both players have made their choice
     console.log("match results data: " + data);
     console.log("winner: " + data.winner);
+    // hide the gameArea
+    hide(ingameMakingChoice)
+    // show the winnerArea
+    ingameDisplayRoundWinner.style.display = 'flex';
     if (player1) {
-        showOpponentsChoice(data.p2Choice);
+        showPlayerChoices(data.p1Choice, data.p2Choice);
+        displayTypeMatchups(data.p1Choice, data.p2Choice);
     }
     else if (!player1) {
-        showOpponentsChoice(data.p1Choice);
+        showPlayerChoices(data.p2Choice, data.p1Choice);
+        displayTypeMatchups(data.p2Choice, data.p1Choice);
     }
+    // TODO - show helper. Helper indicates the type effectiveness against each other
+    
     displayWhoWon(data.winner);
     displayScore(data.p1Wins, data.p2Wins);
-    // create play again button
-    const playAgainButton = document.createElement('button');
-    playAgainButton.textContent = "Play Again";
-    document.getElementById("gameArea").appendChild(playAgainButton);
+    // create the timer and diplay it
     const timerNumber = document.createElement("h1");
     timerNumber.id = "timerNumber";
     document.getElementById("timerDisplay").appendChild(timerNumber);
@@ -89,8 +98,7 @@ socket.on('restartGame', (data) => {
     console.log("received restartGame: ");
     // TODO - everything that restarts the game
     // clear the gameArea, replace with default content in script.js
-    var gameArea = document.getElementById("gameArea");
-    gameArea.innerHTML = defaultGameArea;
+    ingameMakingChoice.innerHTML = defaultGameArea;
     // now we have to add the button to game area
     const buttonContainer = document.querySelector('.button-container');
     // Creates buttons for all the types remaining for the next game
@@ -118,14 +126,22 @@ socket.on('restartGame', (data) => {
         }
     });
 });
-function showOpponentsChoice(type) {
-    console.log("type " + type);
+function showPlayerChoices(yourType, opponentType) {
     var divToShowResult = document.getElementById("otherPlayerChoice");
-    createTypeButton(type, divToShowResult);
+    createTypeButton(opponentType, divToShowResult);
+    divToShowResult = document.getElementById("yourChoice");
+    createTypeButton(yourType, divToShowResult);
+}
+
+function displayTypeMatchups(yourType, opponentType) {
+    var divToShowResult = document.getElementById("otherPlayerChoice");
+    createTypeButton(opponentType, divToShowResult);
+    divToShowResult = document.getElementById("yourChoice");
+    createTypeButton(yourType, divToShowResult); // left it off here CARSON
 }
 
 function displayWhoWon(whoWon) {
-    var textUpdate = document.getElementById("gameStatusUpdate");
+    var textUpdate = document.getElementById("gameWhoWonRoundText");
     if (whoWon == "tie") {
         textUpdate.innerHTML = "It was a tie!"
         textUpdate.style.color = "black";
@@ -182,12 +198,12 @@ function submitChoice() {
     // disable all other buttons
     const buttons = document.querySelectorAll('button.type-button:not(.selected)');
     buttons.forEach((button) => {
-        button.style.display = 'none';
+        hide(button);
     });
     // document.getElementById("Button").disabled = true;
 
     // hide the submit button
-    document.querySelector('.submit-button').style.display = 'none';
+    hide(document.querySelector('.submit-button'));
     // TODO - other stuff to handle the choice (disable click event listener, query for opponent choice, etc)
     hasSubmittedChoice = true;
 }
@@ -235,6 +251,10 @@ function openSignup() {
     document.getElementById('signup-modal').classList.remove('hidden');
   }
   
-  function closeSignup() {
+function closeSignup() {
     document.getElementById('signup-modal').classList.add('hidden');
-  }
+}
+
+function hide(htmlElement) {
+    htmlElement.style.display = 'none';
+}

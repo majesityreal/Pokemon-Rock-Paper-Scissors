@@ -29,8 +29,8 @@ async function createUser(username, password) {
 }
 
 // Connect to the database
-// connectToDatabase()
-//     .catch(console.error);
+connectToDatabase()
+    .catch(console.error);
 
 module.exports = db;
 module.exports = { connectToDatabase }

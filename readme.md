@@ -6,3 +6,8 @@ Issue bc if you click outside login popup, it closes it unless you click on thes
 #### VSCode
 Install PostCSS to read the stuff that Tailwind adds on compiling
 Also install _______________ for the EJS support
+
+## /routes
+Handles all routing related stuff.
+auth.js = handles logging in/signing up/ logging out
+game.js = handles game related routes (creating, joining, re-connecting)

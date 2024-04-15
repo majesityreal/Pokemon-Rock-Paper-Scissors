@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<!-- saved from url=(0022)http://127.0.0.1:3000/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Type Buttons</title>
+    <!-- <link rel="stylesheet" href="style.css">  -->
+    <link href="./stylePlusTailwind.css" rel="stylesheet" id="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body cz-shortcut-listen="true">
+    <nav>
+    <h1 class="text-3xl font-bold">Pokemon Types</h1>
+    
+        <button onclick="login()" class="btn btn-primary">Log in</button>
+    
+     
+</nav>
+    <div id="login-modal" class="fixed hidden top-0 left-0 w-full h-full z-50 overflow-y-auto bg-black/50">
+    <div class="container mx-auto mt-32 flex justify-center items-center">
+      <div class="bg-white p-8 rounded-md shadow-lg relative">
+        <h2 class="text-2xl font-bold mb-4">Login</h2>
+        <button onclick="openSignup()" class="text-blue-500 hover:underline">Don't have an account? Sign up</button>
+        <button type="button" onclick="closeLogin()" class="absolute top-0 right-0 p-2 rounded-full hover:bg-gray-200 focus:outline-none">
+            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        <form id="login-form">
+          <div class="mb-4">
+            <label for="username" class="block text-gray-700 mb-2">Username:</label>
+            <input type="text" id="username" class="w-full border border-gray-300 p-2 rounded">
+          </div>
+          <div class="mb-4">
+            <label for="password" class="block text-gray-700 mb-2">Password:</label>
+            <input type="password" id="password" class="w-full border border-gray-300 p-2 rounded">
+          </div>
+          <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded">Login</button>
+          <button type="button" onclick="closeLogin()" class="bg-gray-400 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded ml-2">Cancel</button>
+        </form>
+      </div>
+    </div>
+</div>
+
+<div id="signup-modal" class="fixed hidden top-0 left-0 w-full h-full z-50 overflow-y-auto bg-black/50">
+    <div class="container mx-auto mt-32 flex justify-center items-center">
+      <div class="bg-white p-8 rounded-md shadow-lg">
+          <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
+          <form id="signup-form">
+            </form>
+          <button type="button" onclick="closeSignup()" class="bg-gray-400 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded">Cancel</button>
+      </div>
+    </div>
+</div>
+
+    <login>
+        
+    </login>
+
+    <h1 class="text-3xl font-bold underline" id="gameWhoWonRoundText">
+        Hello world!
+    </h1>
+    <h2 id="gameScore"> </h2>
+    <button onclick="printRoomsInfo()">Print rooms info</button>
+    <button onclick="changeStylesheet()">Change stylesheet</button>
+
+    
+    <div id="lobbyArea" class="max-w-md mx-auto bg-slate-300 rounded-xl shadow-lg items-center space-x-4 my-4 py-4" style="display: none;">
+        <div></div>
+        <button onclick="createGame()" class="btn btn-primary">Create Game</button>
+        <div>or</div>
+        <button onclick="joinGame()" class="btn btn-primary">Join Game</button>
+        <input type="text" name="" id="roomUniqueId" class="border border-slate-200">
+    </div>
+
+    <div id="gamePlay"> 
+        <div id="waitingArea" style="display: none;"></div> <!-- This displays text when waiting for someone else to join -->
+        <div id="gameArea" style="display: block;">
+            <div>Your choice: </div>
+            <div class="button-container max-w-5xl">
+            <button class="type-button" style="background-color: rgb(168, 167, 122);">Normal</button><button class="type-button" style="background-color: rgb(238, 129, 48);">Fire</button><button class="type-button" style="background-color: rgb(99, 144, 240);">Water</button><button class="type-button" style="background-color: rgb(122, 199, 76);">Grass</button><button class="type-button" style="background-color: rgb(247, 208, 44);">Electric</button><button class="type-button" style="background-color: rgb(150, 217, 214);">Ice</button><button class="type-button" style="background-color: rgb(194, 46, 40);">Fighting</button><button class="type-button" style="background-color: rgb(163, 62, 161);">Poison</button><button class="type-button" style="background-color: rgb(226, 191, 101);">Ground</button><button class="type-button" style="background-color: rgb(169, 143, 243);">Flying</button><button class="type-button" style="background-color: rgb(249, 85, 135);">Psychic</button><button class="type-button" style="background-color: rgb(166, 185, 26);">Bug</button><button class="type-button" style="background-color: rgb(182, 161, 54);">Rock</button><button class="type-button" style="background-color: rgb(115, 87, 151);">Ghost</button><button class="type-button" style="background-color: rgb(111, 53, 252);">Dragon</button><button class="type-button" style="background-color: rgb(112, 87, 70);">Dark</button><button class="type-button" style="background-color: rgb(183, 183, 206);">Steel</button><button class="type-button" style="background-color: rgb(214, 133, 173);">Fairy</button></div>
+            <div class="submit-container">
+                <button class="submit-button btn btn-pikachu" onclick="submitChoice()">Submit</button>
+            </div>
+            <div class="flex flex-col max-w-md mx-auto my-4 bg-slate-300 items-center">
+                <p class="text-3xl font-bold">Opponent:</p>
+                <p id="opponentState" class="text-center">Waiting for Opponent</p>
+                <div> <!-- This is a div to hold the other div in, otherwise it overlaps the flex container-->
+                  <div id="otherPlayerChoice" class="button-container"></div>
+                </div>
+            </div>
+
+        </div>
+        <div class="container mx-auto flex items-center justify-center">
+                <div>Opponent:</div>
+                <p id="opponentState">Opponent made a choice</p>
+                <div id="otherPlayerChoice" class="button-container"></div>
+        </div>
+
+        <div id="roundWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto" style="display: flex;"> <!-- changes from 'hidden' to 'flex' when displayed! -->
+          <div class="choice1 w-1/2 p-4">
+            <p class="font-bold text-center sm:text-2xl text-lg">Your choice:</p>
+            <div id="yourChoice" class=""><button class="type-button" style="background-color: rgb(150, 217, 214);">Ice</button></div> <!--shows YOUR choice at end of match-->
+          </div>
+          <div class="choice2 w-1/2 p-4">
+            <p class="font-bold text-center sm:text-2xl text-lg">Opponent's choice:</p>
+            <div id="otherPlayerChoice" class=""><button class="type-button" style="background-color: rgb(122, 199, 76);">Grass</button></div> <!--shows the other player's choice at end of match-->
+          </div>
+          <div id="roundWinnerAreaTypeExplanation" class="flex flex-col items-center mx-auto">
+            <div>
+              test
+            </div>
+            <div class="flex flex-row items-center py-2">
+              <div class=""><button class="type-button" style="background-color: rgb(150, 217, 214);">Ice</button></div>
+              <p class="font-bold text-center sm:text-xl text-lg px-2">is supereffective against</p>
+              <div class=""><button class="type-button" style="background-color: rgb(122, 199, 76);">Grass</button></div>
+            </div>
+            <div class="flex flex-row items-center py-2">
+              <button class="type-button" style="background-color: rgb(122, 199, 76);">Grass</button>
+              <p class="font-bold text-center sm:text-xl text-lg px-2">is normal effective against</p>
+              <button class="type-button" style="background-color: rgb(150, 217, 214);">Ice</button>
+            </div>
+          </div>
+        </div>
+        <div id="timerDisplay">
+
+        </div>
+    </div>
+    <!-- These have to go at the end so they can get access to the html doc -->
+    <script src="script.js"></script>
+    <script src="client.js"></script>
+
+
+</body></html>
