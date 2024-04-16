@@ -37,7 +37,7 @@ const pokemonTypes = [
   'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
   'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
 ]; // constant used between rounds timer
-const timeBetweenRounds = 100;
+const timeBetweenRounds = 3;
 
 // ADDME - not implemented yet, just here to show the :gameId operator, having variables in the URL
 // Route with a gameId parameter
@@ -96,8 +96,15 @@ io.on('connection', (socket) => {
 
     socket.on('p1Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
         let typeChosen = data.typeChosen;
+        var typesRemaining = rooms[roomUniqueId].typesRemaining;
+        // if they do not choose a type, they get a random one
+        // last option: they sent a type that is not allowed, either a glitch or they cheated (modified client.js)
+        if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
+          var randI = randomInt(typesRemaining.length);
+          p1Choice = typesRemaining[randI];
+          rooms[roomUniqueId].p1Choice = p1Choice; // now we set the game p1Choice
+        }
         rooms[data.roomUniqueId].p1Choice = typeChosen;
-
         socket.to(data.roomUniqueId).emit('p1Choice'); // we only want to tell them that p1 made a choice, not the contents of the choice for security.
         // (if sent to client side, intelligent person could view results before sending their choice)
 
@@ -108,8 +115,13 @@ io.on('connection', (socket) => {
 
     socket.on('p2Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
       let typeChosen = data.typeChosen;
+      var typesRemaining = rooms[roomUniqueId].typesRemaining;
+      if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
+        var randI = randomInt(typesRemaining.length);
+        p1Choice = typesRemaining[randI];
+        rooms[roomUniqueId].p1Choice = p1Choice; // now we set the game p1Choice
+      }
       rooms[data.roomUniqueId].p2Choice = typeChosen;
-
       socket.to(data.roomUniqueId).emit('p2Choice');
       if(rooms[data.roomUniqueId].p1Choice != null) {
         declareRoundWinner(data.roomUniqueId, socket);
@@ -129,22 +141,11 @@ function declareRoundWinner(roomUniqueId, socket) {
   console.log("p1 chose: " + p1Choice + " and p2 chose: " + p2Choice);
   // TODO - if "None", then pick a random available type!!!!!!!
   console.log("random integer " + randomInt(rooms[roomUniqueId].typesRemaining.length));
-  // if they do not choose a type, they get a random one
-  if (p1Choice == "None" || p1Choice == null) {
-    var typesRemaining = rooms[roomUniqueId].typesRemaining;
-    var randI = randomInt(typesRemaining.length);
-    p1Choice = typesRemaining[randI];
-    rooms[roomUniqueId].p1Choice = p1Choice; // now we set the game p1Choice
-  }
-  if (p2Choice == "None" || p2Choice == null) {
-    var typesRemaining = rooms[roomUniqueId].typesRemaining;
-    var randI = randomInt(typesRemaining.length);
-    p2Choice = typesRemaining[randI];
-    rooms[roomUniqueId].p2Choice = p2Choice; // now we set the game p1Choice
-    console.log("p2 didnt choose anything, their choice is now: " + p2Choice);
-  }
   // run the types against each other to determine who wins
-  let netScore = typeCalcs(p1Choice, p2Choice);
+  let typeCalcResults = typeCalcs(p1Choice, p2Choice);
+  let netScore = typeCalcResults.score;
+  let typeInteraction = typeCalcResults.typeInteraction;
+  console.log("type interaction: " + typeInteraction)
   console.log("net score: " + netScore); // TODO - tiebreaker could be by how badly you were beaten (i.e. if you attack with fighting against ghost, you lose by 2 rather than by 1)
   if (netScore > 0) {
       rooms[roomUniqueId].p1Wins += 1;
@@ -161,8 +162,8 @@ function declareRoundWinner(roomUniqueId, socket) {
   console.log("winner: " + winner)
   // display to both clients the results!
   // we need both of these to send to both clients (.to() sends to other one, plain emit() sends to one we received from)
-  socket.to(roomUniqueId).emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
-  socket.emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
+  socket.to(roomUniqueId).emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
+  socket.emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
   // Loop through each room in the rooms object
   // TODO Prep for next round or end the session
   countdownAndRestartGame(timeBetweenRounds, socket, roomUniqueId);
@@ -199,32 +200,47 @@ function countdownAndRestartGame(amountOfTime, socket, roomUniqueId) {
 
 // helper function to do type calcs
 // returns (int)netScore. (-) means p2 won, (+) means p1 won
+// also returns typeInteraction string, first letter is p1 second is p2
+// i.e. "0g" p1 no effect, p2 super effective
 function typeCalcs(p1Choice, p2Choice) {
   let netScore = 0;
+  let typeInteraction = ""; // codes: {0: no effect, b: not very effective, g: super effectie, n: neutral hit}
   const p1Type = pokeTypes.typedex(p1Choice, 4); // 4 is the typeDex API version.
   const p2Type = pokeTypes.typedex(p2Choice, 4); // 4 is the typeDex API version.
 
   // check p1 attacking onto p2 defending
   if (p1Type.typemaps.gen6.attack.noEffect.includes(p2Choice)) { // p1 no effect on p2
     netScore -= 2;
+    typeInteraction += "0"
   }
-  if (p1Type.typemaps.gen6.attack.notVeryEffective.includes(p2Choice)) { // p1 not very effective on p2
+  else if (p1Type.typemaps.gen6.attack.notVeryEffective.includes(p2Choice)) { // p1 not very effective on p2
     netScore -= 1;
+    typeInteraction += "b"
   }
-  if (p1Type.typemaps.gen6.attack.superEffective.includes(p2Choice)) { // p1 super effective on p2
+  else if (p1Type.typemaps.gen6.attack.superEffective.includes(p2Choice)) { // p1 super effective on p2
     netScore += 1;
+    typeInteraction += "g"
+  }
+  else {
+    typeInteraction += "n"
   }
   // p2 attacking p1 defending
   if (p2Type.typemaps.gen6.attack.noEffect.includes(p1Choice)) { // p2 no effect on p1
     netScore += 2;
+    typeInteraction += "0"
   }
-  if (p2Type.typemaps.gen6.attack.notVeryEffective.includes(p1Choice)) { // p2 not very effective on p1
+  else if (p2Type.typemaps.gen6.attack.notVeryEffective.includes(p1Choice)) { // p2 not very effective on p1
     netScore += 1;
+    typeInteraction += "b"
   }
-  if (p2Type.typemaps.gen6.attack.superEffective.includes(p1Choice)) { // p2 super effective on p1
+  else if (p2Type.typemaps.gen6.attack.superEffective.includes(p1Choice)) { // p2 super effective on p1
     netScore -= 1;
+    typeInteraction += "g"
   }
-  return netScore;
+  else {
+    typeInteraction += "n"
+  }
+  return { score: netScore, typeInteraction: typeInteraction };
 }
 
 function restartGame(socket, roomUniqueId) {

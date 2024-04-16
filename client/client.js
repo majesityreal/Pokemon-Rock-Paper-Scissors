@@ -8,6 +8,7 @@ let hasSubmittedChoice = false;
 // chunk of HTML where type buttons are with the submit button
 var ingameMakingChoice = document.getElementById('gameArea');
 var ingameDisplayRoundWinner = document.getElementById('roundWinnerArea');
+var defaultGameArea; // used to reset the game area between rounds (if modified)
 
 function createGame() {
     player1 = true;
@@ -48,6 +49,12 @@ socket.on('playersConnected', () => {
     hide(document.getElementById('lobbyArea'));
     hide(document.getElementById('waitingArea'));
     ingameMakingChoice.style.display = 'block';
+    console.log('received playersConnected socket, cloning node')
+    defaultGameArea = ingameMakingChoice.cloneNode(true); // grab default area at the very beginning so we can store it
+    // Now we want to create buttons for all the types. We do this after grabbing default area because otherwise it
+    pokemonTypes.forEach(type => {
+        createTypeButton(type, buttonContainer);
+    });
 });
 
 socket.on('p1Choice', () => {
@@ -65,19 +72,23 @@ socket.on('p2Choice', () => {
 })
 
 socket.on('matchResults', (data) => { // when both players have made their choice
-    console.log("match results data: " + data);
     console.log("winner: " + data.winner);
+    console.log("type interactrion: " + data.typeInteraction)
     // hide the gameArea
     hide(ingameMakingChoice)
     // show the winnerArea
     ingameDisplayRoundWinner.style.display = 'flex';
     if (player1) {
         showPlayerChoices(data.p1Choice, data.p2Choice);
-        displayTypeMatchups(data.p1Choice, data.p2Choice);
+        displayTypeMatchups(data.p1Choice, data.p2Choice, data.typeInteraction);
     }
     else if (!player1) {
-        showPlayerChoices(data.p2Choice, data.p1Choice);
-        displayTypeMatchups(data.p2Choice, data.p1Choice);
+        showPlayerChoices(data.p2Choice, data.p1Choice); // typeInteraction is the string i.e. "bg" that tells us how each type hits each other
+        // we have to flip the string of typeInteractions since it returns p1,p2
+        var flippedTypeInteraction = "";
+        flippedTypeInteraction += data.typeInteraction[1];
+        flippedTypeInteraction += data.typeInteraction[0];
+        displayTypeMatchups(data.p2Choice, data.p1Choice, flippedTypeInteraction);
     }
     // TODO - show helper. Helper indicates the type effectiveness against each other
     
@@ -91,14 +102,17 @@ socket.on('matchResults', (data) => { // when both players have made their choic
 
 socket.on('timer', (data) => {
     console.log("timer socket with time: " + data.time);
-    document.getElementById("timerNumber").innerHTML = data.time;
+    document.getElementById("timerNumber").textContent = data.time;
 });
 
 socket.on('restartGame', (data) => {
     console.log("received restartGame: ");
     // TODO - everything that restarts the game
-    // clear the gameArea, replace with default content in script.js
-    ingameMakingChoice.innerHTML = defaultGameArea;
+    // clear the gameArea, replace with default content captured from beginning of game
+    ingameMakingChoice.innerHTML = "";
+    ingameMakingChoice.style.display = 'block';
+    console.log("html: " + defaultGameArea.innerHTML);
+    ingameMakingChoice.innerHTML = defaultGameArea.innerHTML;
     // now we have to add the button to game area
     const buttonContainer = document.querySelector('.button-container');
     // Creates buttons for all the types remaining for the next game
@@ -126,18 +140,60 @@ socket.on('restartGame', (data) => {
         }
     });
 });
+// shows what each player chose, after round ends, while waiting for next round
 function showPlayerChoices(yourType, opponentType) {
     var divToShowResult = document.getElementById("otherPlayerChoice");
     createTypeButton(opponentType, divToShowResult);
     divToShowResult = document.getElementById("yourChoice");
     createTypeButton(yourType, divToShowResult);
 }
+// shows how the player's types fare against each other so ppl can learn type charts
+function displayTypeMatchups(yourType, opponentType, typeInteraction) {
+    // showing how they are against each other
+    var divToShowExplanation = document.getElementById("roundWinnerAreaTypeExplanation");
+    // interaction 1 (you vs opponent)
+    var interactionDiv = document.createElement('div');
+    interactionDiv.classList.add('flex', 'flex-row', 'items-center', 'py-2');
+    createTypeInteractionRow(yourType, opponentType, typeInteraction[0], interactionDiv);
+    divToShowExplanation.appendChild(interactionDiv);
+    // interaction 2 (opponent vs you)
+    interactionDiv = document.createElement('div');
+    interactionDiv.classList.add('flex', 'flex-row', 'items-center', 'py-2');
+    createTypeInteractionRow(opponentType, yourType, typeInteraction[1], interactionDiv);
+    divToShowExplanation.appendChild(interactionDiv);
+}
 
-function displayTypeMatchups(yourType, opponentType) {
-    var divToShowResult = document.getElementById("otherPlayerChoice");
-    createTypeButton(opponentType, divToShowResult);
-    divToShowResult = document.getElementById("yourChoice");
-    createTypeButton(yourType, divToShowResult); // left it off here CARSON
+// helper function for displayTypeMatchups
+// takes types and adds typeButton, interaction char, typeButton to 'div'
+function createTypeInteractionRow(firstType, secondType, typeInteraction, div) {
+    // <div> with button
+    var divWithButton = document.createElement('div');
+    createTypeButton(firstType, divWithButton);
+    div.appendChild(divWithButton);
+    // <p> element
+    var p = document.createElement('p');
+    p.classList.add('font-bold', 'text-center', 'sm:text-xl', 'text-lg', 'px-2');
+    if (typeInteraction == "n") {
+        p.textContent = " hits normally against";
+    }
+    else if (typeInteraction == "b") {
+        p.textContent = "is not very effective on";
+    }
+    else if (typeInteraction == "g") {
+        p.textContent = "is super effective on";
+    }
+    else if (typeInteraction == "0") {
+        console.log('no effect...')
+        p.textContent = "has no effect on";
+    }
+    else {
+        p.textContent = "a weird visual glitch happened here, hopefully you know the type chart LOL. Contact the devs with as much info as you can so they can fix it. Or you are viewing this because you are a programming wizard, if so congrats to you. If not, I hope we can fix this soon. Carsonic out.";
+    }
+    div.appendChild(p);
+    // <div> with button
+    divWithButton = document.createElement('div');
+    createTypeButton(secondType, divWithButton);
+    div.appendChild(divWithButton);
 }
 
 function displayWhoWon(whoWon) {

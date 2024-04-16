@@ -29,10 +29,12 @@
         <input type="text" name="" id="roomUniqueId" class="border border-slate-200"/>
     </div>
 
-    <div id="gamePlay">
+    <div id="gamePlay" class="py-4">
         <div id="waitingArea"></div> <!-- This displays text when waiting for someone else to join -->
-        <h1 class="text-3xl font-bold underline" id="gameWhoWonRoundText">Enjoy the game!</h1>
-        <h2 id="gameScore"> </h2>
+        <div class="flex flex-col items-center"> <!-- This displays game info (score, if you win/lose) -->
+            <h1 class="text-3xl font-bold underline" id="gameWhoWonRoundText">Enjoy the game!</h1>
+            <h2 id="gameScore"> </h2>
+        </div>
         <div id="gameArea" style="display: none;">
             <div>Your choice: </div>
             <div class="button-container">
@@ -59,9 +61,8 @@
               <div id="otherPlayerChoice" class=""></div> <!--shows the other player's choice at end of match-->
             </div>
           </div>
-        <div id="timerDisplay">
-
-        </div>
+          <div id="roundWinnerAreaTypeExplanation" class="flex flex-col items-center mx-auto"></div>
+        <div id="timerDisplay"></div>
     </div>
     <!-- These have to go at the end so they can get access to the html doc -->
     <script src="script.js"></script>
