@@ -78,6 +78,7 @@ socket.on('matchResults', (data) => { // when both players have made their choic
     hide(ingameMakingChoice)
     // show the winnerArea
     ingameDisplayRoundWinner.style.display = 'flex';
+    document.getElementById('previousRoundText').innerHTML = ""; // hide this because it is misleading
     if (player1) {
         showPlayerChoices(data.p1Choice, data.p2Choice);
         displayTypeMatchups(data.p1Choice, data.p2Choice, data.typeInteraction);
@@ -113,8 +114,10 @@ socket.on('restartGame', (data) => {
     // clear the gameArea, replace with default content captured from beginning of game
     ingameMakingChoice.innerHTML = "";
     ingameMakingChoice.style.display = 'block';
+    document.getElementById('previousRoundText').innerHTML = "Previous Round:";
     console.log("html: " + defaultGameArea.innerHTML);
     ingameMakingChoice.innerHTML = defaultGameArea.innerHTML;
+    document.getElementById('choiceDisplayWhileWaiting').style.display = 'none';
 
     // now we have to add the button to game area
     const buttonContainer = document.querySelector('.button-container');
@@ -179,20 +182,20 @@ function createTypeInteractionRow(firstType, secondType, typeInteraction, div) {
     var p = document.createElement('p');
     p.classList.add('font-bold', 'text-center', 'sm:text-xl', 'text-lg', 'px-2');
     if (typeInteraction == "n") {
-        p.textContent = " hits normally against";
+        p.innerHTML = " hits normally against";
     }
     else if (typeInteraction == "b") {
-        p.textContent = "is not very effective on";
+        p.innerHTML = "is <span class='text-red-400'>not very effective</span> on";
     }
     else if (typeInteraction == "g") {
-        p.textContent = "is super effective on";
+        p.innerHTML = "is <span class='text-green-600'>super effective</span> on";
     }
     else if (typeInteraction == "0") {
         console.log('no effect...')
-        p.textContent = "has no effect on";
+        p.innerHTML = "has <span class='text-slate-500'>no effect</span> on";
     }
     else {
-        p.textContent = "a weird visual glitch happened here, hopefully you know the type chart LOL. Contact the devs with as much info as you can so they can fix it. Or you are viewing this because you are a programming wizard, if so congrats to you. If not, I hope we can fix this soon. Carsonic out.";
+        p.innerHTML = "a weird visual glitch happened here, hopefully you know the type chart LOL. Contact the devs with as much info as you can so they can fix it. Or you are viewing this because you are a programming wizard, if so congrats to you. If not, I hope we can fix this soon. Carsonic out.";
     }
     div.appendChild(p);
     // <div> with button
@@ -244,10 +247,9 @@ function showOpponentMadeAChoice() {
 }
 
 function submitChoice() {
-    // if didn't choose anything, make random choice
-    if (typeChosen == "None" || typeChosen == null) {
+    // if didn't choose anything, make random choice 
+    if (typeChosen == null) {
         typeChosen = "None";
-        console.log('submitting random');
     }
 
     console.log("submitting choice " + typeChosen); // typeChosen is from script.js. It must be included first before client.js to be accessed like this
@@ -256,12 +258,16 @@ function submitChoice() {
         typeChosen: typeChosen,
         roomUniqueId: roomUniqueId
     });
-    // disable all other buttons
-    const buttons = document.querySelectorAll('button.type-button:not(.selected):not(.display-only)');  // disabling normal buttons, and not the previous round choice ones which are market 'display-only'
+    // disable all type buttons except those for dispaly
+    const buttons = document.querySelectorAll('button.type-button:not(.display-only)');  // disabling normal buttons, and not the previous round choice ones which are market 'display-only'
     buttons.forEach((button) => {
         hide(button);
     });
-    // document.getElementById("Button").disabled = true;
+    // display your type chosen while waiting
+    var DIVchoiceDisplayWhileWaiting = document.getElementById('choiceDisplayWhileWaiting');
+    DIVchoiceDisplayWhileWaiting.style.display = 'flex';
+    var BUTTONchoiceDisplayWhileWaiting = DIVchoiceDisplayWhileWaiting.querySelector('.playerChoice')
+    createTypeButton(typeChosen, BUTTONchoiceDisplayWhileWaiting);
 
     // hide the submit button
     hide(document.querySelector('.submit-button'));

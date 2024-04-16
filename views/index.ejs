@@ -36,7 +36,16 @@
             <h2 id="gameScore"> </h2>
         </div>
         <div id="gameArea" style="display: none;">
-            <div>Your choice: </div>
+            <div id="choiceDisplayWhileWaiting" class="flex-row flex-wrap justify-center max-w-2xl mx-auto" style="display: none;">
+                <div class="choice1 w-1/2 p-4">
+                    <p class="font-bold text-center sm:text-2xl text-lg">Your choice:</p>
+                    <div class="playerChoice"></div> <!--shows YOUR choice at end of match-->
+                </div>
+                <div class="choice2 w-1/2 p-4">
+                    <p class="font-bold text-center sm:text-2xl text-lg">Opponent's choice:</p>
+                    <div class="text-center">Waiting on choice...</div> <!--shows the other player's choice at end of match-->
+                </div>
+            </div>
             <div class="button-container">
             </div>
             <div class="submit-container">
@@ -52,17 +61,17 @@
 
         </div>
         <div id="roundWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto" style="display: none;"> <!-- changes from 'hidden' to 'flex' when displayed! -->
-            <div class="w-full font-bold text-xl text-center">Previous round:</div>
-            <div class="choice1 w-1/2 p-4">
-              <p class="font-bold text-center sm:text-2xl text-lg">Your choice:</p>
-              <div id="yourChoice" class=""></div> <!--shows YOUR choice at end of match-->
-            </div>
-            <div class="choice2 w-1/2 p-4">
-              <p class="font-bold text-center sm:text-2xl text-lg">Opponent's choice:</p>
-              <div id="otherPlayerChoice" class=""></div> <!--shows the other player's choice at end of match-->
-            </div>
-          </div>
-          <div id="roundWinnerAreaTypeExplanation" class="flex flex-col items-center mx-auto"></div>
+            <div id="previousRoundText" class="w-full font-bold text-xl text-center">Previous Round:</div>
+                <div class="choice1 w-1/2 p-4">
+                    <p class="font-bold text-center sm:text-2xl text-lg">Your choice:</p>
+                    <div id="yourChoice" class=""></div> <!--shows YOUR choice at end of match-->
+                </div>
+                <div class="choice2 w-1/2 p-4">
+                    <p class="font-bold text-center sm:text-2xl text-lg">Opponent's choice:</p>
+                    <div id="otherPlayerChoice" class=""></div> <!--shows the other player's choice at end of match-->
+                </div>
+        </div>
+        <div id="roundWinnerAreaTypeExplanation" class="flex flex-col items-center mx-auto"></div>
         <div id="timerDisplay"></div>
     </div>
     <!-- These have to go at the end so they can get access to the html doc -->
