@@ -19,6 +19,14 @@ const UserSchema = new Mongoose.Schema({
   salt: {
     type: String,
     required: true
+  },
+  elo: {
+    type: Number,
+    default: 1000,
+    validate: {
+      validator: Number.isInteger,
+      message: 'ELO must be an integer'
+  }
   }
 })
 

@@ -3,6 +3,7 @@ const http = require('http');
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const app = express();
+// cookieParser is what lets us to req.cookies to get cookies from requests in express
 app.use(cookieParser()); // it is very important it is in this order. Must use cookieParser() before creating the server!!!
 app.set('view engine', 'ejs'); // Set EJS as the view engine
 const httpServer = http.createServer(app); // create server from the app
@@ -73,6 +74,12 @@ app.get('/', (req, res) => {
     res.render('index');
   }
   
+});
+
+app.get('/set-cookie', (req, res) => {
+  // Set a cookie named 'myCookie' with value 'hello'
+  res.cookie('testCookie', 'hello', { maxAge: 900000, httpOnly: true });
+  res.send('Cookie has been set');
 });
 
 app.get('/ingame', (req, res) => {

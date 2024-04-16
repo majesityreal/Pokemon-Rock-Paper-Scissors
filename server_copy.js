@@ -144,7 +144,6 @@ function declareRoundWinner(roomUniqueId, socket) {
   let winner = null;
   // This is what does the type chart calculations!!!
   console.log("p1 chose: " + p1Choice + " and p2 chose: " + p2Choice);
-  // TODO - if "None", then pick a random available type!!!!!!!
   console.log("random integer " + randomInt(rooms[roomUniqueId].typesRemaining.length));
   // if they do not choose a type, they get a random one
   if (p1Choice == "None" || p1Choice == null) {
@@ -180,8 +179,7 @@ function declareRoundWinner(roomUniqueId, socket) {
   // we need both of these to send to both clients (.to() sends to other one, plain emit() sends to one we received from)
   socket.to(roomUniqueId).emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
   socket.emit('matchResults', {winner: winner, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
-  // Loop through each room in the rooms object
-  // TODO Prep for next round or end the session
+  // preps for next round or end the session
   countdownAndRestartGame(3, socket, roomUniqueId);
 
 }

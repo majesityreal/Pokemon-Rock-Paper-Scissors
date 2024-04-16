@@ -32,6 +32,8 @@ const { randomInt } = require('crypto');
 // each room object has attributes: 
 // (str)p1Choice, (str)p2Choice, (str[])typesRemaining, (int)p1Wins, (int)p2Wins
 const rooms = {};
+// (Player[])players, (str[])typesRemaining
+// TODO - make a Player object which stores choice, wins, IP/data, etc
 const pokemonTypes = [
   'Normal', 'Fire', 'Water', 'Grass', 'Electric', 'Ice',
   'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
@@ -52,10 +54,11 @@ const timeBetweenRounds = 3;
 io.on('connection', (socket) => {
     console.log('=-= =-= =-=');
     console.log('a user has connected');
-    socket.on('disconnect', () => { // TODO - work on disconnect features
-      console.log('user disconnected');
+    console.log("cookie: " + socket.handshake.headers.cookie);
+    socket.on('disconnect', (reason) => { // TODO - work on disconnect features
+      console.log(`socket ${socket.id} disconnected due to ${reason}`);
       // Iterate through rooms the player was in and call 'leaveRoom' logic
-      console.log(socket.id);
+
       // Find the room the player was in
       const roomId = Object.keys(socket.rooms).find(roomId => roomId == socket.id);
       console.log("room is " + roomId);
@@ -77,7 +80,10 @@ io.on('connection', (socket) => {
       rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
       rooms[roomUniqueId].p1Wins = 0
       rooms[roomUniqueId].p2Wins = 0
+      //
+      var p1 = new Player("unnamed", 1000);
       console.log("room id created: " + roomUniqueId)
+      // store cookie in users with room ID
       socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
       socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
     })

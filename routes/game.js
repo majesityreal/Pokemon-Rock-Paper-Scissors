@@ -2,6 +2,31 @@
 var express = require('express');
 const router = express.Router();
 
+const rooms = require('../socket').rooms;
+const User = require('../models/User');
+
+class Player {
+    constructor(username, elo) {
+        this.username = username;
+        this.elo = elo;
+        this.wins = 0; // default vals after:
+        this.typeChoice = "None";
+    }
+}
+
+function getPlayer() {
+
+    
+
+    console.log("Finding user " + username)
+    // 1. Find the user by username
+    const user = await User.findOne({ username })
+}
+
+const testPlayer = new Player("Carson", 2000); 
+
+console.log("running game.js!!!");
+console.log('elo: ' + testPlayer.elo);
 
 router.get('/profile', (req, res) => {
     console.log('my profile being called!');
@@ -9,14 +34,22 @@ router.get('/profile', (req, res) => {
 });
 
 router.get('/:gameId', (req, res) => {
-console.log("game!!! " + req.params.gameId);
-// check if gameId exists
+    var gameId = req.params.gameId;
+    console.log("game!!! " + gameId);
+    // check if gameId exists as room!
+    var room = rooms[gameId]
+    if (room) {
+        console.log('room exists!');
+        if (room) {
 
-// check if both players are already connected,
-    // if not, check user cookie to see if they are one of the players in the game
+        }
+    }
+    // check if both players are already connected,
+        // if not, check user cookie to see if they are one of the players in the game
 
 });
 
 module.exports = { 
-    gameRouter: router
-  };
+    gameRouter: router,
+    Player: Player,
+};

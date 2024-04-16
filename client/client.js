@@ -30,7 +30,7 @@ socket.on('newGame', (data) => {
 
     let copyButton = document.createElement('button');
     copyButton.style.display = 'block';
-    copyButton.classList.add('btn','btn-primary','py-2', 'my-2')
+    copyButton.classList.add('btn','btn-primary','py-2', 'my-2', 'mx-auto');
     copyButton.innerText = 'Copy Code';
     copyButton.addEventListener('click', () => {
         navigator.clipboard.writeText(roomUniqueId).then(function() {
@@ -39,8 +39,10 @@ socket.on('newGame', (data) => {
             console.error('Async: Could not copy text: ', err);
         });
     });
-
-    document.getElementById('waitingArea').innerHTML = `Waiting for opponent to join room code: ${roomUniqueId}. Share it with someone so they can join!`;
+    let waitingText = document.createElement('p');
+    waitingText.classList.add('text-center');
+    waitingText.innerHTML =`Waiting for opponent to join room code: ${roomUniqueId} Share it with someone so they can join!`;
+    document.getElementById('waitingArea').appendChild(waitingText); 
     document.getElementById('waitingArea').appendChild(copyButton);
 });
 
@@ -91,7 +93,6 @@ socket.on('matchResults', (data) => { // when both players have made their choic
         flippedTypeInteraction += data.typeInteraction[0];
         displayTypeMatchups(data.p2Choice, data.p1Choice, flippedTypeInteraction);
     }
-    // TODO - show helper. Helper indicates the type effectiveness against each other
     
     displayWhoWon(data.winner);
     displayScore(data.p1Wins, data.p2Wins);
@@ -311,7 +312,7 @@ function loginOutsideClickListener(event) {
   }
 
 function logout() {
-    console.log("logout!!");
+    window.location.href = '/auth/logout';
 }
 
 function openSignup() {
