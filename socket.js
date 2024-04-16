@@ -96,13 +96,13 @@ io.on('connection', (socket) => {
 
     socket.on('p1Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
         let typeChosen = data.typeChosen;
-        var typesRemaining = rooms[roomUniqueId].typesRemaining;
+        var typesRemaining = rooms[data.roomUniqueId].typesRemaining;
         // if they do not choose a type, they get a random one
         // last option: they sent a type that is not allowed, either a glitch or they cheated (modified client.js)
         if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
-          var randI = randomInt(typesRemaining.length);
+          var randI = randomInt(typesRemaining.length); // if typesRemaining.length == 0, welp... we're fucked. That is why we do not let it get to that point
           p1Choice = typesRemaining[randI];
-          rooms[roomUniqueId].p1Choice = p1Choice; // now we set the game p1Choice
+          rooms[data.roomUniqueId].p1Choice = p1Choice; // now we set the game p1Choice
         }
         rooms[data.roomUniqueId].p1Choice = typeChosen;
         socket.to(data.roomUniqueId).emit('p1Choice'); // we only want to tell them that p1 made a choice, not the contents of the choice for security.
@@ -115,11 +115,11 @@ io.on('connection', (socket) => {
 
     socket.on('p2Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
       let typeChosen = data.typeChosen;
-      var typesRemaining = rooms[roomUniqueId].typesRemaining;
+      var typesRemaining = rooms[data.roomUniqueId].typesRemaining;
       if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
         var randI = randomInt(typesRemaining.length);
-        p1Choice = typesRemaining[randI];
-        rooms[roomUniqueId].p1Choice = p1Choice; // now we set the game p1Choice
+        p2Choice = typesRemaining[randI];
+        rooms[data.roomUniqueId].p2Choice = p2Choice; // now we set the game p1Choice
       }
       rooms[data.roomUniqueId].p2Choice = typeChosen;
       socket.to(data.roomUniqueId).emit('p2Choice');

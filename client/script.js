@@ -27,9 +27,12 @@ const colors = {
 };
 
 // parentObject is what we append the button to
-function createTypeButton(type, parentObject) {
+function createTypeButton(type, parentObject, additionalClasses="") {
     const button = document.createElement('button');
     button.classList.add('type-button');
+    if (additionalClasses != "") {
+        button.classList.add(additionalClasses.split(" "));
+    }
     button.textContent = type;
     const color = colors[type.toLowerCase()]; // changing background color of button according to its type
     if (color) {

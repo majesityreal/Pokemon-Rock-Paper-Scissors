@@ -107,12 +107,15 @@ socket.on('timer', (data) => {
 
 socket.on('restartGame', (data) => {
     console.log("received restartGame: ");
+    roundWinnerAreaTypeExplanation.innerHTML = ""; // clear explanation HTML
+    // document.getElementById('roundWinnerArea').innerHTML = ""; // clear roundWinnerArea
     // TODO - everything that restarts the game
     // clear the gameArea, replace with default content captured from beginning of game
     ingameMakingChoice.innerHTML = "";
     ingameMakingChoice.style.display = 'block';
     console.log("html: " + defaultGameArea.innerHTML);
     ingameMakingChoice.innerHTML = defaultGameArea.innerHTML;
+
     // now we have to add the button to game area
     const buttonContainer = document.querySelector('.button-container');
     // Creates buttons for all the types remaining for the next game
@@ -143,9 +146,11 @@ socket.on('restartGame', (data) => {
 // shows what each player chose, after round ends, while waiting for next round
 function showPlayerChoices(yourType, opponentType) {
     var divToShowResult = document.getElementById("otherPlayerChoice");
-    createTypeButton(opponentType, divToShowResult);
+    divToShowResult.innerHTML = ""; // clearing the div
+    createTypeButton(opponentType, divToShowResult, 'display-only');
     divToShowResult = document.getElementById("yourChoice");
-    createTypeButton(yourType, divToShowResult);
+    divToShowResult.innerHTML = ""; // clearing the div again
+    createTypeButton(yourType, divToShowResult, 'display-only');
 }
 // shows how the player's types fare against each other so ppl can learn type charts
 function displayTypeMatchups(yourType, opponentType, typeInteraction) {
@@ -227,10 +232,10 @@ function displayWhoWon(whoWon) {
 function displayScore(p1Wins, p2Wins) {
     var scoreText = document.getElementById("gameScore");
     if (player1) {
-        scoreText.innerHTML = "Your score: " + p1Wins + " Opponents score: " + p2Wins;
+        scoreText.innerHTML = "<span class='text-base'>Your score:</span> <span class='text-xl font-bold'>" + p1Wins + "</span> <span class='text-base'>Opponent's score:</span> <span class='text-xl font-bold'>" + p2Wins + "</span>";
     }
     else if (!player1) {
-        scoreText.innerHTML = "Your score: " + p2Wins + " Opponents score: " + p1Wins;
+        scoreText.innerHTML = "<span class='text-base'>Your score:</span> <span class='text-xl font-bold'>" + p2Wins + "</span> <span class='text-base'>Opponent's score:</span> <span class='text-xl font-bold'>" + p1Wins + "</span>";
     }
 }
 
@@ -246,13 +251,13 @@ function submitChoice() {
     }
 
     console.log("submitting choice " + typeChosen); // typeChosen is from script.js. It must be included first before client.js to be accessed like this
-    const choiceEvent = player1 ? "p1Choice" : "p2Choice"; // TODO - This feels wrong doing it client side, as someone could send something as p2 and p1 then!!! Have something that verifies
+    const choiceEvent = player1 ? "p1Choice" : "p2Choice"; // TODO FIXME - This feels wrong doing it client side, as someone could send something as p2 and p1 then!!! Have something that verifies
     socket.emit(choiceEvent, {
         typeChosen: typeChosen,
         roomUniqueId: roomUniqueId
     });
     // disable all other buttons
-    const buttons = document.querySelectorAll('button.type-button:not(.selected)');
+    const buttons = document.querySelectorAll('button.type-button:not(.selected):not(.display-only)');  // disabling normal buttons, and not the previous round choice ones which are market 'display-only'
     buttons.forEach((button) => {
         hide(button);
     });
