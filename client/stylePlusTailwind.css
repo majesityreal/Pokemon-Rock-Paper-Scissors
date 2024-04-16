@@ -647,6 +647,10 @@ video {
   margin-left: 0.5rem;
 }
 
+.mr-8 {
+  margin-right: 2rem;
+}
+
 .mt-32 {
   margin-top: 8rem;
 }
@@ -713,6 +717,10 @@ video {
 
 .shrink-0 {
   flex-shrink: 0;
+}
+
+.flex-grow {
+  flex-grow: 1;
 }
 
 .resize {
@@ -803,6 +811,11 @@ video {
   background-color: rgb(203 213 225 / var(--tw-bg-opacity));
 }
 
+.bg-slate-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(148 163 184 / var(--tw-bg-opacity));
+}
+
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
@@ -842,6 +855,10 @@ video {
 .py-4 {
   padding-top: 1rem;
   padding-bottom: 1rem;
+}
+
+.pr-2 {
+  padding-right: 0.5rem;
 }
 
 .text-center {
@@ -1055,6 +1072,8 @@ SUBMIT BUTTON + OTHER BUTTONS
 
 .btn-pikachu {
   background-color: #F4DC26;
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
 .btn-pikachu::before {

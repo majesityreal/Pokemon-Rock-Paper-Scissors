@@ -33,7 +33,10 @@
         <div id="waitingArea"></div> <!-- This displays text when waiting for someone else to join -->
         <div class="flex flex-col items-center"> <!-- This displays game info (score, if you win/lose) -->
             <h1 class="text-3xl font-bold underline" id="gameWhoWonRoundText">Enjoy the game!</h1>
-            <h2 id="gameScore"> </h2>
+            <div class="flex flex-row">
+                <div id="gameScore" class="flex-grow pr-2"> </div>
+                <div id="timerDisplay" class="absolute right-0 mr-8 px-4 font-bold text-2xl bg-slate-400 rounded-md"></div>
+            </div>
         </div>
         <div id="gameArea" style="display: none;">
             <div id="choiceDisplayWhileWaiting" class="flex-row flex-wrap justify-center max-w-2xl mx-auto" style="display: none;">
@@ -49,7 +52,7 @@
             <div class="button-container">
             </div>
             <div class="submit-container">
-                <button class="submit-button btn btn-pikachu" onclick="submitChoice()">Submit</button>
+                <button class="submit-button btn btn-pikachu text-black" onclick="submitChoice()">Submit</button>
             </div>
             <div class="flex flex-col max-w-md mx-auto my-4 bg-slate-300 items-center">
                 <p class="text-3xl font-bold">Opponent:</p>
@@ -72,7 +75,6 @@
                 </div>
         </div>
         <div id="roundWinnerAreaTypeExplanation" class="flex flex-col items-center mx-auto"></div>
-        <div id="timerDisplay"></div>
     </div>
     <!-- These have to go at the end so they can get access to the html doc -->
     <script src="script.js"></script>

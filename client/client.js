@@ -118,8 +118,9 @@ socket.on('restartGame', (data) => {
     console.log("html: " + defaultGameArea.innerHTML);
     ingameMakingChoice.innerHTML = defaultGameArea.innerHTML;
     document.getElementById('choiceDisplayWhileWaiting').style.display = 'none';
+    document.getElementById('timerDisplay').innerHTML = ""; // clear timer
 
-    // now we have to add the button to game area
+    // now we add the button to game area
     const buttonContainer = document.querySelector('.button-container');
     // Creates buttons for all the types remaining for the next game
     pokemonTypes.forEach(type => {

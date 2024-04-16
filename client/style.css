@@ -97,6 +97,7 @@ SUBMIT BUTTON + OTHER BUTTONS
 
 .btn-pikachu {
     background-color: #F4DC26;
+    @apply text-black;
 } .btn-pikachu::before {
     content: "🔴\00a0\00a0\00a0";
 } .btn-pikachu::after {
