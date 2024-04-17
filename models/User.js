@@ -30,6 +30,21 @@ const UserSchema = new Mongoose.Schema({
   }
 })
 
+async function getElo(userId) {
+  try {
+    // Find the user by ID and select only the 'elo' field
+    const user = await User.findById(userId).select('elo'); 
+    if (user) {
+      return user.elo;
+    } else {
+      console.error("User not found");
+      return 999;  // Or handle the error as needed // FIXME - check this for errors. making it return 999
+    }
+  } catch (error) {
+    console.error("Error getting ELO:", error);
+  }
+}
+
 // Create a User model
 const User = Mongoose.model('User', UserSchema); // this binds the schema to a database. Now we can use User as a constructor
-module.exports = User
+module.exports = { User: User, getElo: getElo }

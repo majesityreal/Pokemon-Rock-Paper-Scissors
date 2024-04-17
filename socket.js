@@ -28,6 +28,10 @@ const io = dataFromMainJS.io;
 
 const pokeTypes = require('dismondb'); // pokemon type chart calc library
 const { randomInt } = require('crypto');
+const jwt = require('jsonwebtoken');
+const { getInfoFromJwt } = require('./routes/auth');
+const Player = require('./routes/game').Player;
+const { User, getElo } = require('./models/User');
 // rooms which contain each active game
 // each room object has attributes: 
 // (str)p1Choice, (str)p2Choice, (str[])typesRemaining, (int)p1Wins, (int)p2Wins
@@ -54,7 +58,6 @@ const timeBetweenRounds = 3;
 io.on('connection', (socket) => {
     console.log('=-= =-= =-=');
     console.log('a user has connected');
-    console.log("cookie: " + socket.handshake.headers.cookie);
     socket.on('disconnect', (reason) => { // TODO - work on disconnect features
       console.log(`socket ${socket.id} disconnected due to ${reason}`);
       // Iterate through rooms the player was in and call 'leaveRoom' logic
@@ -78,22 +81,61 @@ io.on('connection', (socket) => {
       const roomUniqueId = makeid(10);
       rooms[roomUniqueId] = {};
       rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
-      rooms[roomUniqueId].p1Wins = 0
-      rooms[roomUniqueId].p2Wins = 0
-      //
-      var p1 = new Player("unnamed", 1000);
-      console.log("room id created: " + roomUniqueId)
-      // store cookie in users with room ID
-      socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
-      socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
+      // check the jwt if user is logged in, and then add cookie for session
+        // Access cookies from the handshake object
+        const cookies = socket.handshake.headers.cookie;
+        const parsedCookies = parseCookies(cookies);
+        const jwtToken = parsedCookies.jwt;
+        const jwtInfo = getInfoFromJwt(jwtToken);
+        var p1;
+        if (jwtInfo) {
+          getElo(jwtInfo.id).then((eloVal) => {
+            console.log("elo value: " + eloVal);
+            p1 = new Player(jwtInfo.username, eloVal);
+            rooms[roomUniqueId].p1 = p1;
+            console.log("room id created: " + roomUniqueId)
+            socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
+            socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
+          });
+          // p1 = new Player(username, 1000);
+        }
+        else { // default, no connection to DB
+          p1 = new Player("default", 1000);
+          rooms[roomUniqueId].p1 = p1;
+          console.log("room id created: " + roomUniqueId)
+          socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
+          socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
+        }
     })
 
     socket.on('joinGame', (data) => {
       if (rooms[data.roomUniqueId] != null) {
         console.log('server received joinGame from console! ' + data.roomUniqueId)
-        socket.join(data.roomUniqueId); // joining incoming request to the same room (roomUniqueId should already exist)
-        socket.to(data.roomUniqueId).emit('playersConnected', {}); // when t he two players join we can say they are connected
-        socket.emit("playersConnected"); // this one is to send same transmission to the client that sent the 'joinGame' socket
+        const cookies = socket.handshake.headers.cookie;
+        const parsedCookies = parseCookies(cookies);
+        const jwtToken = parsedCookies.jwt;
+        const jwtInfo = getInfoFromJwt(jwtToken);
+        var p2;
+        if (jwtInfo) {
+          getElo(jwtInfo.id).then((eloVal) => {
+            console.log("elo value: " + eloVal);
+            p2 = new Player(jwtInfo.username, eloVal);
+            rooms[data.roomUniqueId].p2 = p2;
+            console.log("room id created: " + roomUniqueId)
+            socket.join(data.roomUniqueId); // joining incoming request to the same room (roomUniqueId should already exist)
+            socket.to(data.roomUniqueId).emit('playersConnected'); // when t he two players join we can say they are connected
+            socket.emit("playersConnected"); // this one is to send same transmission to the client that sent the 'joinGame' socket
+          });
+          // p1 = new Player(username, 1000);
+        }
+        else { // default, no connection to DB
+          p2 = new Player("default", 1000);
+          rooms[data.roomUniqueId].p2 = p2;
+          console.log("room id created: " + data.roomUniqueId)
+          socket.join(data.roomUniqueId); // joining incoming request to the same room (roomUniqueId should already exist)
+          socket.to(data.roomUniqueId).emit('playersConnected'); // when t he two players join we can say they are connected
+          socket.emit("playersConnected"); // this one is to send same transmission to the client that sent the 'joinGame' socket
+        }
       }
       else {
         // TODO - log to client trying to join, room does not exist yet
@@ -108,13 +150,13 @@ io.on('connection', (socket) => {
         if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
           var randI = randomInt(typesRemaining.length); // if typesRemaining.length == 0, welp... we're fucked. That is why we do not let it get to that point
           p1Choice = typesRemaining[randI];
-          rooms[data.roomUniqueId].p1Choice = p1Choice; // now we set the game p1Choice
+          rooms[data.roomUniqueId].p1.typeChoice = p1Choice; // now we set the game p1Choice
         }
-        rooms[data.roomUniqueId].p1Choice = typeChosen;
+        rooms[data.roomUniqueId].p1.typeChoice = typeChosen;
         socket.to(data.roomUniqueId).emit('p1Choice'); // we only want to tell them that p1 made a choice, not the contents of the choice for security.
         // (if sent to client side, intelligent person could view results before sending their choice)
 
-        if(rooms[data.roomUniqueId].p2Choice != null) {
+        if(rooms[data.roomUniqueId].p2.typeChoice != null) {
           declareRoundWinner(data.roomUniqueId, socket);
       }
     });
@@ -125,11 +167,11 @@ io.on('connection', (socket) => {
       if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
         var randI = randomInt(typesRemaining.length);
         p2Choice = typesRemaining[randI];
-        rooms[data.roomUniqueId].p2Choice = p2Choice; // now we set the game p1Choice
+        rooms[data.roomUniqueId].p2.typeChoice = p2Choice; // now we set the game p1Choice
       }
-      rooms[data.roomUniqueId].p2Choice = typeChosen;
+      rooms[data.roomUniqueId].p2.typeChoice = typeChosen;
       socket.to(data.roomUniqueId).emit('p2Choice');
-      if(rooms[data.roomUniqueId].p1Choice != null) {
+      if(rooms[data.roomUniqueId].p1.typeChoice != null) {
         declareRoundWinner(data.roomUniqueId, socket);
     }
     });
@@ -140,8 +182,8 @@ io.on('connection', (socket) => {
 })
 
 function declareRoundWinner(roomUniqueId, socket) {
-  let p1Choice = rooms[roomUniqueId].p1Choice;
-  let p2Choice = rooms[roomUniqueId].p2Choice;
+  let p1Choice = rooms[roomUniqueId].p1.typeChoice;
+  let p2Choice = rooms[roomUniqueId].p2.typeChoice;
   let winner = null;
   // This is what does the type chart calculations!!!
   console.log("p1 chose: " + p1Choice + " and p2 chose: " + p2Choice);
@@ -154,11 +196,11 @@ function declareRoundWinner(roomUniqueId, socket) {
   console.log("type interaction: " + typeInteraction)
   console.log("net score: " + netScore); // TODO - tiebreaker could be by how badly you were beaten (i.e. if you attack with fighting against ghost, you lose by 2 rather than by 1)
   if (netScore > 0) {
-      rooms[roomUniqueId].p1Wins += 1;
+      rooms[roomUniqueId].p1.wins += 1;
       winner = "p1";
   }
   else if (netScore < 0) {
-    rooms[roomUniqueId].p2Wins += 1;
+    rooms[roomUniqueId].p2.wins += 1;
     winner = "p2";
   }
   else {
@@ -168,8 +210,8 @@ function declareRoundWinner(roomUniqueId, socket) {
   console.log("winner: " + winner)
   // display to both clients the results!
   // we need both of these to send to both clients (.to() sends to other one, plain emit() sends to one we received from)
-  socket.to(roomUniqueId).emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
-  socket.emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1Choice, p2Choice: rooms[roomUniqueId].p2Choice, p1Wins: rooms[roomUniqueId].p1Wins, p2Wins: rooms[roomUniqueId].p2Wins});
+  socket.to(roomUniqueId).emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1.typeChoice, p2Choice: rooms[roomUniqueId].p2.typeChoice, p1Wins: rooms[roomUniqueId].p1.wins, p2Wins: rooms[roomUniqueId].p2.wins});
+  socket.emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1.typeChoice, p2Choice: rooms[roomUniqueId].p2.typeChoice, p1Wins: rooms[roomUniqueId].p1.wins, p2Wins: rooms[roomUniqueId].p2.wins});
   // Loop through each room in the rooms object
   // TODO Prep for next round or end the session
   countdownAndRestartGame(timeBetweenRounds, socket, roomUniqueId);
@@ -277,6 +319,19 @@ function printObjectProperties(obj, indentation = '') {
       } else {
           console.log(indentation + key + ": " + obj[key]);
       }
+  }
+}
+// splits cookies into (key, value) pairs
+function parseCookies(cookieString) {
+  if (cookieString) {
+    return cookieString.split(';').reduce((cookies, cookie) => {
+      const [name, value] = cookie.trim().split('=');
+      cookies[name] = value;
+      return cookies;
+    }, {});
+  }
+  else {
+    return false;
   }
 }
 

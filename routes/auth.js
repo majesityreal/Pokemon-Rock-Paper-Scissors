@@ -6,7 +6,7 @@ var crypto = require('crypto');
 const jwt = require('jsonwebtoken')
 
 var db = require('../database');
-const User = require("../models/User")
+const User = require("../models/User").User;
 
 const loginFilePath = path.join('login.ejs');
 const signupFilePath = path.join(__dirname, 'signup.ejs');
@@ -41,7 +41,7 @@ router.post('/login', (req, res) => {
       }
       else {
           const token = jwt.sign(
-            { id: user._id, username, role: user.role },
+            { id: user._id, username: username, role: user.role },
             process.env.JWT_SECRET,
             {
               expiresIn: cookieMaxAge, // 3hrs in sec
@@ -93,7 +93,7 @@ router.post('/signup', async (req, res) => {
             salt: salt
           }).then((user) => { // putting cookie into user's browser
             const token = jwt.sign( // jwt sign function takes three params 1: payload/data 2: jwtSecret 3: how long token will last
-              { id: user._id, username, role: user.role }, // 1
+              { id: user._id, username: username, role: user.role }, // 1
               process.env.JWT_SECRET, // 2
               { expiresIn: cookieMaxAge, } // 3: 24hrs in sec
             );
@@ -206,32 +206,54 @@ router.get('/profile', userAuth, (req, res) => {
   // ...
 });
 
-var getUsername = (req, res, next) => {
-  if (req.cookies == null) {
-    return res.status(401).json({
-       message: "You have no cookies with you" 
-      })
-  }
-  const token = req.cookies.jwt
-  if (token) {
-    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+// grabs the username from jwt cookie
+// takes in jwtToken
+// outputs either username as string, or boolean false
+function getUsernameFromJwt(jwtToken) {
+  let returnVal = false;
+  if (jwtToken) {
+    jwt.verify(jwtToken, process.env.JWT_SECRET, (err, decodedToken) => {
       if (err) {
-        return res.status(401).json({ message: "Not authorized" })
+        console.log('crashed getting username from jwt token on getUsername method. idk what happened');
+        return;
       } else {
-        if (decodedToken.role !== "Basic") {
-          return res.status(401).json({ message: "Not authorized" })
-        } else {
-          next()
-        }
+        returnVal = decodedToken.username;
       }
     });
-  } else {
-    return res
-      .status(401)
-      .json({ message: "Not authorized, token not available" })
   }
+  return returnVal; // returns false if no token
 }
 
+// grabs all the information from jwt cookie
+// takes in jwtToken
+// outputs either info as object, or boolean false
+function getInfoFromJwt(jwtToken) {
+  let returnVal = false;
+  if (jwtToken) {
+    jwt.verify(jwtToken, process.env.JWT_SECRET, (err, decodedToken) => {
+      if (err) {
+        console.log('crashed getting username from jwt token on getUsername method. idk what happened');
+        return;
+      } else {
+        returnVal = decodedToken;
+      }
+    });
+  }
+  return returnVal; // returns false if no token
+}
+
+// splits cookies into (key, value) pairs
+function parseCookies(cookieString) {
+  return cookieString.split(';').reduce((cookies, cookie) => {
+      const [name, value] = cookie.trim().split('=');
+      cookies[name] = value;
+      return cookies;
+  }, {});
+}
+
+
 module.exports = { 
-  authRouter: router, adminAuth: adminAuth, userAuth: userAuth,
+  authRouter: router, adminAuth: adminAuth, userAuth: userAuth, getUsernameFromJwt: getUsernameFromJwt
 };
+
+module.exports.getInfoFromJwt = getInfoFromJwt;

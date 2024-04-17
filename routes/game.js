@@ -14,15 +14,6 @@ class Player {
     }
 }
 
-function getPlayer() {
-
-    
-
-    console.log("Finding user " + username)
-    // 1. Find the user by username
-    const user = await User.findOne({ username })
-}
-
 const testPlayer = new Player("Carson", 2000); 
 
 console.log("running game.js!!!");
