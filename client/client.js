@@ -22,6 +22,11 @@ function joinGame() {
     socket.emit('joinGame', {roomUniqueId: roomUniqueId})
 }
 
+function matchmake() {
+    console.log("matchmaking from client side!");
+    socket.emit('matchmake');
+}
+
 socket.on('newGame', (data) => {
     roomUniqueId = data.roomUniqueId;
 

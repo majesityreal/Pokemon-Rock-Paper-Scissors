@@ -24,18 +24,27 @@ class MatchmakingSystem {
     // Method to find a match for a player based on their ELO rating
     // returns 'username' of player if found, false if did not match up players, or null if there was an error with eloBin
     findMatchForPlayer(player, eloRating) {
-        const eloBin = getEloBinIndex(eloRating);
+        const eloBinIndex = getEloBinIndex(eloRating);
+        console.log('finding match with eloBinIndex: ' + eloBinIndex);
+        const eloBin = this.queues[eloBinIndex];
+        console.log('finding match with eloBin: ' + JSON.stringify(eloBin));
+        console.log('eloBin players length: ' + eloBin.players.length);
         let opponent = this.checkBin(eloBin);
+        console.log("opponent was: " + JSON.stringify(opponent));
         if (opponent == false) { // adds player to bin if nobody is in it
-            this.queues[eloBin].addPlayer(player);
+            console.log("did not find anybody, adding myself to bin " + JSON.stringify(player));
+            this.queues[eloBinIndex].addPlayer(player);
         }
+        console.log('returning opponent: ' + JSON.stringify(opponent));
         return opponent;
     }
     // this one is used for outer search, does not add player into another bin queue
     findMatchExtendedBins(player, eloRating, numberOfBinsOutside) {
-        const eloBin = getEloBinIndex(eloRating);
-        let upperEloBin = Math.min(eloBin + numberOfBinsOutside, this.queues.length - 1); // use min to ensure upper bound
-        let lowerEloBin = Math.max(eloBin - numberOfBinsOutside, 0); // use max to ensure lower bound
+        const eloBinIndex = getEloBinIndex(eloRating);
+        let upperEloBinIndex = Math.min(eloBinIndex + numberOfBinsOutside, this.queues.length - 1); // use min to ensure upper bound
+        let lowerEloBinIndex = Math.max(eloBinIndex - numberOfBinsOutside, 0); // use max to ensure lower bound
+        const upperEloBin = this.queues[upperEloBinIndex];
+        const lowerEloBin = this.queues[lowerEloBinIndex];
         let lowerPlayer = this.checkBin(lowerEloBin);
         if (lowerPlayer) {
             return lowerPlayer;
@@ -49,22 +58,24 @@ class MatchmakingSystem {
     }
     // returns false if nobody is in bin, Player object if in bin, and null if bin does not exist
     checkBin(eloBin) {
+        console.log("elo bin is being called with bin: " + JSON.stringify(eloBin));
         // checking lower bin first
-        if (eloBin) {
+        if (eloBin.players) {
             // if it is empty, add player to list, otherwise get the player
-            if (eloBin.length == 0) {
+            if (eloBin.players.length == 0) {
                 return false; // false indicates that nobody is in the bin
             }
             else {
-                return eloBin.getNextPlayer(player);
+                return eloBin.getNextPlayer();
             }
         } else {
+            console.log("no bin found for elo bin: " + eloBin);
             return null; // Error: No bins created for this ELO range
         }
     }
     removePlayerFromMatchmaking(player) {
         const eloBin = getEloBinIndex(player.elo);
-        return queue[eloBin].removePlayer(player);
+        return queues[eloBin].removePlayer(player);
     }
 }
 

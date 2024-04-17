@@ -9,7 +9,6 @@ app.set('view engine', 'ejs'); // Set EJS as the view engine
 const httpServer = http.createServer(app); // create server from the app
 const {Server} = require('socket.io');
 const io = new Server(httpServer);
-console.log("requiring socket");
 module.exports = {io: io}; // exporting it here
 const socket = require('./socket');
 

@@ -32,7 +32,6 @@ const Player = require('./routes/game').Player;
 const { User, getElo, updateElo, getUserByUsername } = require('./models/User');
 const elo = require('./helpers/elo');
 const matchmaking = require('./helpers/matchmaking');
-
 const matchmakingSystem = new matchmaking.MatchmakingSystem();
 
 // rooms which contain each active game
@@ -66,8 +65,7 @@ const timeBeforeCheckingNeighboringBins = 5000; // in ms
 io.on('connection', (socket) => {
     console.log('=-= =-= =-=');
     console.log('a user has connected');
-    console.log("socket: " + socket.id);
-    console.log("sockets: " + io.sockets.sockets.get(socket.id).id);
+    console.log("socket: " + io.sockets.sockets.get(socket.id).id);
     socket.on('disconnect', (reason) => { // TODO - work on disconnect features
       console.log(`socket ${socket.id} disconnected due to ${reason}`);
       // Iterate through rooms the player was in and call 'leaveRoom' logic
@@ -185,9 +183,9 @@ function matchmake(player) {
     let matchmakeInterval = setInterval(() => {
       // FIXME I don't like calling findMatchForPlayer again, as it requires iterating through ELO array again rather than just increasing/decreasing the bin index
       // let opponent = matchmakingSystem.findMatchForPlayer(player.username, player.elo - 100);
-      let opponentTry2 = matchmaking.findMatchExtendedBins(player, player.elo, 1); // extending bins by 1!
+      let opponentTry2 = matchmakingSystem.findMatchExtendedBins(player, player.elo, 1); // extending bins by 1!
       if (opponentTry2) {
-        let retVal = matchmaking.removePlayerFromMatchmaking(player);
+        let retVal = matchmakingSystem.removePlayerFromMatchmaking(player);
         if (retVal == -1) {
           console.log('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
         }
@@ -206,39 +204,6 @@ function matchmake(player) {
     // player is p2 since they are the one that did matchmaking later
     createMatch(opponent, player);
   }
-
-  nsp.sockets.get(socketid)
-
-  // tell the client to start the game
-  // socket.to(roomUniqueId).emit('playersConnected'); // when t he two players join we can say they are connected
-  // socket.emit("playersConnected"); // this one is to send same transmission to the client that sent the 'joinGame' socket
-
-  // if (rooms[roomUniqueId] != null) {
-  //   const parsedCookies = parseCookies(cookies);
-  //   const jwtToken = parsedCookies.jwt;
-  //   const jwtInfo = getInfoFromJwt(jwtToken);
-  //   var player;
-  //   if (jwtInfo) {
-  //     getElo(jwtInfo.id).then((eloVal) => {
-  //       console.log("elo value: " + eloVal);
-  //       player = new Player(jwtInfo.username, eloVal);
-  //       rooms[roomUniqueId].player = player;
-  //       console.log("room id created: " + roomUniqueId)
-  //       socket.join(roomUniqueId); // joining incoming request to the same room (roomUniqueId should already exist)
-  //       socket.to(roomUniqueId).emit('playersConnected'); // when t he two players join we can say they are connected
-  //       socket.emit("playersConnected"); // this one is to send same transmission to the client that sent the 'joinGame' socket
-  //     });
-  //     // p1 = new Player(username, 1000);
-  //   }
-  //   else { // default, no connection to DB
-  //     player = new Player("default", 1000);
-  //     rooms[roomUniqueId].player = player;
-  //     console.log("room id created: " + roomUniqueId)
-  //     socket.join(roomUniqueId); // joining incoming request to the same room (roomUniqueId should already exist)
-  //     socket.to(roomUniqueId).emit('playersConnected'); // when t he two players join we can say they are connected
-  //     socket.emit("playersConnected"); // this one is to send same transmission to the client that sent the 'joinGame' socket
-  //   }
-  // }
 }
 
 function createMatch(p1, p2) {
