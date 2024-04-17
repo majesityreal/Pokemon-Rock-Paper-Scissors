@@ -34,7 +34,6 @@ const Player = require('./routes/game').Player;
 const { User, getElo, updateElo, getUserByUsername } = require('./models/User');
 const elo = require('./helpers/elo');
 const matchmaking = require('./helpers/matchmaking');
-const { isDeepStrictEqual } = require('util');
 
 const matchmakingSystem = new matchmaking.MatchmakingSystem();
 
@@ -50,6 +49,7 @@ const pokemonTypes = [
 ]; // constant used between rounds timer
 const timeBetweenRounds = 3;
 const numRoundWinsToWin = 1;
+const timeBeforeCheckingNeighboringBins = 5000; // in ms
 
 // ADDME - not implemented yet, just here to show the :gameId operator, having variables in the URL
 // Route with a gameId parameter
@@ -102,7 +102,6 @@ io.on('connection', (socket) => {
       rooms[roomUniqueId].p1 = p1;
       socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
       socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
-      // createPlayer
     })
 
     socket.on('joinGame', async (data) => {
@@ -112,7 +111,7 @@ io.on('connection', (socket) => {
         var p2 = await createPlayer(cookies, socket.id);
         rooms[data.roomUniqueId].p2 = p2;
         socket.join(data.roomUniqueId);
-        io.to(data.roomUniqueId).emit('playersConnected'); // this sends it to BOTH my socket and all other sockets in the room
+        io.to(data.roomUniqueId).emit('playersConnected'); // this sends it to all other sockets in the room
       }
       else {
         // TODO - log to client trying to join, room does not exist yet
@@ -177,15 +176,21 @@ function matchmake(cookies, player) {
   if (opponent == null) {
     console.error('matchmaking opponent is null, errored out on the bins');
   }
-  if (opponent == false) { // placed into a bin instead, waiting for another matchmaker
-    setInterval(() => {
-
+  if (opponent == false || opponent == null) { // place player into a bin instead, waiting for another matchmaker
+    // we want to check in X time neighboring bins for people if we are waiting too long
+    let matchmakeInterval = setInterval(() => {
+      matchmaking.eloBinDelta; // FIXME I don't like calling findMatchForPlayer again, as it requires iterating through ELO array again rather than just increasing/decreasing the bin index
+      // let opponent = matchmakingSystem.findMatchForPlayer(player.username, player.elo - 100);
       console.log('hi!!!');
-    }, 500); // Check for matches every 0.5 seconds
+      if () {
+        clearInterval(matchmakeInterval);
+      }
+    }, timeBeforeCheckingNeighboringBins);
   }
   else {
     // create the match!!!
-    createMatch();
+    // player is p2 since they are the one that did matchmaking later
+    createMatch(opponent, player);
   }
 
   nsp.sockets.get(socketid)
@@ -222,7 +227,7 @@ function matchmake(cookies, player) {
   // }
 }
 
-function createMatch(socket, p1, p2) {
+function createMatch(p1, p2) {
   roomUniqueId = makeid(10);
   rooms[roomUniqueId] = {};
   rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
