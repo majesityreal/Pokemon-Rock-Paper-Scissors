@@ -10,7 +10,7 @@ class Player {
         this.username = username;
         this.elo = elo;
         this.wins = 0; // default vals after:
-        this.typeChoice = "None";
+        this.typeChoice = null; // has to start null so that it does not end the round when any player submits something
     }
 }
 

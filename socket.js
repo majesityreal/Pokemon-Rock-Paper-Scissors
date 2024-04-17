@@ -31,7 +31,9 @@ const { randomInt } = require('crypto');
 const jwt = require('jsonwebtoken');
 const { getInfoFromJwt } = require('./routes/auth');
 const Player = require('./routes/game').Player;
-const { User, getElo } = require('./models/User');
+const { User, getElo, updateElo, getUserByUsername } = require('./models/User');
+const elo = require('./helpers/elo');
+
 // rooms which contain each active game
 // each room object has attributes: 
 // (str)p1Choice, (str)p2Choice, (str[])typesRemaining, (int)p1Wins, (int)p2Wins
@@ -44,6 +46,7 @@ const pokemonTypes = [
   'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
 ]; // constant used between rounds timer
 const timeBetweenRounds = 3;
+const numRoundWinsToWin = 1;
 
 // ADDME - not implemented yet, just here to show the :gameId operator, having variables in the URL
 // Route with a gameId parameter
@@ -121,7 +124,7 @@ io.on('connection', (socket) => {
             console.log("elo value: " + eloVal);
             p2 = new Player(jwtInfo.username, eloVal);
             rooms[data.roomUniqueId].p2 = p2;
-            console.log("room id created: " + roomUniqueId)
+            console.log("room id created: " + data.roomUniqueId)
             socket.join(data.roomUniqueId); // joining incoming request to the same room (roomUniqueId should already exist)
             socket.to(data.roomUniqueId).emit('playersConnected'); // when t he two players join we can say they are connected
             socket.emit("playersConnected"); // this one is to send same transmission to the client that sent the 'joinGame' socket
@@ -163,6 +166,7 @@ io.on('connection', (socket) => {
 
     socket.on('p2Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
       let typeChosen = data.typeChosen;
+      console.log('type hconse: ' + typeChosen);
       var typesRemaining = rooms[data.roomUniqueId].typesRemaining;
       if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
         var randI = randomInt(typesRemaining.length);
@@ -181,6 +185,7 @@ io.on('connection', (socket) => {
     });
 })
 
+///////////////// HELPER FUNCTIONS HERE ///////////////////////////
 function declareRoundWinner(roomUniqueId, socket) {
   let p1Choice = rooms[roomUniqueId].p1.typeChoice;
   let p2Choice = rooms[roomUniqueId].p2.typeChoice;
@@ -212,13 +217,36 @@ function declareRoundWinner(roomUniqueId, socket) {
   // we need both of these to send to both clients (.to() sends to other one, plain emit() sends to one we received from)
   socket.to(roomUniqueId).emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1.typeChoice, p2Choice: rooms[roomUniqueId].p2.typeChoice, p1Wins: rooms[roomUniqueId].p1.wins, p2Wins: rooms[roomUniqueId].p2.wins});
   socket.emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1.typeChoice, p2Choice: rooms[roomUniqueId].p2.typeChoice, p1Wins: rooms[roomUniqueId].p1.wins, p2Wins: rooms[roomUniqueId].p2.wins});
-  // Loop through each room in the rooms object
-  // TODO Prep for next round or end the session
-  countdownAndRestartGame(timeBetweenRounds, socket, roomUniqueId);
+  // check for winner, otherwise restart the game
+  if (rooms[roomUniqueId].p1.wins >= numRoundWinsToWin) {
+    declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p1, rooms[roomUniqueId].p2);
+  }
+  else if (rooms[roomUniqueId].p2.wins >= numRoundWinsToWin) {
+    declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p2, rooms[roomUniqueId].p1);
+  }
+  else {
+    countdownAndRestartGame(timeBetweenRounds, socket, roomUniqueId);
+  }
 
 }
 
-///////////////// HELPER FUNCTIONS HERE ///////////////////////////
+// winner + loser are Player objects
+function declareGameWinner(socket, roomUniqueId, winner, loser) {
+
+  // calculate ELO change
+  let winnerELO = elo.getNewRating(winner.elo, loser.elo, 1); // gets winner ELO
+  let loserELO = elo.getNewRating(loser.elo, winner.elo, 0); // gets loser ELO
+
+  updateElo(winner.username, winnerELO);
+  updateElo(loser.username, loserELO);
+
+  console.log("winner ELO: " + winnerELO);
+  console.log("loser ELO: " + loserELO);
+
+  socket.to(roomUniqueId).emit('gameWon', {});
+  socket.emit('gameWon', {});
+}
+
 // helper function to make a room id
 function makeid(length) {
   var result           = '';
@@ -297,16 +325,17 @@ function restartGame(socket, roomUniqueId) {
   console.log("types remain: " + currRoom.typesRemaining);
   // increment who won?
 
-  const p1Index = currRoom.typesRemaining.indexOf(currRoom.p1Choice);
+  // remove player choices
+  const p1Index = currRoom.typesRemaining.indexOf(currRoom.p1.typeChoice);
   if (p1Index !== -1) { currRoom.typesRemaining.splice(p1Index, 1); }
-  const p2Index = currRoom.typesRemaining.indexOf(currRoom.p2Choice);
+  const p2Index = currRoom.typesRemaining.indexOf(currRoom.p2.typeChoice);
   if (p2Index !== -1) { currRoom.typesRemaining.splice(p2Index, 1); }
 
   // clear p1 and p2 choices
-  currRoom.p1Choice = null;
-  currRoom.p2Choice = null;
+  currRoom.p1.typeChoice = null;
+  currRoom.p2.typeChoice = null;
 
-  const dataToEmit = { typesRemaining: currRoom.typesRemaining, p1Wins: currRoom.p1Wins, p2Wins: currRoom.p2Wins }
+  const dataToEmit = { typesRemaining: currRoom.typesRemaining, p1Wins: currRoom.p1.wins, p2Wins: currRoom.p2.wins }
   socket.to(roomUniqueId).emit('restartGame', dataToEmit); // TODO - put in some data here
   socket.emit('restartGame', dataToEmit);
 }
