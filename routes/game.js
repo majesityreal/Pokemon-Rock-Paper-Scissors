@@ -4,6 +4,7 @@ const router = express.Router();
 
 const rooms = require('../socket').rooms;
 const User = require('../models/User');
+const matchmaking = require('zapi-matchmaking')
 
 class Player {
     constructor(username, elo) {
@@ -12,6 +13,14 @@ class Player {
         this.wins = 0; // default vals after:
         this.typeChoice = null; // has to start null so that it does not end the round when any player submits something
     }
+}
+
+// private games are a dictionary structure
+
+// public games queue
+
+class MatchMaking {
+
 }
 
 const testPlayer = new Player("Carson", 2000); 

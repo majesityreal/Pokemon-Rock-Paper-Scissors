@@ -2,7 +2,7 @@ console.log('client.js executing');
 
 const socket = io();
 let roomUniqueId = null;
-let player1 = false;
+let isPlayer1 = false;
 let hasSubmittedChoice = false;
 
 // chunk of HTML where type buttons are with the submit button
@@ -11,7 +11,7 @@ var ingameDisplayRoundWinner = document.getElementById('roundWinnerArea');
 var defaultGameArea; // used to reset the game area between rounds (if modified)
 
 function createGame() {
-    player1 = true;
+    isPlayer1 = true;
     console.log('creating game on client.js end!');
     socket.emit('createGame')
 }
@@ -61,14 +61,14 @@ socket.on('playersConnected', () => {
 
 socket.on('p1Choice', () => {
     console.log("p1 choice socket received!!");
-    if (!player1) {
+    if (!isPlayer1) {
         showOpponentMadeAChoice();
     }
 })
 
 socket.on('p2Choice', () => {
     console.log("p2 choice socket received!!");
-    if (player1) {
+    if (isPlayer1) {
         showOpponentMadeAChoice();
     }
 })
@@ -81,11 +81,11 @@ socket.on('matchResults', (data) => { // when both players have made their choic
     // show the winnerArea
     ingameDisplayRoundWinner.style.display = 'flex';
     document.getElementById('previousRoundText').innerHTML = ""; // hide this because it is misleading
-    if (player1) {
+    if (isPlayer1) {
         showPlayerChoices(data.p1Choice, data.p2Choice);
         displayTypeMatchups(data.p1Choice, data.p2Choice, data.typeInteraction);
     }
-    else if (!player1) {
+    else if (!isPlayer1) {
         showPlayerChoices(data.p2Choice, data.p1Choice); // typeInteraction is the string i.e. "bg" that tells us how each type hits each other
         // we have to flip the string of typeInteractions since it returns p1,p2
         var flippedTypeInteraction = "";
@@ -212,7 +212,7 @@ function displayWhoWon(whoWon) {
         textUpdate.innerHTML = "It was a tie!"
         textUpdate.style.color = "black";
     }
-    else if (player1) {
+    else if (isPlayer1) {
         if (whoWon == "p1") {
             textUpdate.innerHTML = "You won!"
             textUpdate.style.color = "green";
@@ -222,7 +222,7 @@ function displayWhoWon(whoWon) {
             textUpdate.style.color = "red";
         }
     }
-    else if (!player1) {
+    else if (!isPlayer1) {
         if (whoWon == "p2") {
             textUpdate.innerHTML = "You won!"
             textUpdate.style.color = "green";
@@ -236,10 +236,10 @@ function displayWhoWon(whoWon) {
 
 function displayScore(p1Wins, p2Wins) {
     var scoreText = document.getElementById("gameScore");
-    if (player1) {
+    if (isPlayer1) {
         scoreText.innerHTML = "<span class='text-base'>Your score:</span> <span class='text-xl font-bold'>" + p1Wins + "</span> <span class='text-base'>Opponent's score:</span> <span class='text-xl font-bold'>" + p2Wins + "</span>";
     }
-    else if (!player1) {
+    else if (!isPlayer1) {
         scoreText.innerHTML = "<span class='text-base'>Your score:</span> <span class='text-xl font-bold'>" + p2Wins + "</span> <span class='text-base'>Opponent's score:</span> <span class='text-xl font-bold'>" + p1Wins + "</span>";
     }
 }
@@ -255,7 +255,7 @@ function submitChoice() {
     }
 
     console.log("submitting choice " + typeChosen); // typeChosen is from script.js. It must be included first before client.js to be accessed like this
-    const choiceEvent = player1 ? "p1Choice" : "p2Choice"; // TODO FIXME - This feels wrong doing it client side, as someone could send something as p2 and p1 then!!! Have something that verifies
+    const choiceEvent = isPlayer1 ? "p1Choice" : "p2Choice"; // TODO FIXME - This feels wrong doing it client side, as someone could send something as p2 and p1 then!!! Have something that verifies
     socket.emit(choiceEvent, {
         typeChosen: typeChosen,
         roomUniqueId: roomUniqueId
