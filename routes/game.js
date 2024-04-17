@@ -7,9 +7,10 @@ const User = require('../models/User');
 const matchmaking = require('zapi-matchmaking')
 
 class Player {
-    constructor(username, elo) {
+    constructor(username, elo, socketId) {
         this.username = username;
         this.elo = elo;
+        this.socketId = socketId; // do this for matchmaking purposes
         this.wins = 0; // default vals after:
         this.typeChoice = null; // has to start null so that it does not end the round when any player submits something
     }

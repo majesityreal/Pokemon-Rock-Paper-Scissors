@@ -33,10 +33,14 @@ const { getInfoFromJwt } = require('./routes/auth');
 const Player = require('./routes/game').Player;
 const { User, getElo, updateElo, getUserByUsername } = require('./models/User');
 const elo = require('./helpers/elo');
+const matchmaking = require('./helpers/matchmaking');
+const { isDeepStrictEqual } = require('util');
+
+const matchmakingSystem = new matchmaking.MatchmakingSystem();
 
 // rooms which contain each active game
 // each room object has attributes: 
-// (str)p1Choice, (str)p2Choice, (str[])typesRemaining, (int)p1Wins, (int)p2Wins
+// (Player)p1, (Player)p2, (str[])typesRemaining,
 const rooms = {};
 // (Player[])players, (str[])typesRemaining
 const pokemonTypes = [
@@ -57,9 +61,15 @@ const numRoundWinsToWin = 1;
 //     res.render('in-game');
 // });
 
+// nsp = namespace, in my case it is "io.sockets" which makes it kinda ugly
+// nsp.sockets.get(socketid).join(roomId)
+// nsp.to(roomId).emit("message",{message : "something"})
+
 io.on('connection', (socket) => {
     console.log('=-= =-= =-=');
     console.log('a user has connected');
+    console.log("socket: " + socket.id);
+    console.log("sockets: " + io.sockets.sockets.get(socket.id).id);
     socket.on('disconnect', (reason) => { // TODO - work on disconnect features
       console.log(`socket ${socket.id} disconnected due to ${reason}`);
       // Iterate through rooms the player was in and call 'leaveRoom' logic
@@ -79,66 +89,30 @@ io.on('connection', (socket) => {
     }
     })
 
-    socket.on('createGame', () => {
-      createMatch("o", "o", "o");
+    socket.on('createGame', async () => {
       const roomUniqueId = makeid(10);
       rooms[roomUniqueId] = {};
       rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
       // check the jwt if user is logged in, and then add cookie for session
-        // Access cookies from the handshake object
-        const cookies = socket.handshake.headers.cookie;
-        const parsedCookies = parseCookies(cookies);
-        const jwtToken = parsedCookies.jwt;
-        const jwtInfo = getInfoFromJwt(jwtToken);
-        var p1;
-        if (jwtInfo) {
-          getElo(jwtInfo.id).then((eloVal) => {
-            console.log("elo value: " + eloVal);
-            p1 = new Player(jwtInfo.username, eloVal);
-            rooms[roomUniqueId].p1 = p1;
-            console.log("room id created: " + roomUniqueId)
-            socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
-            socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
-          });
-          // p1 = new Player(username, 1000);
-        }
-        else { // default, no connection to DB
-          p1 = new Player("default", 1000);
-          rooms[roomUniqueId].p1 = p1;
-          console.log("room id created: " + roomUniqueId)
-          socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
-          socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
-        }
+      // Access cookies from the handshake object
+      const cookies = socket.handshake.headers.cookie;
+      console.log("room id created: " + roomUniqueId)
+      // create player object
+      var p1 = await createPlayer(cookies, socket.id);
+      rooms[roomUniqueId].p1 = p1;
+      socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
+      socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
+      // createPlayer
     })
 
-    socket.on('joinGame', (data) => {
+    socket.on('joinGame', async (data) => {
       if (rooms[data.roomUniqueId] != null) {
         console.log('server received joinGame from console! ' + data.roomUniqueId)
         const cookies = socket.handshake.headers.cookie;
-        const parsedCookies = parseCookies(cookies);
-        const jwtToken = parsedCookies.jwt;
-        const jwtInfo = getInfoFromJwt(jwtToken);
-        var p2;
-        if (jwtInfo) {
-          getElo(jwtInfo.id).then((eloVal) => {
-            console.log("elo value: " + eloVal);
-            p2 = new Player(jwtInfo.username, eloVal);
-            rooms[data.roomUniqueId].p2 = p2;
-            console.log("room id created: " + data.roomUniqueId)
-            socket.join(data.roomUniqueId); // joining incoming request to the same room (roomUniqueId should already exist)
-            socket.to(data.roomUniqueId).emit('playersConnected'); // when t he two players join we can say they are connected
-            socket.emit("playersConnected"); // this one is to send same transmission to the client that sent the 'joinGame' socket
-          });
-          // p1 = new Player(username, 1000);
-        }
-        else { // default, no connection to DB
-          p2 = new Player("default", 1000);
-          rooms[data.roomUniqueId].p2 = p2;
-          console.log("room id created: " + data.roomUniqueId)
-          socket.join(data.roomUniqueId); // joining incoming request to the same room (roomUniqueId should already exist)
-          socket.to(data.roomUniqueId).emit('playersConnected'); // when t he two players join we can say they are connected
-          socket.emit("playersConnected"); // this one is to send same transmission to the client that sent the 'joinGame' socket
-        }
+        var p2 = await createPlayer(cookies, socket.id);
+        rooms[data.roomUniqueId].p2 = p2;
+        socket.join(data.roomUniqueId);
+        io.to(data.roomUniqueId).emit('playersConnected'); // this sends it to BOTH my socket and all other sockets in the room
       }
       else {
         // TODO - log to client trying to join, room does not exist yet
@@ -191,16 +165,30 @@ io.on('connection', (socket) => {
 })
 
 ///////////////// HELPER FUNCTIONS HERE ///////////////////////////
-function createMatch(cookies, p1, p2) {
+function matchmake(cookies, player) {
   // const roomUniqueId = makeid(10);
   // rooms[roomUniqueId] = {};
   // rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
   // rooms[roomUniqueId].p1 = p1;
   // rooms[roomUniqueId].p2 = p2;
   
-  setInterval(() => {
-    console.log('hi!!!');
-  }, 500); // Check for matches every 0.5 seconds
+  // first check if someone already has a match waiting
+  let opponent = matchmakingSystem.findMatchForPlayer(player.username, player.elo);
+  if (opponent == null) {
+    console.error('matchmaking opponent is null, errored out on the bins');
+  }
+  if (opponent == false) { // placed into a bin instead, waiting for another matchmaker
+    setInterval(() => {
+
+      console.log('hi!!!');
+    }, 500); // Check for matches every 0.5 seconds
+  }
+  else {
+    // create the match!!!
+    createMatch();
+  }
+
+  nsp.sockets.get(socketid)
 
   // tell the client to start the game
   // socket.to(roomUniqueId).emit('playersConnected'); // when t he two players join we can say they are connected
@@ -232,6 +220,37 @@ function createMatch(cookies, p1, p2) {
   //     socket.emit("playersConnected"); // this one is to send same transmission to the client that sent the 'joinGame' socket
   //   }
   // }
+}
+
+function createMatch(socket, p1, p2) {
+  roomUniqueId = makeid(10);
+  rooms[roomUniqueId] = {};
+  rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
+  rooms[roomUniqueId].p1 = p1;
+  rooms[roomUniqueId].p2 = p2;
+  // both players join socket room
+  io.sockets.sockets.get(p1.socketId).join(roomUniqueId)
+  io.sockets.sockets.get(p2.socketId).join(roomUniqueId)
+  io.to(roomUniqueId).emit('playersConnected'); // this sends it ALL sockets in the room
+
+}
+
+async function createPlayer(cookies, socketId) {
+  const parsedCookies = parseCookies(cookies);
+  const jwtToken = parsedCookies.jwt;
+  const jwtInfo = getInfoFromJwt(jwtToken);
+  var p1;
+  // createPlayer
+  if (jwtInfo) {
+    const eloVal = await getElo(jwtInfo.id);
+    console.log("createPlayer() elo value: " + eloVal);
+    p1 = new Player(jwtInfo.username, eloVal, socketId);
+    return p1;
+  }
+  else { // default, no connection to DB
+    p1 = new Player("default", 1000, socketId);
+    return p1;
+  }
 }
 
 function declareRoundWinner(roomUniqueId, socket) {

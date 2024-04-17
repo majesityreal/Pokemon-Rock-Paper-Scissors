@@ -2,6 +2,44 @@
 const eloBins = [[999, 1100], [1100, 1200], [1200, 1300], [1300, 1400], [1400, 1500],
      [1500, 1600], [1600, 1700], [1700, 1800], [1800, 1900], [1900, 2000], [2000, 4000]];
 
+     // MatchmakingSystem class to manage the matchmaking process
+// 'player' is the username of the player!!!
+class MatchmakingSystem {
+    constructor() {
+        this.queues = []; // Dictionary to store queues based on ELO range
+        for (let i = 0; i < eloBins.length; i++) { // create EloQueues
+            this.queues[i] = new EloQueue();
+        }
+    }
+
+    // Method to add a player to the appropriate queue based on their ELO rating
+    // addPlayerToQueue(player, eloRating) {
+    //     const eloBin = getEloBinIndex(eloRating); // Function to determine ELO range
+    //     if (!this.queues[eloBin]) {
+    //         console.error("error: tried to add player to bin " + eloBin + " with elo rating " + eloRating);
+    //     }
+    //     this.queues[eloBin].addPlayer(player);
+    // }
+
+    // Method to find a match for a player based on their ELO rating
+    // returns 'username' of player if found, false if did not match up players, or null if there was an error with eloBin
+    findMatchForPlayer(player, eloRating) {
+        const eloBin = getEloBinIndex(eloRating);
+        if (this.queues[eloBin]) {
+            // if it is empty, add player to list, otherwise get the player
+            if (this.queues[eloBin].length == 0) {
+                this.queues[eloBin].addPlayer(player);
+                return false; // false indicates that we are waiting for players
+            }
+            else {
+                return this.queues[eloBin].getNextPlayer(player);
+            }
+        } else {
+            return null; // Error: No bins created for this ELO range
+        }
+    }
+}
+
 // Define the EloQueue class to represent a queue for a specific ELO range
 class EloQueue {
     constructor() {
@@ -24,50 +62,13 @@ class EloQueue {
     // if they disconnect, for example
     removePlayer(player) {
         let pIndex = this.players.indexOf((playerInQueue) => {
-            return playerInQueue == player;
+            return playerInQueue.username == player.username;
         });
         if (pIndex == -1) { // player not in queue!
             return false;
         }
         let removedPlayer = this.players.splice(pIndex, 1);
         console.log("removed player " + JSON.stringify(removedPlayer));
-    }
-}
-
-// MatchmakingSystem class to manage the matchmaking process
-// 'player' is the username of the player!!!
-class MatchmakingSystem {
-    constructor() {
-        this.queues = []; // Dictionary to store queues based on ELO range
-        for (let i = 0; i < eloBins.length; i++) { // create EloQueues
-            this.queues[i] = new EloQueue();
-        }
-    }
-
-    // Method to add a player to the appropriate queue based on their ELO rating
-    // addPlayerToQueue(player, eloRating) {
-    //     const eloBin = getEloBinIndex(eloRating); // Function to determine ELO range
-    //     if (!this.queues[eloBin]) {
-    //         console.error("error: tried to add player to bin " + eloBin + " with elo rating " + eloRating);
-    //     }
-    //     this.queues[eloBin].addPlayer(player);
-    // }
-
-    // Method to find a match for a player based on their ELO rating
-    findMatchForPlayer(player, eloRating) {
-        const eloBin = getEloBinIndex(eloRating);
-        if (this.queues[eloBin]) {
-            // if it is empty, add player to list, otherwise get the player
-            if (this.queues[eloBin].length == 0) {
-                this.queues[eloBin].addPlayer(player);
-                // return that we are waiting for players
-            }
-            else {
-                return this.queues[eloBin].getNextPlayer(player);
-            }
-        } else {
-            return null; // No players in this ELO range
-        }
     }
 }
 
@@ -81,20 +82,24 @@ function getEloBinIndex(eloRating) {
     }
 }
 
-// Example usage:
-const matchmakingSystem = new MatchmakingSystem();
-const player1 = "Player1";
-const player2 = "Player2";
-const eloRatingPlayer1 = 1201;
-const eloRatingPlayer2 = 1250;
-
-matchmakingSystem.addPlayerToQueue(player1, eloRatingPlayer1);
-matchmakingSystem.addPlayerToQueue(player2, eloRatingPlayer2);
-
-const match = matchmakingSystem.findMatchForPlayer(player1, eloRatingPlayer1);
-const match2 = matchmakingSystem.findMatchForPlayer(player1, eloRatingPlayer1);
-if (match2) {
-    console.log("Match found:", match2);
-} else {
-    console.log("No match found for", player1);
+module.exports = {
+    MatchmakingSystem: MatchmakingSystem,
 }
+
+// Example usage:
+// const matchmakingSystem = new MatchmakingSystem();
+// const player1 = "Player1";
+// const player2 = "Player2";
+// const eloRatingPlayer1 = 1201;
+// const eloRatingPlayer2 = 1250;
+
+// matchmakingSystem.addPlayerToQueue(player1, eloRatingPlayer1);
+// matchmakingSystem.addPlayerToQueue(player2, eloRatingPlayer2);
+
+// const match = matchmakingSystem.findMatchForPlayer(player1, eloRatingPlayer1);
+// const match2 = matchmakingSystem.findMatchForPlayer(player1, eloRatingPlayer1);
+// if (match2) {
+//     console.log("Match found:", match2);
+// } else {
+//     console.log("No match found for", player1);
+// }
