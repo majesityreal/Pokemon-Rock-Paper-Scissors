@@ -12,7 +12,6 @@ const io = new Server(httpServer);
 console.log("requiring socket");
 module.exports = {io: io}; // exporting it here
 const socket = require('./socket');
-console.log("ending require socket");
 
 const path = require('path');
 const mongoose = require('mongoose');

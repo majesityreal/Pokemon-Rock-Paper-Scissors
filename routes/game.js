@@ -24,10 +24,10 @@ class MatchMaking {
 
 }
 
-const testPlayer = new Player("Carson", 2000); 
+// const testPlayer = new Player("Carson", 2000); 
 
-console.log("running game.js!!!");
-console.log('elo: ' + testPlayer.elo);
+// console.log("running game.js!!!");
+// console.log('elo: ' + testPlayer.elo);
 
 router.get('/profile', (req, res) => {
     console.log('my profile being called!');

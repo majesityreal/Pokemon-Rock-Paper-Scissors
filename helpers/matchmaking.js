@@ -1,7 +1,6 @@
 // first one is 999 instead of 1000 bc I use '>' in checking function and do not want a special case >= for beginning of bin
 const eloBins = [[999, 1100], [1100, 1200], [1200, 1300], [1300, 1400], [1400, 1500],
      [1500, 1600], [1600, 1700], [1700, 1800], [1800, 1900], [1900, 2000], [2000, 4000]];
-const eloBinDelta = 100; // delta between the bins (used for socket.js matchmake() function)
 
      // MatchmakingSystem class to manage the matchmaking process
 // 'player' is the username of the player!!!
@@ -26,18 +25,46 @@ class MatchmakingSystem {
     // returns 'username' of player if found, false if did not match up players, or null if there was an error with eloBin
     findMatchForPlayer(player, eloRating) {
         const eloBin = getEloBinIndex(eloRating);
-        if (this.queues[eloBin]) {
+        let opponent = this.checkBin(eloBin);
+        if (opponent == false) { // adds player to bin if nobody is in it
+            this.queues[eloBin].addPlayer(player);
+        }
+        return opponent;
+    }
+    // this one is used for outer search, does not add player into another bin queue
+    findMatchExtendedBins(player, eloRating, numberOfBinsOutside) {
+        const eloBin = getEloBinIndex(eloRating);
+        let upperEloBin = Math.min(eloBin + numberOfBinsOutside, this.queues.length - 1); // use min to ensure upper bound
+        let lowerEloBin = Math.max(eloBin - numberOfBinsOutside, 0); // use max to ensure lower bound
+        let lowerPlayer = this.checkBin(lowerEloBin);
+        if (lowerPlayer) {
+            return lowerPlayer;
+        }
+        let upperPlayer = this.checkBin(upperEloBin);
+        if (upperPlayer) {
+            return upperPlayer;
+        }
+        // if we reach here, there was nobody in either bin
+        return false;
+    }
+    // returns false if nobody is in bin, Player object if in bin, and null if bin does not exist
+    checkBin(eloBin) {
+        // checking lower bin first
+        if (eloBin) {
             // if it is empty, add player to list, otherwise get the player
-            if (this.queues[eloBin].length == 0) {
-                this.queues[eloBin].addPlayer(player);
-                return false; // false indicates that we are waiting for players
+            if (eloBin.length == 0) {
+                return false; // false indicates that nobody is in the bin
             }
             else {
-                return this.queues[eloBin].getNextPlayer(player);
+                return eloBin.getNextPlayer(player);
             }
         } else {
             return null; // Error: No bins created for this ELO range
         }
+    }
+    removePlayerFromMatchmaking(player) {
+        const eloBin = getEloBinIndex(player.elo);
+        return queue[eloBin].removePlayer(player);
     }
 }
 
@@ -69,7 +96,7 @@ class EloQueue {
             return false;
         }
         let removedPlayer = this.players.splice(pIndex, 1);
-        console.log("removed player " + JSON.stringify(removedPlayer));
+        console.log("removed player from eloBin " + JSON.stringify(removedPlayer));
     }
 }
 
@@ -94,7 +121,6 @@ function getEloBinIndex(eloRating) {
 
 module.exports = {
     MatchmakingSystem: MatchmakingSystem,
-    eloBinDelta: eloBinDelta,
 }
 
 // Example usage:

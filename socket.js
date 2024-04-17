@@ -21,11 +21,9 @@ Lobbies
 
 */
 // main node.js server functionalitys
-console.log("SERFVER.JS IS BEING CALLED!!!!!");
 // the socket.io stuff
 const dataFromMainJS = require('./main'); // grabbing the httpServer created in main.js in order to create our socket var io
 const io = dataFromMainJS.io;
-
 const pokeTypes = require('dismondb'); // pokemon type chart calc library
 const { randomInt } = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -118,9 +116,15 @@ io.on('connection', (socket) => {
       }
     })
 
-    socket.on('matchmake', (data) => {
+    socket.on('matchmake', async (data) => {
       // we want player username, and other stuff from data
       // use the MatchMaking class
+      const cookies = socket.handshake.headers.cookie;
+      // create player object
+      var p1 = await createPlayer(cookies, socket.id);
+      console.log('=-= =-= =-= commencing matchmaking')
+      matchmake(p1);
+      console.log('=-= =-= =-= matchmaking concluded')
     })
 
     socket.on('p1Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
@@ -164,7 +168,7 @@ io.on('connection', (socket) => {
 })
 
 ///////////////// HELPER FUNCTIONS HERE ///////////////////////////
-function matchmake(cookies, player) {
+function matchmake(player) {
   // const roomUniqueId = makeid(10);
   // rooms[roomUniqueId] = {};
   // rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
@@ -172,22 +176,32 @@ function matchmake(cookies, player) {
   // rooms[roomUniqueId].p2 = p2;
   
   // first check if someone already has a match waiting
-  let opponent = matchmakingSystem.findMatchForPlayer(player.username, player.elo);
+  let opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
   if (opponent == null) {
     console.error('matchmaking opponent is null, errored out on the bins');
   }
   if (opponent == false || opponent == null) { // place player into a bin instead, waiting for another matchmaker
     // we want to check in X time neighboring bins for people if we are waiting too long
     let matchmakeInterval = setInterval(() => {
-      matchmaking.eloBinDelta; // FIXME I don't like calling findMatchForPlayer again, as it requires iterating through ELO array again rather than just increasing/decreasing the bin index
+      // FIXME I don't like calling findMatchForPlayer again, as it requires iterating through ELO array again rather than just increasing/decreasing the bin index
       // let opponent = matchmakingSystem.findMatchForPlayer(player.username, player.elo - 100);
-      console.log('hi!!!');
-      if () {
-        clearInterval(matchmakeInterval);
+      let opponentTry2 = matchmaking.findMatchExtendedBins(player, player.elo, 1); // extending bins by 1!
+      if (opponentTry2) {
+        let retVal = matchmaking.removePlayerFromMatchmaking(player);
+        if (retVal == -1) {
+          console.log('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
+        }
+        createMatch(opponentTry2, player);
       }
+      clearInterval(matchmakeInterval);
     }, timeBeforeCheckingNeighboringBins);
   }
   else {
+    // remove player from queue so other people cannot discover a non-existant player
+    let retVal = matchmaking.removePlayerFromMatchmaking(player);
+    if (retVal == -1) {
+      console.log('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
+    }
     // create the match!!!
     // player is p2 since they are the one that did matchmaking later
     createMatch(opponent, player);
