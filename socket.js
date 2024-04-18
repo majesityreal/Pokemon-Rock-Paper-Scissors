@@ -33,6 +33,9 @@ const { User, getElo, updateElo, getUserByUsername } = require('./models/User');
 const elo = require('./helpers/elo');
 const matchmaking = require('./helpers/matchmaking');
 const matchmakingSystem = new matchmaking.MatchmakingSystem();
+setInterval(() => {
+  matchmakingSystem.printAllBins();
+}, 1000);
 
 // rooms which contain each active game
 // each room object has attributes: 
@@ -69,6 +72,10 @@ io.on('connection', (socket) => {
     console.log('a user has connected');
     console.log("socket: " + io.sockets.sockets.get(socket.id).id);
     socket.on('disconnect', (reason) => { // TODO - work on disconnect features
+
+      // FIXME VERY IMPORTANT: when a player disconnects, we need to clear the matchmakingIntervals dictionary. This uses socketId to store player matchmaking timer!
+      // do other stuff too
+
       console.log(`socket ${socket.id} disconnected due to ${reason}`);
       // Iterate through rooms the player was in and call 'leaveRoom' logic
 
@@ -122,9 +129,7 @@ io.on('connection', (socket) => {
       const cookies = socket.handshake.headers.cookie;
       // create player object
       var p1 = await createPlayer(cookies, socket.id);
-      console.log('=-= =-= =-= commencing matchmaking')
       matchmake(p1);
-      console.log('=-= =-= =-= matchmaking concluded')
     })
 
     socket.on('p1Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
@@ -198,41 +203,39 @@ function matchmake(player) {
   // }
 }
 
+const matchmakingIntervals = {};
 // we want to check in X time neighboring bins for people if we are waiting too long
 function startMatchmaking(player) {
   let totalTimeElapsed = 0;
-  let matchmakeInterval = setInterval(() => {
+  matchmakingIntervals[player.socketId] = setInterval(() => {
     // FIXME I don't like calling findMatchForPlayer again, as it requires iterating through ELO array again rather than just increasing/decreasing the bin index
     var opponent;
     if (totalTimeElapsed <= 5000) {
       opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
-      console.log('doing findMatchForPlayer found opponent: ' + JSON.stringify(opponent));
     } else {
       opponent = matchmakingSystem.findMatchExtendedBins(player, player.elo, 1); // extending bins by 1!
-      console.log('doing findMatchExtendedBins found opponent: ' + JSON.stringify(opponent));
     }
     if (opponent == null) {
       console.error('matchmaking opponent2 is null, errored out on the bins');
     }
-    console.log("opponent try 2: " + JSON.stringify(opponent));
     if (opponent) {
       let retVal = matchmakingSystem.removePlayerFromMatchmaking(player);
       if (retVal == false) {
         console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
       }
       // create the match!!!
-      clearInterval(matchmakeInterval);
+      clearInterval(matchmakingIntervals[player.socketId]);
+      clearInterval(matchmakingIntervals[opponent.socketId]);
       createMatch(opponent, player);
-      return; // no longer need to finish off the rest of this stuff
+      return;
     }
     totalTimeElapsed += timeBetweenCheckingMatchmaking;
-    console.log('total time elapsed so far: ' + totalTimeElapsed);
     if (totalTimeElapsed >= 8000) {
       let retVal = matchmakingSystem.removePlayerFromMatchmaking(player); // since we are ending matchmaking, we remove player from bins
       if (retVal == false) {
         console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
       }
-      clearInterval(matchmakeInterval);
+      clearInterval(matchmakingIntervals[player.socketId]);
     }
   }, timeBetweenCheckingMatchmaking);
 }
@@ -245,7 +248,6 @@ function createMatch(p1, p2) {
   rooms[roomUniqueId].p1 = p1;
   rooms[roomUniqueId].p2 = p2;
   // both players join socket room
-  console.log("p1 socket 1: " + p1.socketId);
   io.sockets.sockets.get(p1.socketId).join(roomUniqueId);
   io.sockets.sockets.get(p2.socketId).join(roomUniqueId);
   // tell p1 to be p1 (all clients are by default p2 so we don't need to tell them)

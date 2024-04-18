@@ -26,14 +26,13 @@ class MatchmakingSystem {
     findMatchForPlayer(player, eloRating) {
         const eloBinIndex = getEloBinIndex(eloRating);
         const eloBin = this.queues[eloBinIndex];
-        console.log('finding match with eloBinIndex' + eloBinIndex + ' and eloBin: ' + JSON.stringify(eloBin));
+        // console.log('finding match with eloBinIndex' + eloBinIndex + ' and eloBin: ' + JSON.stringify(eloBin));
         let opponent = this.checkBin(eloBin, player);
         console.log("opponent was: " + JSON.stringify(opponent) + " and I am: " + JSON.stringify(player));
         if (opponent == false) { // adds player to bin if nobody is in it
             console.log("did not find anybody, adding myself to bin " + JSON.stringify(player));
             this.queues[eloBinIndex].addPlayer(player);
         }
-        console.log('returning opponent: ' + JSON.stringify(opponent));
         return opponent;
     }
     // this one is used for outer search, does not add player into another bin queue
@@ -61,7 +60,6 @@ class MatchmakingSystem {
     // returns false if nobody is in bin, Player object if in bin, and null if bin does not exist
     // ignoreThisPlayer skips that player in list, for checking the same bin a person is in
     checkBin(eloBin, ignoreThisPlayer=null) {
-        console.log("elo bin is being called with bin: " + JSON.stringify(eloBin));
         // checking lower bin first
         if (eloBin.players) {
             // if it is empty, add player to list, otherwise get the player
@@ -77,13 +75,19 @@ class MatchmakingSystem {
                 }
             }
         } else {
-            console.log("no bin found for elo bin: " + eloBin);
+            console.log("ERROR no bin found for elo bin: " + eloBin);
             return null; // Error: No bins created for this ELO range
         }
     }
     removePlayerFromMatchmaking(player) {
         const eloBinIndex = getEloBinIndex(player.elo);
         return this.queues[eloBinIndex].removePlayer(player);
+    }
+    printAllBins() {
+        // for (let i = 0; i < 2; i++) {
+        //     console.log("the bins: " + prettyjson.render(this.queues[i]));
+        // }
+        console.log('==================================');
     }
 }
 
@@ -109,7 +113,6 @@ class EloQueue {
     getNextPlayerSkippingMyself(playerToSkip) {
         for (let i = 0; i < this.players.length; i++) {
             if (this.players[i] !== playerToSkip) {
-                console.log('returning player to remove: ' + JSON.stringify(this.players[i]));
                 return this.players.splice(i)[0]; // we have to use '[0]' because splice() returns an array
             }
         }
@@ -117,8 +120,7 @@ class EloQueue {
     }
     // if they disconnect, for example
     removePlayer(player) {
-        console.log("remove player start players array: " + JSON.stringify(this.players));
-        console.log();
+        console.log("remove player, players array: " + JSON.stringify(this.players));
         let pIndex = this.players.indexOf(player);
         if (pIndex == -1) { // player not in queue!
             return false;
