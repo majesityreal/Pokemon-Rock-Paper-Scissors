@@ -84,9 +84,9 @@ class MatchmakingSystem {
         return this.queues[eloBinIndex].removePlayer(player);
     }
     printAllBins() {
-        // for (let i = 0; i < 2; i++) {
-        //     console.log("the bins: " + prettyjson.render(this.queues[i]));
-        // }
+        for (let i = 0; i < 1; i++) {
+            console.log("the bins: " + JSON.stringify(this.queues[i], null, 1));
+        }
         console.log('==================================');
     }
 }

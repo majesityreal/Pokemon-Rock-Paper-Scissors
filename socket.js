@@ -36,6 +36,7 @@ const matchmakingSystem = new matchmaking.MatchmakingSystem();
 setInterval(() => {
   matchmakingSystem.printAllBins();
 }, 1000);
+var matchmakingIntervals = {}; // dictionary storing {player.socketId, intervalId} to handle matchmaking
 
 // rooms which contain each active game
 // each room object has attributes: 
@@ -203,9 +204,13 @@ function matchmake(player) {
   // }
 }
 
-const matchmakingIntervals = {};
 // we want to check in X time neighboring bins for people if we are waiting too long
 function startMatchmaking(player) {
+  // check if already matchmaking, if so do not allow
+  if (matchmakingIntervals[player.socketId]) {
+    // TODO - error message to user, already matchmaking!
+    return;
+  }
   let totalTimeElapsed = 0;
   matchmakingIntervals[player.socketId] = setInterval(() => {
     // FIXME I don't like calling findMatchForPlayer again, as it requires iterating through ELO array again rather than just increasing/decreasing the bin index
@@ -235,12 +240,18 @@ function startMatchmaking(player) {
       if (retVal == false) {
         console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
       }
+      // take socket out from
+      matchmakingIntervals
       clearInterval(matchmakingIntervals[player.socketId]);
     }
   }, timeBetweenCheckingMatchmaking);
 }
 
 function createMatch(p1, p2) {
+  // take both players outside of matchmaking dict
+  matchmakingIntervals.delete(p1.socketId);
+  matchmakingIntervals.delete(p2.socketId);
+  // create room!
   roomUniqueId = makeid(10);
   console.log("creating match after matchmake with id: " + roomUniqueId + " and player 1: " + JSON.stringify(p1) + " and p2: " + JSON.stringify(p2));
   rooms[roomUniqueId] = {};
