@@ -50,9 +50,11 @@ socket.on('newGame', (data) => {
     document.getElementById('waitingArea').appendChild(waitingText); 
     document.getElementById('waitingArea').appendChild(copyButton);
 });
-
-socket.on('playersConnected', () => {
+// sets up the game view client side!
+socket.on('playersConnected', (data) => {
     console.log("received playersConnected socket");
+    // get the room id!
+    roomUniqueId = data.roomUniqueId;
     hide(document.getElementById('lobbyArea'));
     hide(document.getElementById('waitingArea'));
     ingameMakingChoice.style.display = 'block';
@@ -63,6 +65,11 @@ socket.on('playersConnected', () => {
         createTypeButton(type, buttonContainer);
     });
 });
+
+socket.on('setP1', () => {
+    console.log("setting myself to be p1!");
+    isPlayer1 = true;
+})
 
 socket.on('p1Choice', () => {
     console.log("p1 choice socket received!!");

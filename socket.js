@@ -47,6 +47,8 @@ const pokemonTypes = [
 const timeBetweenRounds = 3;
 const numRoundWinsToWin = 1;
 const timeBeforeCheckingNeighboringBins = 5000; // in ms
+const timeBetweenCheckingMatchmaking = 1000; // in ms, checks queue every X for a potential match
+const maxTimeToMatchmake = 20000; // should not matchmake more than 20 seconds!
 
 // ADDME - not implemented yet, just here to show the :gameId operator, having variables in the URL
 // Route with a gameId parameter
@@ -128,6 +130,8 @@ io.on('connection', (socket) => {
     socket.on('p1Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
         let typeChosen = data.typeChosen;
         var typesRemaining = rooms[data.roomUniqueId].typesRemaining;
+        console.log('room unique id: ' + data.roomUniqueId);
+        console.log('Room info:  ' + JSON.stringify(rooms[data.roomUniqueId]));
         // if they do not choose a type, they get a random one
         // last option: they sent a type that is not allowed, either a glitch or they cheated (modified client.js)
         if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
@@ -147,6 +151,8 @@ io.on('connection', (socket) => {
     socket.on('p2Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
       let typeChosen = data.typeChosen;
       console.log('type hconse: ' + typeChosen);
+      console.log('room unique id: ' + data.roomUniqueId);
+      console.log('Room info:  ' + JSON.stringify(rooms[data.roomUniqueId]));
       var typesRemaining = rooms[data.roomUniqueId].typesRemaining;
       if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
         var randI = randomInt(typesRemaining.length);
@@ -167,55 +173,84 @@ io.on('connection', (socket) => {
 
 ///////////////// HELPER FUNCTIONS HERE ///////////////////////////
 function matchmake(player) {
-  // const roomUniqueId = makeid(10);
-  // rooms[roomUniqueId] = {};
-  // rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
-  // rooms[roomUniqueId].p1 = p1;
-  // rooms[roomUniqueId].p2 = p2;
-  
-  // first check if someone already has a match waiting
-  let opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
-  if (opponent == null) {
-    console.error('matchmaking opponent is null, errored out on the bins');
-  }
-  if (opponent == false || opponent == null) { // place player into a bin instead, waiting for another matchmaker
-    // we want to check in X time neighboring bins for people if we are waiting too long
-    let matchmakeInterval = setInterval(() => {
-      // FIXME I don't like calling findMatchForPlayer again, as it requires iterating through ELO array again rather than just increasing/decreasing the bin index
-      // let opponent = matchmakingSystem.findMatchForPlayer(player.username, player.elo - 100);
-      let opponentTry2 = matchmakingSystem.findMatchExtendedBins(player, player.elo, 1); // extending bins by 1!
-      if (opponentTry2) {
-        let retVal = matchmakingSystem.removePlayerFromMatchmaking(player);
-        if (retVal == -1) {
-          console.log('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
-        }
-        createMatch(opponentTry2, player);
+  startMatchmaking(player);
+
+
+  // // first check if someone already has a match waiting
+  // let opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
+  // if (opponent == null) {
+  //   console.error('matchmaking opponent is null, errored out on the bins');
+  // }
+  // // setting this here so I can clear it in the else{} part, if someone else found me as a match
+  // if (opponent == false || opponent == null) { // place player into a bin instead, waiting for another matchmaker
+  //   matchmakeInterval = startMatchmaking(player);
+  //   console.log("matchmake interval inside!: " + matchmakeInterval)
+  // }
+  // else {
+  //   // remove player from queue so other people cannot discover a non-existant player
+  //   let retVal = matchmakingSystem.removePlayerFromMatchmaking(player);
+  //   if (retVal == false) { // FIXME handle this error, along with same above. not good as it could have leaky people in matchmaking system
+  //     console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
+  //   }
+  //   // create the match!!!
+  //   console.log("matchmake interval outside: " + matchmakeInterval)
+  //   createMatch(opponent, player); // player is p2 since they are the one that did matchmaking second
+  // }
+}
+
+// we want to check in X time neighboring bins for people if we are waiting too long
+function startMatchmaking(player) {
+  let totalTimeElapsed = 0;
+  let matchmakeInterval = setInterval(() => {
+    // FIXME I don't like calling findMatchForPlayer again, as it requires iterating through ELO array again rather than just increasing/decreasing the bin index
+    var opponent;
+    if (totalTimeElapsed <= 5000) {
+      opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
+      console.log('doing findMatchForPlayer found opponent: ' + JSON.stringify(opponent));
+    } else {
+      opponent = matchmakingSystem.findMatchExtendedBins(player, player.elo, 1); // extending bins by 1!
+      console.log('doing findMatchExtendedBins found opponent: ' + JSON.stringify(opponent));
+    }
+    if (opponent == null) {
+      console.error('matchmaking opponent2 is null, errored out on the bins');
+    }
+    console.log("opponent try 2: " + JSON.stringify(opponent));
+    if (opponent) {
+      let retVal = matchmakingSystem.removePlayerFromMatchmaking(player);
+      if (retVal == false) {
+        console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
+      }
+      // create the match!!!
+      clearInterval(matchmakeInterval);
+      createMatch(opponent, player);
+      return; // no longer need to finish off the rest of this stuff
+    }
+    totalTimeElapsed += timeBetweenCheckingMatchmaking;
+    console.log('total time elapsed so far: ' + totalTimeElapsed);
+    if (totalTimeElapsed >= 8000) {
+      let retVal = matchmakingSystem.removePlayerFromMatchmaking(player); // since we are ending matchmaking, we remove player from bins
+      if (retVal == false) {
+        console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
       }
       clearInterval(matchmakeInterval);
-    }, timeBeforeCheckingNeighboringBins);
-  }
-  else {
-    // remove player from queue so other people cannot discover a non-existant player
-    let retVal = matchmaking.removePlayerFromMatchmaking(player);
-    if (retVal == -1) {
-      console.log('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
     }
-    // create the match!!!
-    // player is p2 since they are the one that did matchmaking later
-    createMatch(opponent, player);
-  }
+  }, timeBetweenCheckingMatchmaking);
 }
 
 function createMatch(p1, p2) {
   roomUniqueId = makeid(10);
+  console.log("creating match after matchmake with id: " + roomUniqueId + " and player 1: " + JSON.stringify(p1) + " and p2: " + JSON.stringify(p2));
   rooms[roomUniqueId] = {};
   rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
   rooms[roomUniqueId].p1 = p1;
   rooms[roomUniqueId].p2 = p2;
   // both players join socket room
-  io.sockets.sockets.get(p1.socketId).join(roomUniqueId)
-  io.sockets.sockets.get(p2.socketId).join(roomUniqueId)
-  io.to(roomUniqueId).emit('playersConnected'); // this sends it ALL sockets in the room
+  console.log("p1 socket 1: " + p1.socketId);
+  io.sockets.sockets.get(p1.socketId).join(roomUniqueId);
+  io.sockets.sockets.get(p2.socketId).join(roomUniqueId);
+  // tell p1 to be p1 (all clients are by default p2 so we don't need to tell them)
+  io.sockets.sockets.get(p1.socketId).emit('setP1');
+  io.to(roomUniqueId).emit('playersConnected', { roomUniqueId: roomUniqueId }); // this sends it ALL sockets in the room
 
 }
 

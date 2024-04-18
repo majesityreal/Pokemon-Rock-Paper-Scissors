@@ -25,12 +25,10 @@ class MatchmakingSystem {
     // returns 'username' of player if found, false if did not match up players, or null if there was an error with eloBin
     findMatchForPlayer(player, eloRating) {
         const eloBinIndex = getEloBinIndex(eloRating);
-        console.log('finding match with eloBinIndex: ' + eloBinIndex);
         const eloBin = this.queues[eloBinIndex];
-        console.log('finding match with eloBin: ' + JSON.stringify(eloBin));
-        console.log('eloBin players length: ' + eloBin.players.length);
-        let opponent = this.checkBin(eloBin);
-        console.log("opponent was: " + JSON.stringify(opponent));
+        console.log('finding match with eloBinIndex' + eloBinIndex + ' and eloBin: ' + JSON.stringify(eloBin));
+        let opponent = this.checkBin(eloBin, player);
+        console.log("opponent was: " + JSON.stringify(opponent) + " and I am: " + JSON.stringify(player));
         if (opponent == false) { // adds player to bin if nobody is in it
             console.log("did not find anybody, adding myself to bin " + JSON.stringify(player));
             this.queues[eloBinIndex].addPlayer(player);
@@ -41,23 +39,28 @@ class MatchmakingSystem {
     // this one is used for outer search, does not add player into another bin queue
     findMatchExtendedBins(player, eloRating, numberOfBinsOutside) {
         const eloBinIndex = getEloBinIndex(eloRating);
-        let upperEloBinIndex = Math.min(eloBinIndex + numberOfBinsOutside, this.queues.length - 1); // use min to ensure upper bound
-        let lowerEloBinIndex = Math.max(eloBinIndex - numberOfBinsOutside, 0); // use max to ensure lower bound
-        const upperEloBin = this.queues[upperEloBinIndex];
-        const lowerEloBin = this.queues[lowerEloBinIndex];
-        let lowerPlayer = this.checkBin(lowerEloBin);
-        if (lowerPlayer) {
-            return lowerPlayer;
+        let upperEloBinIndex = eloBinIndex + numberOfBinsOutside;
+        if (upperEloBinIndex <= this.queues.length - 1) { // if it reaches outside bounds, we don't check it
+            const upperEloBin = this.queues[upperEloBinIndex];
+            let upperPlayer = this.checkBin(upperEloBin);
+            if (upperPlayer) {
+                return upperPlayer;
+            }
         }
-        let upperPlayer = this.checkBin(upperEloBin);
-        if (upperPlayer) {
-            return upperPlayer;
+        let lowerEloBinIndex = eloBinIndex - numberOfBinsOutside;
+        if (lowerEloBinIndex >= 0) {
+            const lowerEloBin = this.queues[lowerEloBinIndex];
+            let lowerPlayer = this.checkBin(lowerEloBin);
+            if (lowerPlayer) {
+                return lowerPlayer;
+            }
         }
         // if we reach here, there was nobody in either bin
         return false;
     }
     // returns false if nobody is in bin, Player object if in bin, and null if bin does not exist
-    checkBin(eloBin) {
+    // ignoreThisPlayer skips that player in list, for checking the same bin a person is in
+    checkBin(eloBin, ignoreThisPlayer=null) {
         console.log("elo bin is being called with bin: " + JSON.stringify(eloBin));
         // checking lower bin first
         if (eloBin.players) {
@@ -66,7 +69,12 @@ class MatchmakingSystem {
                 return false; // false indicates that nobody is in the bin
             }
             else {
-                return eloBin.getNextPlayer();
+                if (ignoreThisPlayer) {
+                    return eloBin.getNextPlayerSkippingMyself(ignoreThisPlayer);
+                }
+                else {
+                    return eloBin.getNextPlayer();
+                }
             }
         } else {
             console.log("no bin found for elo bin: " + eloBin);
@@ -74,8 +82,8 @@ class MatchmakingSystem {
         }
     }
     removePlayerFromMatchmaking(player) {
-        const eloBin = getEloBinIndex(player.elo);
-        return queues[eloBin].removePlayer(player);
+        const eloBinIndex = getEloBinIndex(player.elo);
+        return this.queues[eloBinIndex].removePlayer(player);
     }
 }
 
@@ -92,22 +100,32 @@ class EloQueue {
     // removes + returns first player from queue
     getNextPlayer() {
         if (this.players.length > 0) {
-            return this.players.pop();
+            return this.players.shift();
         }
         else {
             return null;
         }
     }
+    getNextPlayerSkippingMyself(playerToSkip) {
+        for (let i = 0; i < this.players.length; i++) {
+            if (this.players[i] !== playerToSkip) {
+                console.log('returning player to remove: ' + JSON.stringify(this.players[i]));
+                return this.players.splice(i)[0]; // we have to use '[0]' because splice() returns an array
+            }
+        }
+        return null; // if we get here, there are no players that aren't myself
+    }
     // if they disconnect, for example
     removePlayer(player) {
-        let pIndex = this.players.indexOf((playerInQueue) => {
-            return playerInQueue.username == player.username;
-        });
+        console.log("remove player start players array: " + JSON.stringify(this.players));
+        console.log();
+        let pIndex = this.players.indexOf(player);
         if (pIndex == -1) { // player not in queue!
             return false;
         }
         let removedPlayer = this.players.splice(pIndex, 1);
         console.log("removed player from eloBin " + JSON.stringify(removedPlayer));
+        return removedPlayer;
     }
 }
 
