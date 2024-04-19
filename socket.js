@@ -209,6 +209,7 @@ function startMatchmaking(player) {
   // check if already matchmaking, if so do not allow
   if (matchmakingIntervals[player.socketId]) {
     // TODO - error message to user, already matchmaking!
+    console.log("you are already in matchmaking!");
     return;
   }
   let totalTimeElapsed = 0;
@@ -240,8 +241,11 @@ function startMatchmaking(player) {
       if (retVal == false) {
         console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
       }
-      // take socket out from
-      matchmakingIntervals
+      // take socket out from matchmaking
+      console.log("matchmaking socket id: " + JSON.stringify(matchmakingIntervals[player.socketId]));
+      console.log("matchmaking PLAYER: " + JSON.stringify(player));
+      delete (matchmakingIntervals[player.socketId]);
+      console.log("matchmaking: " + JSON.stringify(matchmakingIntervals));
       clearInterval(matchmakingIntervals[player.socketId]);
     }
   }, timeBetweenCheckingMatchmaking);
