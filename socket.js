@@ -236,7 +236,7 @@ function startMatchmaking(player) {
       return;
     }
     totalTimeElapsed += timeBetweenCheckingMatchmaking;
-    if (totalTimeElapsed >= 8000) {
+    if (totalTimeElapsed >= maxTimeToMatchmake) {
       let retVal = matchmakingSystem.removePlayerFromMatchmaking(player); // since we are ending matchmaking, we remove player from bins
       if (retVal == false) {
         console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
@@ -253,8 +253,9 @@ function startMatchmaking(player) {
 
 function createMatch(p1, p2) {
   // take both players outside of matchmaking dict
-  matchmakingIntervals.delete(p1.socketId);
-  matchmakingIntervals.delete(p2.socketId);
+  delete (matchmakingIntervals[p1.socketId]);
+  delete (matchmakingIntervals[p2.socketId]);
+
   // create room!
   roomUniqueId = makeid(10);
   console.log("creating match after matchmake with id: " + roomUniqueId + " and player 1: " + JSON.stringify(p1) + " and p2: " + JSON.stringify(p2));
