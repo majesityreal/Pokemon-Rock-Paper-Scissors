@@ -2,12 +2,10 @@
 npx tailwindcss -i ./client/style.css -o ./client/stylePlusTailwind.css --watch
 
 OVERALL TODO
-Stylizing stuff - make it look nicer
-Declare a round winner after 3 (or X wins). If there is no winner after all the types have been chosen,
+- If there is no winner after all the types have been chosen,
   tie it and do ELO based on tie
 
-Accounts. People can create accounts, this is only for the ELO system.
-ELO system.
+- Caching database for leaderboard (display leaderboard, but cache it if top 100 user so do not need to read from it super often)
 
 // socket.io generates a socket.id every time it connects. so that is unique!
 // give the client a new thing
@@ -33,9 +31,10 @@ const { User, getElo, updateElo, getUserByUsername } = require('./models/User');
 const elo = require('./helpers/elo');
 const matchmaking = require('./helpers/matchmaking');
 const matchmakingSystem = new matchmaking.MatchmakingSystem();
-setInterval(() => {
-  matchmakingSystem.printAllBins();
-}, 1000);
+// this makes it print out the matchmaking bins every second
+// setInterval(() => {
+//   matchmakingSystem.printAllBins();
+// }, 1000);
 var matchmakingIntervals = {}; // dictionary storing {player.socketId, intervalId} to handle matchmaking
 
 // rooms which contain each active game
@@ -72,9 +71,18 @@ io.on('connection', (socket) => {
     console.log('=-= =-= =-=');
     console.log('a user has connected');
     console.log("socket: " + io.sockets.sockets.get(socket.id).id);
+    console.log('=-= =-= =-=');
     socket.on('disconnect', (reason) => { // TODO - work on disconnect features
 
       // FIXME VERY IMPORTANT: when a player disconnects, we need to clear the matchmakingIntervals dictionary. This uses socketId to store player matchmaking timer!
+      if (matchmakingIntervals[socket.id]) {
+        console.log('player disconnected, removing from matchmaking')
+        clearInterval(matchmakingIntervals[socket.id]);
+        delete (matchmakingIntervals[socket.id]);
+        // TODO FIXME - make it remove based on socketId!!!!!!!!!
+        //let retVal = matchmakingSystem.removePlayerFromMatchmaking(player); // since we are ending matchmaking, we remove player from bins
+        //console.log("ret val: " + retVal);
+      }
       // do other stuff too
 
       console.log(`socket ${socket.id} disconnected due to ${reason}`);
@@ -216,13 +224,13 @@ function startMatchmaking(player) {
   matchmakingIntervals[player.socketId] = setInterval(() => {
     // FIXME I don't like calling findMatchForPlayer again, as it requires iterating through ELO array again rather than just increasing/decreasing the bin index
     var opponent;
-    if (totalTimeElapsed <= 5000) {
+    if (totalTimeElapsed <= 999999999999) {
       opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
     } else {
       opponent = matchmakingSystem.findMatchExtendedBins(player, player.elo, 1); // extending bins by 1!
     }
     if (opponent == null) {
-      console.error('matchmaking opponent2 is null, errored out on the bins');
+      console.error('matchmaking opponent2 is null, nobody found or the bin does not exist');
     }
     if (opponent) {
       let retVal = matchmakingSystem.removePlayerFromMatchmaking(player);
@@ -237,16 +245,17 @@ function startMatchmaking(player) {
     }
     totalTimeElapsed += timeBetweenCheckingMatchmaking;
     if (totalTimeElapsed >= maxTimeToMatchmake) {
-      let retVal = matchmakingSystem.removePlayerFromMatchmaking(player); // since we are ending matchmaking, we remove player from bins
-      if (retVal == false) {
-        console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
-      }
+      clearInterval(matchmakingIntervals[player.socketId]);
       // take socket out from matchmaking
       console.log("matchmaking socket id: " + JSON.stringify(matchmakingIntervals[player.socketId]));
       console.log("matchmaking PLAYER: " + JSON.stringify(player));
       delete (matchmakingIntervals[player.socketId]);
       console.log("matchmaking: " + JSON.stringify(matchmakingIntervals));
-      clearInterval(matchmakingIntervals[player.socketId]);
+      // final thing to do is remove player from list
+      let retVal = matchmakingSystem.removePlayerFromMatchmaking(player); // since we are ending matchmaking, we remove player from bins
+      if (retVal == false) {
+        console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
+      }
     }
   }, timeBetweenCheckingMatchmaking);
 }
