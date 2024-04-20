@@ -52,6 +52,7 @@ const numRoundWinsToWin = 1;
 const timeBeforeCheckingNeighboringBins = 5000; // in ms
 const timeBetweenCheckingMatchmaking = 1000; // in ms, checks queue every X for a potential match
 const maxTimeToMatchmake = 20000; // should not matchmake more than 20 seconds!
+const maxBinsToExtend = 4;
 
 // ADDME - not implemented yet, just here to show the :gameId operator, having variables in the URL
 // Route with a gameId parameter
@@ -74,33 +75,31 @@ io.on('connection', (socket) => {
     console.log('=-= =-= =-=');
     socket.on('disconnect', (reason) => { // TODO - work on disconnect features
 
+      // TODO - disconnect from a room, send room message that player disconnected and has 1 minute to reconnect or something
+          // Get the list of rooms the socket is currently joined to
+          const roomsJoined = Object.keys(socket.rooms);
+          console.log(' rooms joined: ' + JSON.stringify(roomsJoined));
+
+          // Iterate over the rooms joined by the socket
+          roomsJoined.forEach(roomId => {
+              // Perform cleanup or update actions for each room
+              // For example, you can delete the room from the rooms object
+              delete rooms[roomId];
+          });
+      
       // FIXME VERY IMPORTANT: when a player disconnects, we need to clear the matchmakingIntervals dictionary. This uses socketId to store player matchmaking timer!
-      if (matchmakingIntervals[socket.id]) {
-        console.log('player disconnected, removing from matchmaking')
-        clearInterval(matchmakingIntervals[socket.id]);
-        delete (matchmakingIntervals[socket.id]);
-        // TODO FIXME - make it remove based on socketId!!!!!!!!!
-        //let retVal = matchmakingSystem.removePlayerFromMatchmaking(player); // since we are ending matchmaking, we remove player from bins
-        //console.log("ret val: " + retVal);
+
+      let player = matchmakingSystem.players[socket.id];
+      if (player) { // if player is matchmaking
+        console.log(`player disconnected, removing ${JSON.stringify(player)} from matchmaking`);
+        removeFromMatchmaking(player);
       }
+
       // do other stuff too
 
       console.log(`socket ${socket.id} disconnected due to ${reason}`);
       // Iterate through rooms the player was in and call 'leaveRoom' logic
 
-      // Find the room the player was in
-      const roomId = Object.keys(socket.rooms).find(roomId => roomId == socket.id);
-      console.log("room is " + roomId);
-      if (roomId && rooms[roomId]) {
-        // Remove the player from the room
-        rooms[roomId] = rooms[roomId].filter(playerId => playerId !== socket.id);
-        // Check if the room is empty
-        if (rooms[roomId].length === 0) {
-          // Delete the room
-          delete rooms[roomId];
-          console.log(`Room ${roomId} deleted because it became empty.`);
-        }
-    }
     })
 
     socket.on('createGame', async () => {
@@ -139,6 +138,14 @@ io.on('connection', (socket) => {
       // create player object
       var p1 = await createPlayer(cookies, socket.id);
       matchmake(p1);
+    })
+
+    socket.on('cancelMatchmake', (data) => {
+      let player = matchmakingSystem.players[socket.id];
+      if (player) { // if player is matchmaking
+        console.log(`player canceled matchmaking, removing ${JSON.stringify(player)} from matchmaking`);
+        removeFromMatchmaking(player);
+      }
     })
 
     socket.on('p1Choice', (data) => { // TODO - verify user is indeed p1 and not someone sending that socket value
@@ -187,84 +194,71 @@ io.on('connection', (socket) => {
 
 ///////////////// HELPER FUNCTIONS HERE ///////////////////////////
 function matchmake(player) {
-  startMatchmaking(player);
-
-
-  // // first check if someone already has a match waiting
-  // let opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
-  // if (opponent == null) {
-  //   console.error('matchmaking opponent is null, errored out on the bins');
-  // }
-  // // setting this here so I can clear it in the else{} part, if someone else found me as a match
-  // if (opponent == false || opponent == null) { // place player into a bin instead, waiting for another matchmaker
-  //   matchmakeInterval = startMatchmaking(player);
-  //   console.log("matchmake interval inside!: " + matchmakeInterval)
-  // }
-  // else {
-  //   // remove player from queue so other people cannot discover a non-existant player
-  //   let retVal = matchmakingSystem.removePlayerFromMatchmaking(player);
-  //   if (retVal == false) { // FIXME handle this error, along with same above. not good as it could have leaky people in matchmaking system
-  //     console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
-  //   }
-  //   // create the match!!!
-  //   console.log("matchmake interval outside: " + matchmakeInterval)
-  //   createMatch(opponent, player); // player is p2 since they are the one that did matchmaking second
-  // }
-}
-
-// we want to check in X time neighboring bins for people if we are waiting too long
-function startMatchmaking(player) {
   // check if already matchmaking, if so do not allow
   if (matchmakingIntervals[player.socketId]) {
     // TODO - error message to user, already matchmaking!
     console.log("you are already in matchmaking!");
     return;
   }
-  let totalTimeElapsed = 0;
-  matchmakingIntervals[player.socketId] = setInterval(() => {
-    // FIXME I don't like calling findMatchForPlayer again, as it requires iterating through ELO array again rather than just increasing/decreasing the bin index
-    var opponent;
-    if (totalTimeElapsed <= 999999999999) {
-      opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
-    } else {
-      opponent = matchmakingSystem.findMatchExtendedBins(player, player.elo, 1); // extending bins by 1!
-    }
-    if (opponent == null) {
-      console.error('matchmaking opponent2 is null, nobody found or the bin does not exist');
-    }
-    if (opponent) {
-      let retVal = matchmakingSystem.removePlayerFromMatchmaking(player);
-      if (retVal == false) {
-        console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
-      }
-      // create the match!!!
-      clearInterval(matchmakingIntervals[player.socketId]);
-      clearInterval(matchmakingIntervals[opponent.socketId]);
-      createMatch(opponent, player);
-      return;
-    }
-    totalTimeElapsed += timeBetweenCheckingMatchmaking;
-    if (totalTimeElapsed >= maxTimeToMatchmake) {
-      clearInterval(matchmakingIntervals[player.socketId]);
-      // take socket out from matchmaking
-      console.log("matchmaking socket id: " + JSON.stringify(matchmakingIntervals[player.socketId]));
-      console.log("matchmaking PLAYER: " + JSON.stringify(player));
-      delete (matchmakingIntervals[player.socketId]);
-      console.log("matchmaking: " + JSON.stringify(matchmakingIntervals));
-      // final thing to do is remove player from list
-      let retVal = matchmakingSystem.removePlayerFromMatchmaking(player); // since we are ending matchmaking, we remove player from bins
-      if (retVal == false) {
-        console.error('was not able to remove player from matchmaking! something fishy here, someone else perhaps removed it ' + JSON.stringify(player));
-      }
-    }
-  }, timeBetweenCheckingMatchmaking);
+
+  var opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
+  if (opponent) { // if opponent, I am the one who found a match. I am the second, opponent joined queue first
+    removeFromMatchmaking(opponent);
+    removeFromMatchmaking(player);
+    createMatch(opponent, player);
+    return;
+  }
+
+  // if we get here, we did not find anybody in the bin so we matchmakeExtended bins
+  // matchmakeExtended is a recursive function
+  matchmakingIntervals[player.socketId] = setTimeout(() => {
+    matchmakeExtended(player, 1);
+  }, 5000);
+  console.log("setting timeout with value: " + matchmakingIntervals[player.socketId]);
+}
+
+function removeFromMatchmaking(player) {
+  // take player's socket out of the matchmaking dict. we do this first to minimize possible race conditions
+  clearTimeout(matchmakingIntervals[player.socketId]);
+  delete (matchmakingIntervals[player.socketId]); // lol i used to have this before clearTimeout... I wonder why THAT didn't work?????
+  let retVal = matchmakingSystem.removePlayerFromMatchmaking(player);
+  if (retVal == false) {
+    console.error('couldnt remove player from matchmaking! something fishy here ' + JSON.stringify(player));
+  }
+  // take player out of player matchmaking dict
+  delete matchmakingSystem.players[player.socketId] 
+}
+
+function disconnectedRemoveFromMatchmaking(socketId) {
+  let idkTempPlayer = new Player("dummy", ELOVALUEIDKWHATITIS, socketId);
+  let retVal = matchmakingSystem.removeDisconnectedPlayerFromMatchmaking(player);
+  if (retVal == false) {
+    console.error('couldnt remove player from matchmaking! something fishy here ' + JSON.stringify(socketId));
+  }
+  // take player out of the matchmaking dict
+  delete (matchmakingIntervals[socketId]);
+  clearTimeout(matchmakingIntervals[socketId]);
+}
+
+// RECURSIVE helper function for extending bins, keep extending until it finds somebody
+function matchmakeExtended(player, intExtended) {
+  if (intExtended > maxBinsToExtend) { // prevents 3000 ELO from playing 1000 elo lol, limits how far it can search
+    return;
+  }
+  opponent = matchmakingSystem.findMatchExtendedBins(player, player.elo, intExtended); // extending bins by intExtended!
+  console.log(`checking extending bins! opponent is ${opponent}`);
+  if (opponent) {
+    removeFromMatchmaking(opponent);
+    removeFromMatchmaking(player);
+    createMatch(opponent, player);
+    return;
+  }
+  matchmakeExtended(player, intExtended + 1); // recursive call
 }
 
 function createMatch(p1, p2) {
-  // take both players outside of matchmaking dict
-  delete (matchmakingIntervals[p1.socketId]);
-  delete (matchmakingIntervals[p2.socketId]);
-
+  delete matchmakingSystem.players[p1.socketId]
+  delete matchmakingSystem.players[p2.socketId]
   // create room!
   roomUniqueId = makeid(10);
   console.log("creating match after matchmake with id: " + roomUniqueId + " and player 1: " + JSON.stringify(p1) + " and p2: " + JSON.stringify(p2));

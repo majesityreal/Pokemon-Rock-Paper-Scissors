@@ -6,7 +6,8 @@ const eloBins = [[999, 1100], [1100, 1200], [1200, 1300], [1300, 1400], [1400, 1
 // 'player' is the username of the player!!!
 class MatchmakingSystem {
     constructor() {
-        this.queues = []; // Dictionary to store queues based on ELO range
+        this.queues = []; // Array to store queues based on ELO range
+        this.players = {}; // Dictionary to store players that are matchmaking {socketId: playerObject}
         for (let i = 0; i < eloBins.length; i++) { // create EloQueues
             this.queues[i] = new EloQueue();
         }
@@ -32,6 +33,7 @@ class MatchmakingSystem {
         if (opponent == false) { // adds player to bin if nobody is in it
             console.log("did not find anybody, adding myself to bin " + JSON.stringify(player));
             this.queues[eloBinIndex].addPlayer(player);
+            this.players[player.socketId] = player; // this is to tell socket.js a player is matchmaking for easy removal on disconnect
         }
         return opponent;
     }
@@ -83,6 +85,10 @@ class MatchmakingSystem {
         const eloBinIndex = getEloBinIndex(player.elo);
         return this.queues[eloBinIndex].removePlayer(player);
     }
+    removeDisconnectedPlayerFromMatchmaking(player) {
+        const eloBinIndex = getEloBinIndex(player.elo);
+        return this.queues[eloBinIndex].removePlayerWithSocketId(player.socketId);
+    }
     printAllBins() {
         for (let i = 0; i < 1; i++) {
             console.log("the bins: " + JSON.stringify(this.queues[i], null, 1));
@@ -118,10 +124,12 @@ class EloQueue {
         }
         return null; // if we get here, there are no players that aren't myself
     }
-    // if they disconnect, for example
+    // if they cancel or timeout, for example
     removePlayer(player) {
         console.log("remove player, players array: " + JSON.stringify(this.players));
-        let pIndex = this.players.indexOf(player);
+        // let pIndex = this.players.indexOf(player);
+        let pIndex = this.players.findIndex(p => p.socketId === player.socketId);
+        // let pIndex = this.players.find(p => p.socketId === player.socketId);
         if (pIndex == -1) { // player not in queue!
             return false;
         }
@@ -129,6 +137,17 @@ class EloQueue {
         console.log("removed player from eloBin " + JSON.stringify(removedPlayer));
         return removedPlayer;
     }
+    // this is for if they disconnect, I do not have access to the Player object then
+    removePlayerWithSocketId(socketId) {
+        let pIndex = this.players.findIndex(p => p.socketId === socketId);
+        if (pIndex == -1) { // player not in queue!
+            return false;
+        }
+        let removedPlayer = this.players.splice(pIndex, 1);
+        console.log("removed player from eloBin " + JSON.stringify(removedPlayer));
+        return removedPlayer;
+    }
+
 }
 
 // returns index of EloQueue in MatchmakingSystem based on eloRating.
