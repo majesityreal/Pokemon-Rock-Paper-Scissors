@@ -21,13 +21,33 @@
     <button onclick="location.href = 'http://127.0.0.1:3000/ingame'" class="btn">InGame View</button>
 
     
-    <div id="lobbyArea" class="max-w-md mx-auto bg-slate-200 rounded-xl shadow-lg items-center space-x-4 my-4 py-4">
+    <div id="lobbyArea" class="max-w-sm mx-auto">
         <div></div>
-        <button onclick="matchmake()" class="btn btn-primary">Matchamke</button>
-        <button onclick="createGame()" class="btn btn-primary">Create Game</button>
-        <div>or</div>
-        <button onclick="joinGame()" class="btn btn-primary">Join Game</button>
-        <input type="text" name="" id="roomUniqueId" class="border border-slate-200"/>
+        <div class="bg-slate-200 rounded-xl shadow-lg space-x-4 my-4 pt-4 pb-6 flex flex-col justify-center items-center space-y-2">
+            <div></div>
+            <div id="matchmakeButton" style="display: flex">
+                <button onclick="matchmake()" class="btn btn-primary">Matchmake</button>
+            </div>
+            <div id="matchmakeLoadingButton" class="flex-col justify-center items-center space-y-2" style="display: none">
+                <button class="btn-faded flex items-center space-x-2">
+                    <div class="animate-spin rounded-full h-8 w-8 px-1">
+                        <img src="./images/Poké_Ball_icon.svg">
+                    </div>
+                    <p>Matchmaking...</p>
+                </button>
+                <button onclick="cancelMatchmake()" class="btn btn-primary">Cancel</button>
+            </div>
+
+
+        </div>
+        <div class="bg-slate-200 rounded-xl shadow-lg space-x-4 my-4 py-4 flex flex-col justify-center items-center space-y-2">
+            <div></div>
+            <button onclick="createGame()" class="btn btn-primary">Create Game</button>
+            <div>or</div>
+            <button onclick="joinGame()" class="btn btn-primary">Join Game</button>
+            <input type="text" name="" id="roomUniqueId" class="border border-slate-500"/>
+        </div>
+        
     </div>
 
     <div id="gamePlay" class="py-4">

@@ -78,7 +78,7 @@ SUBMIT BUTTON + OTHER BUTTONS
 ********************************************************** */
 /* default buttons with TailwindCSS*/
 .btn {
-    @apply font-bold py-2 px-4 rounded bg-red-500 text-white;
+    @apply font-bold py-1.5 px-6 rounded bg-red-500 text-white;
 }
 .btn:hover {
     @apply bg-slate-900;
@@ -120,4 +120,7 @@ BUTTONS - tailwind customization
 }
 .btn-primary:hover {
     @apply bg-blue-700;
+}
+.btn-faded {
+    @apply font-bold py-0.5 px-6 bg-slate-400 text-slate-700 rounded;
 }

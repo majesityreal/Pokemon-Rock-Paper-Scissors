@@ -25,6 +25,14 @@ function joinGame() {
 function matchmake() {
     console.log("matchmaking from client side!");
     socket.emit('matchmake');
+    document.getElementById('matchmakeButton').style.display = 'none';
+    document.getElementById('matchmakeLoadingButton').style.display = 'flex';
+}
+
+function cancelMatchmake() {
+    socket.emit('cancelMatchmake');
+    document.getElementById('matchmakeLoadingButton').style.display = 'none';
+    document.getElementById('matchmakeButton').style.display = 'flex';
 }
 
 socket.on('newGame', (data) => {
