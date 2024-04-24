@@ -6,7 +6,8 @@ var crypto = require('crypto');
 const jwt = require('jsonwebtoken')
 
 var db = require('../database');
-const User = require("../models/User").User;
+// const User = require("../models/User").User;
+const { User, getElo, updateElo, getUserByUsername } = require('../models/User');
 
 const loginFilePath = path.join('login.ejs');
 const signupFilePath = path.join(__dirname, 'signup.ejs');
@@ -34,11 +35,10 @@ router.post('/login', (req, res) => {
     }    
     checkCredentialsForLogin(username, password).then((user) => {
       if (user == false || user == null) {
-        console.log('hitting this! something wrong')
-        res.status(400).json({ errorMessage: "Something went wrong in login process, refresh and try again" });
+        return res.status(400).json({ errorMessage: "Something went wrong in login process, refresh and try again" });
       }
       else if (user.status == 400) {
-        res.status(400, { errorMessage: user.message })
+        return res.status(400).json({ errorMessage: user.message });
       }
       else {
           const token = jwt.sign(
@@ -52,7 +52,7 @@ router.post('/login', (req, res) => {
             httpOnly: true,
             maxAge: cookieMaxAge * 1000, // 3hrs in ms
           });
-          res.redirect('/'); // TODO - fix this redirect
+          return res.status(200).json("");
       }
     });
     // res.redirect('/'); // if you call res.redirect, it sends headers to the client before the promise is finished!!!!! this took me 30 minutes to debug OOF!!
@@ -130,9 +130,10 @@ router.post('/register', (req, res) => {
 async function checkCredentialsForLogin(username, password) {
     try {
       console.log("Finding user " + username)
-      // 1. Find the user by username
-      const user = await User.findOne({ username })
+      // 1. Find the user by username      
+      const user = await getUserByUsername(username);
       if (!user || user == null) {
+        console.log("lol i am so silly I could not find user")
         return {status: 400, message: 'Username not found'};
       }
       // 2. Hash the incoming password with the stored salt

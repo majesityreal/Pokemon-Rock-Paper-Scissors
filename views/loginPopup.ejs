@@ -79,6 +79,7 @@
       // Send the form data to the server using fetch or AJAX
       console.log('form data: ' + user + password);
       try {
+        console.log('sending post')
         const response = await fetch('/auth/login', {
             method: 'POST',
             body: JSON.stringify({ username: user, password: password }), // You can adjust the body format as needed
@@ -86,24 +87,27 @@
                 'Content-Type': 'application/json'
             }
         });
-
-        if (!response.ok) {
-            throw new Error('Failed to log in. Did not get response from server');
+        if (response.status != 200) {
+            const responseData = await response.json(); // Convert the response body to JSON format
+            throw new Error(responseData.errorMessage);
         }
-
-        // Handle successful login
-        // For example, redirect to another page
-        window.location.href = '/dashboard'; // Change the URL as needed
+        // Handle successful login after this
+        document.getElementById('login-modal').classList.add('hidden');
+        location.href = location.href;
     } catch (error) {
-        console.error('Error:', error);
-        const errorMessage = 'Failed to log in. Please try again.';
+        let errorMessage;
+        if (error) {
+          errorMessage = error;
+        }
+        else {
+          errorMessage = 'Failed to log in. Please try again.';
+        }
         document.getElementById('loginErrorMessage').textContent = errorMessage;
         document.getElementById('loginButton').classList.remove('hidden');
         document.getElementById('cancelLogin').classList.remove('hidden');
         document.getElementById('loginLoadingButton').classList.add('hidden');
         document.getElementById('loginLoadingButton').classList.remove('flex');
     }
-
   });
 
   // Function to handle form submission for signup
