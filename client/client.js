@@ -61,8 +61,10 @@ socket.on('newGame', (data) => {
 // sets up the game view client side!
 socket.on('playersConnected', (data) => {
     console.log("received playersConnected socket");
-    // get the room id!
-    roomUniqueId = data.roomUniqueId;
+    // This is for if players matchmake, otherwise the id is sent through (data)
+    if (data && data.roomUniqueId) {
+        roomUniqueId = data.roomUniqueId;
+    }
     hide(document.getElementById('lobbyArea'));
     hide(document.getElementById('waitingArea'));
     ingameMakingChoice.style.display = 'block';
@@ -120,6 +122,50 @@ socket.on('matchResults', (data) => { // when both players have made their choic
     const timerNumber = document.createElement("h1");
     timerNumber.id = "timerNumber";
     document.getElementById("timerDisplay").appendChild(timerNumber);
+});
+// TODO - still needs to be fixed
+socket.on('gameWon', (data) => {
+    console.log('game won with data: ' + JSON.stringify(data));
+    hide(ingameMakingChoice)
+    // ingameDisplayRoundWinner.style.display = 'flex';
+
+    if (data && data.winner) {
+        if ((isPlayer1 && data.winner == 'p1') || (!isPlayer1 && data.winner == 'p2')) { // if I won
+
+        }
+        else { // I did not win :(
+
+        }
+    }
+
+    console.log("winner: " + data.winner);
+    console.log("type interactrion: " + data.typeInteraction)
+    // hide the gameArea
+    hide(ingameMakingChoice)
+    // show the winnerArea
+    ingameDisplayRoundWinner.style.display = 'flex';
+    document.getElementById('previousRoundText').innerHTML = ""; // hide this because it is misleading
+    if (isPlayer1) {
+        showPlayerChoices(data.p1Choice, data.p2Choice);
+        displayTypeMatchups(data.p1Choice, data.p2Choice, data.typeInteraction);
+    }
+    else if (!isPlayer1) {
+        showPlayerChoices(data.p2Choice, data.p1Choice); // typeInteraction is the string i.e. "bg" that tells us how each type hits each other
+        // we have to flip the string of typeInteractions since it returns p1,p2
+        var flippedTypeInteraction = "";
+        flippedTypeInteraction += data.typeInteraction[1];
+        flippedTypeInteraction += data.typeInteraction[0];
+        displayTypeMatchups(data.p2Choice, data.p1Choice, flippedTypeInteraction);
+    }
+    
+    displayWhoWon(data.winner);
+    displayScore(data.p1Wins, data.p2Wins);
+    // create the timer and diplay it
+    const timerNumber = document.createElement("h1");
+    timerNumber.id = "timerNumber";
+    document.getElementById("timerDisplay").appendChild(timerNumber);
+
+
 });
 
 socket.on('timer', (data) => {
@@ -311,37 +357,8 @@ function changeStylesheet() {
     }
 }
 
-function login() {
-    document.getElementById('login-modal').classList.remove('hidden');
-    // Close the login modal when clicking anywhere on the page
-    // Add the event listener for closing on outside click
-    window.addEventListener('click', loginOutsideClickListener);
-}
-
-function closeLogin() {
-    document.getElementById('login-modal').classList.add('hidden');
-    window.removeEventListener('click', loginOutsideClickListener);
-
-}
-
-function loginOutsideClickListener(event) {
-    const modal = document.getElementById('login-modal');
-    if (event.target === modal) {
-      closeLogin();
-    }
-  }
-
 function logout() {
     window.location.href = '/auth/logout';
-}
-
-function openSignup() {
-    document.getElementById('login-modal').classList.add('hidden');
-    document.getElementById('signup-modal').classList.remove('hidden');
-  }
-  
-function closeSignup() {
-    document.getElementById('signup-modal').classList.add('hidden');
 }
 
 function hide(htmlElement) {

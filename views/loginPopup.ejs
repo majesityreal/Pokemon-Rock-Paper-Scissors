@@ -8,10 +8,7 @@
           </button>
         <form action="/auth/login" method="post" id="loginForm">
           <section>
-            <p id="errorMessage"></p>
-            <% if (typeof errorMessage !== 'undefined') { %>
-                <p style="color: red;"><%= errorMessage %></p>
-            <% } %>
+            <p id="loginErrorMessage" style="color: red;"></p>
           </section>
           <div class="mb-4">
             <label for="username" class="block text-gray-700 mb-2">Username:</label>
@@ -21,20 +18,146 @@
             <label for="password" class="block text-gray-700 mb-2">Password:</label>
             <input type="password" name="password" id="password" autocomplete="current-password" class="w-full border border-gray-300 p-2 rounded" required>
           </div>
-          <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded">Login</button>
-          <button type="button" onclick="closeLogin()" class="bg-gray-400 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded ml-2">Cancel</button>
+          <button id="loginButton" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded">Login</button>
+          <button id="loginLoadingButton" class="btn-faded items-center space-x-2 hidden" disabled="true">
+            <div class="animate-spin rounded-full h-8 w-8 px-1">
+                <img src="./images/Poké_Ball_icon.svg">
+            </div>
+            <p>Logging in...</p>
+        </button>
+          <button id="cancelLogin" type="button" onclick="closeLogin()" class="bg-gray-400 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded ml-2">Cancel</button>
         </form>
       </div>
     </div>
 </div>
 
 <div id="signup-modal" class="fixed hidden top-0 left-0 w-full h-full z-50 overflow-y-auto bg-black/50">
-    <div class="container mx-auto mt-32 flex justify-center items-center">
-      <div class="bg-white p-8 rounded-md shadow-lg">
-          <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
-          <form id="signup-form">
-            </form>
-          <button type="button" onclick="closeSignup()" class="bg-gray-400 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded">Cancel</button>
-      </div>
+  <div class="container mx-auto mt-32 flex justify-center items-center">
+    <div class="bg-white p-8 rounded-md shadow-lg relative">
+      <h2 class="text-2xl font-bold mb-4">Login</h2>
+      <button type="button" onclick="closeSignup()" class="absolute top-0 right-0 p-2 rounded-full hover:bg-gray-200 focus:outline-none">
+          <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      <form action="/auth/signup" method="post" id="signupForm">
+        <section>
+          <p id="signupErrorMessage"></p>
+          <% if (typeof errorMessage !== 'undefined') { %>
+              <p style="color: red;"><%= errorMessage %></p>
+          <% } %>
+        </section>
+        <div class="mb-4">
+          <label for="username" class="block text-gray-700 mb-2">Username:</label>
+          <input type="text" name="username" id="username2" autocomplete="username" class="w-full border border-gray-300 p-2 rounded" required autofocus>
+        </div>
+        <div class="mb-4">
+          <label for="password" class="block text-gray-700 mb-2">Password:</label>
+          <input type="password" name="password" id="password2" autocomplete="current-password" class="w-full border border-gray-300 p-2 rounded" required>
+        </div>
+        <div class="mb-4">
+          <label for="password" class="block text-gray-700 mb-2">Confirm Password:</label>
+          <input type="password" name="password-confirm" id="password-confirm" class="w-full border border-gray-300 p-2 rounded" required>
+        </div>
+        <button id="signupButton" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded">Sign up</button>
+        <button type="button" onclick="closeSignup()" class="bg-gray-400 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded ml-2">Cancel</button>
+      </form>
     </div>
+  </div>
 </div>
+
+<script>
+  // Function to handle form submission for login
+  document.getElementById('loginForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      document.getElementById('loginButton').classList.add('hidden');
+      document.getElementById('cancelLogin').classList.add('hidden');
+      document.getElementById('loginLoadingButton').classList.remove('hidden');
+      document.getElementById('loginLoadingButton').classList.add('flex');
+      const formData = new FormData(this);
+      const user = formData.get('username');
+      const password = formData.get('password');
+
+      // Send the form data to the server using fetch or AJAX
+      console.log('form data: ' + user + password);
+      try {
+        const response = await fetch('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ username: user, password: password }), // You can adjust the body format as needed
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to log in. Did not get response from server');
+        }
+
+        // Handle successful login
+        // For example, redirect to another page
+        window.location.href = '/dashboard'; // Change the URL as needed
+    } catch (error) {
+        console.error('Error:', error);
+        const errorMessage = 'Failed to log in. Please try again.';
+        document.getElementById('loginErrorMessage').textContent = errorMessage;
+        document.getElementById('loginButton').classList.remove('hidden');
+        document.getElementById('cancelLogin').classList.remove('hidden');
+        document.getElementById('loginLoadingButton').classList.add('hidden');
+        document.getElementById('loginLoadingButton').classList.remove('flex');
+    }
+
+  });
+
+  // Function to handle form submission for signup
+  document.getElementById('signupForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+      const user = formData.get('username');
+      const password = formData.get('password');
+      const confirmPassword = formData.get('password-confirm');
+
+      // Send the form data to the server using fetch or AJAX
+      console.log('form data: ' + user + password + confirmPassword);
+
+      // Assuming you receive an error message from the server in response
+      const errorMessage = "Your error message here";
+      document.getElementById('signupErrorMessage').textContent = errorMessage;
+  });
+
+  // Function to open signup modal
+  function openSignup() {
+    document.getElementById('login-modal').classList.add('hidden');
+    document.getElementById('signup-modal').classList.remove('hidden');
+    window.addEventListener('click', signupOutsideClickListener); // FIXME - this does not work for space left and right of modal. idk why
+  }
+  // Function to close signup modal
+  function closeSignup() {
+    document.getElementById('signup-modal').classList.add('hidden');
+    window.removeEventListener('click', signupOutsideClickListener);
+  }
+
+  function openLogin() {
+    document.getElementById('login-modal').classList.remove('hidden');
+    // Close the login modal when clicking anywhere on the page
+    window.addEventListener('click', loginOutsideClickListener); // FIXME - this does not work for space left and right of modal. idk why
+  }
+
+  function closeLogin() {
+      document.getElementById('login-modal').classList.add('hidden');
+      document.getElementById('signup-modal').classList.add('hidden');
+      window.removeEventListener('click', loginOutsideClickListener);
+
+  }
+
+  function loginOutsideClickListener(event) {
+      const modal = document.getElementById('login-modal');
+      if (event.target === modal) {
+        closeLogin();
+      }
+  }
+
+  function signupOutsideClickListener(event) {
+      const modal = document.getElementById('signup-modal');
+      if (event.target === modal) {
+        closeSignup();
+      }
+  }
+</script>

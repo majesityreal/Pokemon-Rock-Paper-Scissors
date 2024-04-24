@@ -48,11 +48,13 @@ const pokemonTypes = [
   'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
 ]; // constant used between rounds timer
 const timeBetweenRounds = 3;
-const numRoundWinsToWin = 1;
+const numRoundWinsToWin = 2;
 const timeBeforeCheckingNeighboringBins = 5000; // in ms
 const timeBetweenCheckingMatchmaking = 1000; // in ms, checks queue every X for a potential match
 const maxTimeToMatchmake = 20000; // should not matchmake more than 20 seconds!
 const maxBinsToExtend = 4;
+
+const defaultUsernameForUnregisteredUsers = "default";
 
 // ADDME - not implemented yet, just here to show the :gameId operator, having variables in the URL
 // Route with a gameId parameter
@@ -320,38 +322,48 @@ function declareRoundWinner(roomUniqueId, socket) {
       winner = "tie";
   }
   console.log("winner: " + winner)
-  // display to both clients the results!
-  // we need both of these to send to both clients (.to() sends to other one, plain emit() sends to one we received from)
-  socket.to(roomUniqueId).emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1.typeChoice, p2Choice: rooms[roomUniqueId].p2.typeChoice, p1Wins: rooms[roomUniqueId].p1.wins, p2Wins: rooms[roomUniqueId].p2.wins});
-  socket.emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1.typeChoice, p2Choice: rooms[roomUniqueId].p2.typeChoice, p1Wins: rooms[roomUniqueId].p1.wins, p2Wins: rooms[roomUniqueId].p2.wins});
+  
   // check for winner, otherwise restart the game
   if (rooms[roomUniqueId].p1.wins >= numRoundWinsToWin) {
-    declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p1, rooms[roomUniqueId].p2);
+    declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p1, rooms[roomUniqueId].p2, 'p1');
   }
   else if (rooms[roomUniqueId].p2.wins >= numRoundWinsToWin) {
-    declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p2, rooms[roomUniqueId].p1);
+    declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p2, rooms[roomUniqueId].p1, 'p2');
   }
   else {
     countdownAndRestartGame(timeBetweenRounds, socket, roomUniqueId);
+    // display to both clients the results!
+    // we need both of these to send to both clients (.to() sends to other one, plain emit() sends to one we received from)
+    socket.to(roomUniqueId).emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1.typeChoice, p2Choice: rooms[roomUniqueId].p2.typeChoice, p1Wins: rooms[roomUniqueId].p1.wins, p2Wins: rooms[roomUniqueId].p2.wins});
+    socket.emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1.typeChoice, p2Choice: rooms[roomUniqueId].p2.typeChoice, p1Wins: rooms[roomUniqueId].p1.wins, p2Wins: rooms[roomUniqueId].p2.wins});
   }
 
 }
 
-// winner + loser are Player objects
-function declareGameWinner(socket, roomUniqueId, winner, loser) {
+// winner + loser are Player objects, send from declareRoundWinner, from the pXChoice socket
+// I don't like winString parameber, but it is tradeoff for not checking if() again for efficiency
+// alternatively, I could add that functionality outside this function but I wanted to keep it modular
+function declareGameWinner(socket, roomUniqueId, winner, loser, winString) {
 
   // calculate ELO change
   let winnerELO = elo.getNewRating(winner.elo, loser.elo, 1); // gets winner ELO
   let loserELO = elo.getNewRating(loser.elo, winner.elo, 0); // gets loser ELO
 
-  updateElo(winner.username, winnerELO);
-  updateElo(loser.username, loserELO);
+  // only updateElo in the database if the user is signed in
+  if (winner.username != defaultUsernameForUnregisteredUsers) {
+    updateElo(winner.username, winnerELO);
+  }
+  if (loser.username != defaultUsernameForUnregisteredUsers) {
+    updateElo(loser.username, loserELO);
+  }
 
   console.log("winner ELO: " + winnerELO);
   console.log("loser ELO: " + loserELO);
 
-  socket.to(roomUniqueId).emit('gameWon', {});
-  socket.emit('gameWon', {});
+  // TODO - clear the room and restart stuff
+
+  socket.to(roomUniqueId).emit('gameWon', {winner: winString});
+  socket.emit('gameWon', {winner: winString});
 }
 
 // helper function to make a room id

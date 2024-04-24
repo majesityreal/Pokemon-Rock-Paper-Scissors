@@ -34,10 +34,11 @@ router.post('/login', (req, res) => {
     }    
     checkCredentialsForLogin(username, password).then((user) => {
       if (user == false || user == null) {
-        res.render('login', { errorMessage: "Something went wrong in login process, refresh and try again" })
+        console.log('hitting this! something wrong')
+        res.status(400).json({ errorMessage: "Something went wrong in login process, refresh and try again" });
       }
-      if (user.status == 400) {
-        res.render('login', { errorMessage: user.message })
+      else if (user.status == 400) {
+        res.status(400, { errorMessage: user.message })
       }
       else {
           const token = jwt.sign(

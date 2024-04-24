@@ -55,7 +55,7 @@ async function updateElo(username, newElo) {
         { new: true } // Option to return the updated document
     );
     if (updatedUser) {
-      console.log("ELO updated successfully. New ELO:", updatedUser.elo);
+      console.log("ELO updated successfully for user " + username + ". New ELO:", updatedUser.elo);
       return updatedUser; 
     } else {
       console.error("User not found");
