@@ -85,6 +85,17 @@
             </div>
 
         </div>
+        <div id="roundWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto hidden"> <!-- changes from 'hidden' to 'flex' when displayed! -->
+            <div id="previousRoundText" class="w-full font-bold text-xl text-center">Previous Round:</div>
+                <div class="choice1 w-1/2 p-4">
+                    <p class="font-bold text-center sm:text-2xl text-lg">Your choice:</p>
+                    <div id="yourChoice" class=""></div> <!--shows YOUR choice at end of match-->
+                </div>
+                <div class="choice2 w-1/2 p-4">
+                    <p class="font-bold text-center sm:text-2xl text-lg">Opponent's choice:</p>
+                    <div id="otherPlayerChoice" class=""></div> <!--shows the other player's choice at end of match-->
+                </div>
+        </div>
         <div id="gameWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto my-4 hidden">
             <div class="flex flex-col items-center">
                 <div class="font-bold"> updated ELO </div>
@@ -95,17 +106,6 @@
                 </div>
                 <button class="btn btn-primary mt-4" onclick="returnToLobby()">Return to lobby</button>
             </div>
-        </div>
-        <div id="roundWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto hidden" style="display: none;"> <!-- changes from 'hidden' to 'flex' when displayed! -->
-            <div id="previousRoundText" class="w-full font-bold text-xl text-center">Previous Round:</div>
-                <div class="choice1 w-1/2 p-4">
-                    <p class="font-bold text-center sm:text-2xl text-lg">Your choice:</p>
-                    <div id="yourChoice" class=""></div> <!--shows YOUR choice at end of match-->
-                </div>
-                <div class="choice2 w-1/2 p-4">
-                    <p class="font-bold text-center sm:text-2xl text-lg">Opponent's choice:</p>
-                    <div id="otherPlayerChoice" class=""></div> <!--shows the other player's choice at end of match-->
-                </div>
         </div>
         <div id="roundWinnerAreaTypeExplanation" class="flex flex-col items-center mx-auto"></div>
     </div>
