@@ -24,7 +24,7 @@
                 <img src="./images/Poké_Ball_icon.svg">
             </div>
             <p>Logging in...</p>
-        </button>
+          </button>
           <button id="cancelLogin" type="button" onclick="closeLogin()" class="bg-gray-400 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded ml-2">Cancel</button>
         </form>
       </div>
@@ -40,10 +40,7 @@
         </button>
       <form action="/auth/signup" method="post" id="signupForm">
         <section>
-          <p id="signupErrorMessage"></p>
-          <% if (typeof errorMessage !== 'undefined') { %>
-              <p style="color: red;"><%= errorMessage %></p>
-          <% } %>
+          <p id="signupErrorMessage" style="color: red;"></p>
         </section>
         <div class="mb-4">
           <label for="username" class="block text-gray-700 mb-2">Username:</label>
@@ -58,7 +55,13 @@
           <input type="password" name="password-confirm" id="password-confirm" class="w-full border border-gray-300 p-2 rounded" required>
         </div>
         <button id="signupButton" type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded">Sign up</button>
-        <button type="button" onclick="closeSignup()" class="bg-gray-400 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded ml-2">Cancel</button>
+        <button id="signupLoadingButton" class="btn-faded items-center space-x-2 hidden" disabled="true">
+          <div class="animate-spin rounded-full h-8 w-8 px-1">
+              <img src="./images/Poké_Ball_icon.svg">
+          </div>
+          <p>Signing up...</p>
+        </button>
+        <button id="cancelSignup" type="button" onclick="closeSignup()" class="bg-gray-400 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded ml-2">Cancel</button>
       </form>
     </div>
   </div>
@@ -94,7 +97,7 @@
         // Handle successful login after this
         document.getElementById('login-modal').classList.add('hidden');
         location.href = location.href;
-    } catch (error) {
+      } catch (error) {
         let errorMessage;
         if (error) {
           errorMessage = error;
@@ -107,7 +110,7 @@
         document.getElementById('cancelLogin').classList.remove('hidden');
         document.getElementById('loginLoadingButton').classList.add('hidden');
         document.getElementById('loginLoadingButton').classList.remove('flex');
-    }
+      }
   });
 
   // Function to handle form submission for signup
@@ -117,13 +120,44 @@
       const user = formData.get('username');
       const password = formData.get('password');
       const confirmPassword = formData.get('password-confirm');
-
+      // check if password and confirmPassword are the same
+      if (confirmPassword != password) {
+        const errorMessage = "Passwords do not match!";
+        document.getElementById('signupErrorMessage').textContent = errorMessage;
+        return;
+      }
       // Send the form data to the server using fetch or AJAX
       console.log('form data: ' + user + password + confirmPassword);
-
-      // Assuming you receive an error message from the server in response
-      const errorMessage = "Your error message here";
-      document.getElementById('signupErrorMessage').textContent = errorMessage;
+      try {
+        console.log('sending post')
+        const response = await fetch('/auth/signup', {
+            method: 'POST',
+            body: JSON.stringify({ username: user, password: password }), // You can adjust the body format as needed
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (response.status != 200) {
+            const responseData = await response.json(); // Convert the response body to JSON format
+            throw new Error(responseData.errorMessage);
+        }
+        // Handle successful login after this
+        document.getElementById('signup-modal').classList.add('hidden');
+        location.href = location.href;
+      } catch (error) {
+        let errorMessage;
+        if (error) {
+          errorMessage = error;
+        }
+        else {
+          errorMessage = 'Failed to sign up. Please try again.';
+        }
+        document.getElementById('signupErrorMessage').textContent = errorMessage;
+        document.getElementById('signupButton').classList.remove('hidden');
+        document.getElementById('cancelSignup').classList.remove('hidden');
+        document.getElementById('signupLoadingButton').classList.add('hidden');
+        document.getElementById('signupLoadingButton').classList.remove('flex');
+      }
   });
 
   // Function to open signup modal

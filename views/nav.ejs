@@ -1,14 +1,24 @@
 <nav>
-    <h1 class="text-3xl font-bold relative top-4">Pokemon Types</h1>
+    <h1 class="text-4xl font-bold relative top-2">Pokemon Types</h1>
     <% if (typeof username !== 'undefined') { %>
-    <div id="userProfileSection" class="flex flex-row-reverse relative bottom-5">
+    <!-- <div class="flex flex-col absolute right-5 bottom-5">
+        <p class="font-bold text-xl"><%- username %> </p>
+        <button onclick="logout()" class="btn btn-nav max-w-32">Log out</button>
+    </div> -->
+    <div id="userProfileSection" class="flex flex-row-reverse">
+        <div></div>
         <div class="flex flex-col">
-            <p><%- username %> </p>
-            <button onclick="logout()" class="btn btn-primary">Log out</button>
+            <p class="font-bold text-xl"><%- username %> </p>
+            <button onclick="logout()" class="btn btn-nav">Log out</button>
         </div>
     </div>
     <% } else {%>
-        <button onclick="openLogin()" class="btn btn-primary">Log in</button>
+        <div id="userProfileSection" class="flex flex-row-reverse">
+            <div></div>
+            <div class="flex flex-col">
+                <button onclick="openLogin()" class="btn btn-nav">Log in</button>
+            </div>
+        </div>
     <% } %>
      
 </nav>

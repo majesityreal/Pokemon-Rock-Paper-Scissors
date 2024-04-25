@@ -115,6 +115,14 @@ BUTTONS - tailwind customization
 .btn-slate:hover {
     @apply bg-slate-900;
 }
+.btn-nav {
+    background-color: #974241;
+    outline-color: #6d3130;
+    @apply text-white outline outline-1 px-4;
+}
+.btn-nav:hover {
+    background-color: #7a2a28;
+}
 .btn-primary {
     @apply bg-blue-500 text-white;
 }

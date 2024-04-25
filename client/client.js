@@ -101,7 +101,7 @@ socket.on('matchResults', (data) => { // when both players have made their choic
     // hide the gameArea
     hide(ingameMakingChoice)
     // show the winnerArea
-    ingameDisplayRoundWinner.style.display = 'flex';
+    ingameDisplayRoundWinner.classList.add('flex');
     document.getElementById('previousRoundText').innerHTML = ""; // hide this because it is misleading
     if (isPlayer1) {
         showPlayerChoices(data.p1Choice, data.p2Choice);
@@ -127,14 +127,21 @@ socket.on('matchResults', (data) => { // when both players have made their choic
 socket.on('gameWon', (data) => {
     console.log('game won with data: ' + JSON.stringify(data));
     hide(ingameMakingChoice)
-    // ingameDisplayRoundWinner.style.display = 'flex';
-
+    document.getElementById('gameWinnerArea').classList.remove('hidden');
+    document.getElementById('roundWinnerArea').classList.add('hidden');
     if (data && data.winner) {
+        var textUpdate = document.getElementById("gameWhoWonRoundText");
         if ((isPlayer1 && data.winner == 'p1') || (!isPlayer1 && data.winner == 'p2')) { // if I won
-
+            textUpdate.innerHTML = "You won the game!"
+            textUpdate.style.color = "green";
+            document.getElementById('eloDisplayOld').innerHTML = data.winnerOldELO;
+            document.getElementById('eloDisplayNew').innerHTML = data.winnerELO;
         }
         else { // I did not win :(
-
+            textUpdate.innerHTML = "You lost the game! :("
+            textUpdate.style.color = "red";
+            document.getElementById('eloDisplayOld').innerHTML = data.loserOldELO;
+            document.getElementById('eloDisplayNew').innerHTML = data.loserELO;
         }
     }
 
@@ -143,7 +150,7 @@ socket.on('gameWon', (data) => {
     // hide the gameArea
     hide(ingameMakingChoice)
     // show the winnerArea
-    ingameDisplayRoundWinner.style.display = 'flex';
+    ingameDisplayRoundWinner.classList.add('flex');
     document.getElementById('previousRoundText').innerHTML = ""; // hide this because it is misleading
     if (isPlayer1) {
         showPlayerChoices(data.p1Choice, data.p2Choice);
@@ -221,6 +228,7 @@ function showPlayerChoices(yourType, opponentType) {
     createTypeButton(opponentType, divToShowResult, 'display-only');
     divToShowResult = document.getElementById("yourChoice");
     divToShowResult.innerHTML = ""; // clearing the div again
+    console.log('PLAYER CHOICES! : ')
     createTypeButton(yourType, divToShowResult, 'display-only');
 }
 // shows how the player's types fare against each other so ppl can learn type charts
@@ -280,21 +288,21 @@ function displayWhoWon(whoWon) {
     }
     else if (isPlayer1) {
         if (whoWon == "p1") {
-            textUpdate.innerHTML = "You won!"
+            textUpdate.innerHTML = "Round won!"
             textUpdate.style.color = "green";
         }
         else {
-            textUpdate.innerHTML = "You lost!"
+            textUpdate.innerHTML = "Round lost!"
             textUpdate.style.color = "red";
         }
     }
     else if (!isPlayer1) {
         if (whoWon == "p2") {
-            textUpdate.innerHTML = "You won!"
+            textUpdate.innerHTML = "Round won!"
             textUpdate.style.color = "green";
         }
         else {
-            textUpdate.innerHTML = "You lost!"
+            textUpdate.innerHTML = "Round lost!"
             textUpdate.style.color = "red";
         }
     }
@@ -359,6 +367,10 @@ function changeStylesheet() {
 
 function logout() {
     window.location.href = '/auth/logout';
+}
+
+function returnToLobby() {
+    window.location.href = "";
 }
 
 function hide(htmlElement) {

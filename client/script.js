@@ -28,6 +28,9 @@ const colors = {
 
 // parentObject is what we append the button to
 function createTypeButton(type, parentObject, additionalClasses="") {
+    if (type == undefined) {
+        return;
+    }
     const button = document.createElement('button');
     button.classList.add('type-button');
     if (additionalClasses != "") {

@@ -616,12 +616,16 @@ video {
   right: 0px;
 }
 
+.right-5 {
+  right: 1.25rem;
+}
+
 .top-0 {
   top: 0px;
 }
 
-.top-4 {
-  top: 1rem;
+.top-2 {
+  top: 0.5rem;
 }
 
 .z-50 {
@@ -722,6 +726,10 @@ video {
 
 .max-w-2xl {
   max-width: 42rem;
+}
+
+.max-w-32 {
+  max-width: 8rem;
 }
 
 .max-w-5xl {
@@ -938,6 +946,11 @@ video {
 .text-3xl {
   font-size: 1.875rem;
   line-height: 2.25rem;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
 }
 
 .text-base {
@@ -1167,6 +1180,21 @@ BUTTONS - tailwind customization
 .btn-slate:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(15 23 42 / var(--tw-bg-opacity));
+}
+
+.btn-nav {
+  background-color: #974241;
+  outline-color: #6d3130;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+  outline-style: solid;
+  outline-width: 1px;
+}
+
+.btn-nav:hover {
+  background-color: #7a2a28;
 }
 
 .btn-primary {

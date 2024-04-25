@@ -7,6 +7,7 @@
     <!-- <link rel="stylesheet" href="style.css">  -->
     <link href="./stylePlusTailwind.css" rel="stylesheet" id="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <%- include('nav.ejs') %>
@@ -52,9 +53,9 @@
 
     <div id="gamePlay" class="py-4">
         <div id="waitingArea" class="mx-2"></div> <!-- This displays text when waiting for someone else to join -->
-        <div class="flex flex-col items-center"> <!-- This displays game info (score, if you win/lose) -->
+        <div class="flex flex-col items-center pb-4"> <!-- This displays game info (score, if you win/lose) -->
             <h1 class="text-3xl font-bold underline" id="gameWhoWonRoundText">Enjoy the game!</h1>
-            <div class="flex flex-row">
+            <div class="flex flex-row pt-2">
                 <div id="gameScore" class="flex-grow pr-2"> </div>
                 <div id="timerDisplay" class="absolute right-0 mr-8 px-4 font-bold text-2xl bg-slate-400 rounded-md"></div>
             </div>
@@ -84,12 +85,18 @@
             </div>
 
         </div>
-        <div id="gameWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto" style="display: none;">
-            <div>
-                Game over! You either won or lost!
+        <div id="gameWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto my-4 hidden">
+            <div class="flex flex-col items-center">
+                <div class="font-bold"> updated ELO </div>
+                <div class="flex flex-row items-center">
+                    <div id="eloDisplayOld">1000</div>
+                    <p class="text-3xl pb-2 mx-2">→</p> <!-- right arrow emoji-->
+                    <div id="eloDisplayNew">1016</div>
+                </div>
+                <button class="btn btn-primary mt-4" onclick="returnToLobby()">Return to lobby</button>
             </div>
         </div>
-        <div id="roundWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto" style="display: none;"> <!-- changes from 'hidden' to 'flex' when displayed! -->
+        <div id="roundWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto hidden" style="display: none;"> <!-- changes from 'hidden' to 'flex' when displayed! -->
             <div id="previousRoundText" class="w-full font-bold text-xl text-center">Previous Round:</div>
                 <div class="choice1 w-1/2 p-4">
                     <p class="font-bold text-center sm:text-2xl text-lg">Your choice:</p>

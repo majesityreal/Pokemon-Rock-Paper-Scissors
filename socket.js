@@ -362,8 +362,8 @@ function declareGameWinner(socket, roomUniqueId, winner, loser, winString) {
 
   // TODO - clear the room and restart stuff
 
-  socket.to(roomUniqueId).emit('gameWon', {winner: winString});
-  socket.emit('gameWon', {winner: winString});
+  socket.to(roomUniqueId).emit('gameWon', {winner: winString, winnerELO: winnerELO, winnerOldELO: winner.elo, loserELO: loserELO, loserOldELO: loser.elo});
+  socket.emit('gameWon', {winner: winString, winnerELO: winnerELO, winnerOldELO: winner.elo, loserELO: loserELO, loserOldELO: loser.elo});
 }
 
 // helper function to make a room id

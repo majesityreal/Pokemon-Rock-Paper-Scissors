@@ -74,11 +74,11 @@ router.post('/signup', async (req, res) => {
         const { username, password } = req.body
         if (!username || !password) {
           return res.status(400).json({
-            message: "Username or Password not present",
+            errorMessage: "Username or Password not present",
           })
         }
         if (password.length < 6) {
-          return res.status(400).json({ message: "Password less than 6 characters" })
+          return res.status(400).json({ errorMessage: "Password less than 6 characters" })
         }
         const salt = crypto.randomBytes(4).toString('hex'); // Generate salt
         // chain of creating the user
@@ -102,19 +102,18 @@ router.post('/signup', async (req, res) => {
               httpOnly: true,
               maxAge: cookieMaxAge * 1000, // 24hrs in ms
             });
-            res.status(201).json({
+            res.status(200).json({
               message: "User successfully created",
               user: user._id,
             });
           });
         }).catch((error) => {
           res.status(400).json({
-            message: "User not successful created",
+            errorMessage: "Username already taken",
             error: error.message,
           })
         });
-        // remaining login logic here:
-        res.redirect('/');
+        // remaining signup logic here:
 
       } catch (err) {
         console.log(err); 
