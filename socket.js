@@ -18,6 +18,13 @@ Lobbies
 // random function grabs any type, NEEDS TO BE FROM types remaining
 
 */
+
+/*
+FOR PRODUCTION:
+
+Next.js - minify TailwindCSS files to reduce bandwidth
+*/
+
 // main node.js server functionalitys
 // the socket.io stuff
 const dataFromMainJS = require('./main'); // grabbing the httpServer created in main.js in order to create our socket var io
@@ -79,11 +86,13 @@ io.on('connection', (socket) => {
 
       // TODO - disconnect from a room, send room message that player disconnected and has 1 minute to reconnect or something
           // Get the list of rooms the socket is currently joined to
+          console.log('socket rooms: ' + JSON.stringify(socket.rooms));
           const roomsJoined = Object.keys(socket.rooms);
           console.log(' rooms joined: ' + JSON.stringify(roomsJoined));
 
           // Iterate over the rooms joined by the socket
           roomsJoined.forEach(roomId => {
+            console.log('deleting room: ' + roomId);
               // Perform cleanup or update actions for each room
               // For example, you can delete the room from the rooms object
               delete rooms[roomId];
@@ -115,7 +124,9 @@ io.on('connection', (socket) => {
       // create player object
       var p1 = await createPlayer(cookies, socket.id);
       rooms[roomUniqueId].p1 = p1;
+      console.log('rooms of socket before: ' + JSON.stringify(socket.rooms));
       socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
+      console.log('rooms of socket after: ' + JSON.stringify(socket.rooms));
       socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
     })
 
