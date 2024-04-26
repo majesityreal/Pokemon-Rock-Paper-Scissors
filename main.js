@@ -8,7 +8,14 @@ app.use(cookieParser()); // it is very important it is in this order. Must use c
 app.set('view engine', 'ejs'); // Set EJS as the view engine
 const httpServer = http.createServer(app); // create server from the app
 const {Server} = require('socket.io');
-const io = new Server(httpServer);
+const io = new Server(httpServer, {
+  connectionStateRecovery: {
+    // the backup duration of the sessions and the packets
+    maxDisconnectionDuration: 2 * 60 * 1000, // 2 minutes
+    // whether to skip middlewares upon successful recovery
+    skipMiddlewares: true,
+  }
+});
 module.exports = {io: io}; // exporting it here
 const socket = require('./socket');
 
@@ -42,11 +49,14 @@ app.use(session({ // this is what establishes the session
   saveUninitialized: false, // Don't save new sessions that have no data
   cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // Session expires in 1 week by default
 }));
+
 app.use(express.json()); // Parse JSON bodies (as sent by API clients)
 // my middleware setup
 // routers in different files
 app.use('/auth', authRouter); // Mount the auth router at a specific path
 app.use('/game', gameRouter);
+
+
 
 // here we just need to tell the server to listen, the other .js files handle some of the routes
 httpServer.listen(3000, () => {

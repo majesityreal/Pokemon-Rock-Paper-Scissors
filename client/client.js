@@ -75,6 +75,12 @@ socket.on('playersConnected', (data) => {
         createTypeButton(type, buttonContainer);
     });
 });
+// this is not needed anymore, but leaving here just in case!
+// handle disconnection
+// socket.on('playerDisconnected', () => {
+//     console.log("received DISCONNECTED socket");
+//     hide(document.getElementById('gameArea'));
+// });
 
 socket.on('setP1', () => {
     console.log("setting myself to be p1!");
@@ -128,8 +134,8 @@ socket.on('gameWon', (data) => {
     console.log('game won with data: ' + JSON.stringify(data));
     hide(ingameMakingChoice)
     document.getElementById('gameWinnerArea').classList.remove('hidden');
-    document.getElementById('roundWinnerArea').classList.remove('hidden');
     if (data && data.winner) {
+        document.getElementById('roundWinnerArea').classList.remove('hidden');
         var textUpdate = document.getElementById("gameWhoWonRoundText");
         if ((isPlayer1 && data.winner == 'p1') || (!isPlayer1 && data.winner == 'p2')) { // if I won
             textUpdate.innerHTML = "You won the game!"
@@ -147,31 +153,11 @@ socket.on('gameWon', (data) => {
             showPlayerChoices(data.loserTypeChoice, data.winnerTypeChoice);
         }
     }
-
-    console.log("winner: " + data.winner);
-    console.log("type interactrion: " + data.typeInteraction)
-    // // hide the gameArea
-    // hide(ingameMakingChoice)
-    // // show the winnerArea
-    // ingameDisplayRoundWinner.classList.add('flex');
-    // document.getElementById('previousRoundText').innerHTML = ""; // hide this because it is misleading
-    // if (isPlayer1) {
-    //     showPlayerChoices(data.p1Choice, data.p2Choice);
-    //     displayTypeMatchups(data.p1Choice, data.p2Choice, data.typeInteraction);
-    // }
-    // else if (!isPlayer1) {
-    //     showPlayerChoices(data.p2Choice, data.p1Choice); // typeInteraction is the string i.e. "bg" that tells us how each type hits each other
-    //     // we have to flip the string of typeInteractions since it returns p1,p2
-    //     var flippedTypeInteraction = "";
-    //     flippedTypeInteraction += data.typeInteraction[1];
-    //     flippedTypeInteraction += data.typeInteraction[0];
-    //     displayTypeMatchups(data.p2Choice, data.p1Choice, flippedTypeInteraction);
-    // }
-    
-    // displayWhoWon(data.winner);
-    // displayScore(data.p1Wins, data.p2Wins);
-
-
+    else { // this is the disconnect case
+        var textUpdate = document.getElementById("gameWhoWonRoundText");
+        textUpdate.innerHTML = "Opponent disconnected: You won the game!"
+        textUpdate.style.color = "green";
+    }
 });
 
 socket.on('timer', (data) => {
@@ -220,6 +206,16 @@ socket.on('restartGame', (data) => {
         }
     });
 });
+// on initial connection, store sessionID in localStorage
+socket.on("session", ({ sessionID, userID }) => {
+    // attach the session ID to the next reconnection attempts
+    socket.auth = { sessionID };
+    // store it in the localStorage
+    localStorage.setItem("sessionID", sessionID);
+    // save the ID of the user
+    socket.userID = userID;
+});
+
 // shows what each player chose, after round ends, while waiting for next round
 function showPlayerChoices(yourType, opponentType) {
     var divToShowResult = document.getElementById("otherPlayerChoice");

@@ -61,6 +61,8 @@ const timeBetweenCheckingMatchmaking = 1000; // in ms, checks queue every X for 
 const maxTimeToMatchmake = 20000; // should not matchmake more than 20 seconds!
 const maxBinsToExtend = 4;
 
+const socketIDLength = 10;
+
 const defaultUsernameForUnregisteredUsers = "default";
 
 // ADDME - not implemented yet, just here to show the :gameId operator, having variables in the URL
@@ -77,28 +79,55 @@ const defaultUsernameForUnregisteredUsers = "default";
 // nsp.sockets.get(socketid).join(roomId)
 // nsp.to(roomId).emit("message",{message : "something"})
 
+// set up the socket.io session stuff (persists through page refreshes)
+
+// socket.io middleware to check on reconnections
+io.use(async (socket, next) => {
+  
+  socket.sessionID = makeid(socketIDLength);
+  socket.userID = makeid(socketIDLength);
+  next();
+});
+
 io.on('connection', (socket) => {
+    if (socket.recovered) {
+      // recovery was successful: socket.id, socket.rooms and socket.data were restored
+      console.log('recovered!!!')
+    } else {
+      console.log('not recovered!!!!')
+      // new or unrecoverable session
+    }
     console.log('=-= =-= =-=');
     console.log('a user has connected');
-    console.log("socket: " + io.sockets.sockets.get(socket.id).id);
-    console.log('=-= =-= =-=');
+    socket.emit("session", { // creating sessionID to protect against page refreshes
+      sessionID: socket.sessionID,
+      userID: socket.userID,
+    });
+    // socket.join(socket.userID); // based on userID which is generated on server-side
+
+    socket.on('disconnecting', () => {
+      console.log('disconnecting')
+      console.log('rooms of socket DISCONNECTING: ' + socket.rooms);
+      console.log('rooms of socket DISCONNECTING: ' + [...socket.rooms]);
+
+      for (const item of socket.rooms) {
+        if (item.length > socketIDLength) { // if it is not an ID we create for the game rooms, skip!
+          continue;
+        }
+        // io.to(item).emit('playerDisconnected'); // tell the other players that someone disconnected
+        io.to(item).emit('gameWon'); // sending gameWon with no data implies a disconnection; client handles as such
+        // TOOD - handle the remaining disconnecting shit
+        
+        // now remove the game from the rooms dictionary:
+        delete rooms[item];
+        console.log("deleting room: " + item);
+      }
+    });
+
     socket.on('disconnect', (reason) => { // TODO - work on disconnect features
-
       // TODO - disconnect from a room, send room message that player disconnected and has 1 minute to reconnect or something
-          // Get the list of rooms the socket is currently joined to
-          console.log('socket rooms: ' + JSON.stringify(socket.rooms));
-          const roomsJoined = Object.keys(socket.rooms);
-          console.log(' rooms joined: ' + JSON.stringify(roomsJoined));
-
-          // Iterate over the rooms joined by the socket
-          roomsJoined.forEach(roomId => {
-            console.log('deleting room: ' + roomId);
-              // Perform cleanup or update actions for each room
-              // For example, you can delete the room from the rooms object
-              delete rooms[roomId];
-          });
-      
       // FIXME VERY IMPORTANT: when a player disconnects, we need to clear the matchmakingIntervals dictionary. This uses socketId to store player matchmaking timer!
+      console.log(JSON.stringify(Object.keys(socket.rooms)));
 
       let player = matchmakingSystem.players[socket.id];
       if (player) { // if player is matchmaking
@@ -114,7 +143,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('createGame', async () => {
-      const roomUniqueId = makeid(10);
+      const roomUniqueId = makeid(socketIDLength);
       rooms[roomUniqueId] = {};
       rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
       // check the jwt if user is logged in, and then add cookie for session
@@ -124,9 +153,10 @@ io.on('connection', (socket) => {
       // create player object
       var p1 = await createPlayer(cookies, socket.id);
       rooms[roomUniqueId].p1 = p1;
-      console.log('rooms of socket before: ' + JSON.stringify(socket.rooms));
+      console.log('rooms of socket before: ' + [...socket.rooms]);
       socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
-      console.log('rooms of socket after: ' + JSON.stringify(socket.rooms));
+      console.log('rooms of socket after JSON: ' + [...socket.rooms]);
+      console.log('rooms of socket after: ' + [...socket.rooms]);
       socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
     })
 
@@ -273,7 +303,7 @@ function createMatch(p1, p2) {
   delete matchmakingSystem.players[p1.socketId]
   delete matchmakingSystem.players[p2.socketId]
   // create room!
-  roomUniqueId = makeid(10);
+  roomUniqueId = makeid(socketIDLength);
   console.log("creating match after matchmake with id: " + roomUniqueId + " and player 1: " + JSON.stringify(p1) + " and p2: " + JSON.stringify(p2));
   rooms[roomUniqueId] = {};
   rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
@@ -355,7 +385,13 @@ function declareRoundWinner(roomUniqueId, socket) {
 // I don't like winString parameber, but it is tradeoff for not checking if() again for efficiency
 // alternatively, I could add that functionality outside this function but I wanted to keep it modular
 function declareGameWinner(socket, roomUniqueId, winner, loser, winString) {
+  // TODO - clear the room and restart stuff
+  let eloCalc = eloCalculations(winner, loser);
+  socket.to(roomUniqueId).emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
+  socket.emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
+}
 
+function eloCalculations(winner, loser) {
   // calculate ELO change
   let winnerELO = elo.getNewRating(winner.elo, loser.elo, 1); // gets winner ELO
   let loserELO = elo.getNewRating(loser.elo, winner.elo, 0); // gets loser ELO
@@ -371,10 +407,7 @@ function declareGameWinner(socket, roomUniqueId, winner, loser, winString) {
   console.log("winner ELO: " + winnerELO);
   console.log("loser ELO: " + loserELO);
 
-  // TODO - clear the room and restart stuff
-
-  socket.to(roomUniqueId).emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: winnerELO, winnerOldELO: winner.elo, loserELO: loserELO, loserOldELO: loser.elo});
-  socket.emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: winnerELO, winnerOldELO: winner.elo, loserELO: loserELO, loserOldELO: loser.elo});
+  return {winnerELO: winnerELO, loserELO: loserELO};
 }
 
 // helper function to make a room id
@@ -387,6 +420,8 @@ function makeid(length) {
   }
   return result;
 }
+// this is used by socket.io documentation for random ID:
+// const randomId = () => crypto.randomBytes(8).toString("hex");
 
 // Function to display countdown timer
 function countdownAndRestartGame(amountOfTime, socket, roomUniqueId) {
