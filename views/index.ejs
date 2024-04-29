@@ -16,10 +16,12 @@
     <login>
         
     </login>
-
-    <button onclick="printRoomsInfo()" class="btn mx-auto">Print rooms info</button>
-    <button onclick="changeStylesheet()" class="btn">Change stylesheet</button>
-    <button onclick="location.href = 'http://127.0.0.1:3000/ingame'" class="btn">InGame View</button>
+    <div class="hidden">
+        <button onclick="printRoomsInfo()" class="btn mx-auto">Print rooms info</button>
+        <button onclick="changeStylesheet()" class="btn">Change stylesheet</button>
+        <button onclick="location.href = 'http://127.0.0.1:3000/ingame'" class="btn">InGame View</button>
+    </div>
+    
 
     
     <div id="lobbyArea" class="max-w-sm mx-auto">
@@ -52,9 +54,9 @@
     </div>
 
     <div id="gamePlay" class="py-4">
-        <div id="waitingArea" class="mx-2"></div> <!-- This displays text when waiting for someone else to join -->
+        <div id="waitingArea" class="mx-2 my-6"></div> <!-- This displays text when waiting for someone else to join -->
         <div class="flex flex-col items-center pb-4"> <!-- This displays game info (score, if you win/lose) -->
-            <h1 class="text-3xl font-bold underline" id="gameWhoWonRoundText">Enjoy the game!</h1>
+            <h1 class="text-3xl font-bold underline hidden" id="gameWhoWonRoundText">Enjoy the game!</h1>
             <div class="flex flex-row pt-2">
                 <div id="gameScore" class="flex-grow pr-2"> </div>
                 <div id="timerDisplay" class="absolute right-0 mr-8 px-4 font-bold text-2xl bg-slate-400 rounded-md"></div>
@@ -71,7 +73,7 @@
                     <div class="text-center">Waiting on choice...</div> <!--shows the other player's choice at end of match-->
                 </div>
             </div>
-            <div class="button-container">
+            <div class="button-container max-w-screen-xl mx-auto">
             </div>
             <div class="submit-container">
                 <button class="submit-button btn btn-pikachu text-black" onclick="submitChoice()">Submit</button>

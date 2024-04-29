@@ -10,7 +10,8 @@ function getRatingDelta(myRating, opponentRating, myGameResult) {
   }
 
 function getNewRating(myRating, opponentRating, myGameResult) {
-    return myRating + getRatingDelta(myRating, opponentRating, myGameResult);
+    // floors rating at 1000 so people do not go below
+    return Math.max(1000, myRating + getRatingDelta(myRating, opponentRating, myGameResult));
 }
 
 module.exports.getNewRating = getNewRating;

@@ -36,6 +36,7 @@ function cancelMatchmake() {
 }
 
 socket.on('newGame', (data) => {
+    document.getElementById('userProfileSection').classList.add('hidden'); // hide login/logout
     roomUniqueId = data.roomUniqueId;
 
     hide(document.getElementById('lobbyArea'));
@@ -43,7 +44,7 @@ socket.on('newGame', (data) => {
 
     let copyButton = document.createElement('button');
     copyButton.style.display = 'block';
-    copyButton.classList.add('btn','btn-primary','py-2', 'my-2', 'mx-auto');
+    copyButton.classList.add('btn','btn-primary','py-2', 'my-4', 'mx-auto');
     copyButton.innerText = 'Copy Code';
     copyButton.addEventListener('click', () => {
         navigator.clipboard.writeText(roomUniqueId).then(function() {
@@ -53,18 +54,22 @@ socket.on('newGame', (data) => {
         });
     });
     let waitingText = document.createElement('p');
-    waitingText.classList.add('text-center');
-    waitingText.innerHTML =`Waiting for opponent to join room code: ${roomUniqueId} Share it with someone so they can join!`;
+    waitingText.classList.add('text-center', 'space-y-2');
+    waitingText.innerHTML =`<div>Waiting for opponent to join room code: ${roomUniqueId}</div> <div>Share it with someone so they can join!</div>`;
     document.getElementById('waitingArea').appendChild(waitingText); 
     document.getElementById('waitingArea').appendChild(copyButton);
 });
 // sets up the game view client side!
 socket.on('playersConnected', (data) => {
+    document.getElementById('userProfileSection').classList.add('hidden'); // hide login/logout
     console.log("received playersConnected socket");
     // This is for if players matchmake, otherwise the id is sent through (data)
     if (data && data.roomUniqueId) {
         roomUniqueId = data.roomUniqueId;
     }
+    var textUpdate = document.getElementById("gameWhoWonRoundText");
+    textUpdate.classList.remove('hidden');
+    textUpdate.innerHTML = "Pick a type"
     hide(document.getElementById('lobbyArea'));
     hide(document.getElementById('waitingArea'));
     ingameMakingChoice.style.display = 'block';
@@ -131,6 +136,7 @@ socket.on('matchResults', (data) => { // when both players have made their choic
 });
 // TODO - still needs to be fixed
 socket.on('gameWon', (data) => {
+    document.getElementById('userProfileSection').classList.remove('hidden'); // hide login/logout
     console.log('game won with data: ' + JSON.stringify(data));
     hide(ingameMakingChoice)
     document.getElementById('gameWinnerArea').classList.remove('hidden');
@@ -173,6 +179,8 @@ socket.on('restartGame', (data) => {
     // clear the gameArea, replace with default content captured from beginning of game
     ingameMakingChoice.innerHTML = "";
     ingameMakingChoice.style.display = 'block';
+    var textUpdate = document.getElementById("gameWhoWonRoundText");
+    textUpdate.innerHTML = "Pick a type"
     document.getElementById('previousRoundText').innerHTML = "Previous Round:";
     console.log("html: " + defaultGameArea.innerHTML);
     ingameMakingChoice.innerHTML = defaultGameArea.innerHTML;

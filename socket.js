@@ -16,6 +16,7 @@ Lobbies
 // KNOWN BUGS
 // if you don't pick anything, it does not display the random pick on your client end (opponent works)
 // random function grabs any type, NEEDS TO BE FROM types remaining
+// when player disconnects, ELO does not get updated for winner/loser
 
 */
 
@@ -90,13 +91,6 @@ io.use(async (socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    if (socket.recovered) {
-      // recovery was successful: socket.id, socket.rooms and socket.data were restored
-      console.log('recovered!!!')
-    } else {
-      console.log('not recovered!!!!')
-      // new or unrecoverable session
-    }
     console.log('=-= =-= =-=');
     console.log('a user has connected');
     socket.emit("session", { // creating sessionID to protect against page refreshes
@@ -114,13 +108,17 @@ io.on('connection', (socket) => {
         if (item.length > socketIDLength) { // if it is not an ID we create for the game rooms, skip!
           continue;
         }
-        // io.to(item).emit('playerDisconnected'); // tell the other players that someone disconnected
-        io.to(item).emit('gameWon'); // sending gameWon with no data implies a disconnection; client handles as such
-        // TOOD - handle the remaining disconnecting shit
-        
-        // now remove the game from the rooms dictionary:
-        delete rooms[item];
-        console.log("deleting room: " + item);
+
+        if (rooms[item] != null) {
+          // io.to(item).emit('playerDisconnected'); // tell the other players that someone disconnected
+          io.to(item).emit('gameWon'); // sending gameWon with no data implies a disconnection; client handles as such
+          // TOOD - handle the remaining disconnecting shit
+          // ELO calculation for player won!
+          
+          // now remove the game from the rooms dictionary:
+          delete rooms[item];
+          console.log("deleting room: " + item);
+        }
       }
     });
 
@@ -134,8 +132,6 @@ io.on('connection', (socket) => {
         console.log(`player disconnected, removing ${JSON.stringify(player)} from matchmaking`);
         removeFromMatchmaking(player);
       }
-
-      // do other stuff too
 
       console.log(`socket ${socket.id} disconnected due to ${reason}`);
       // Iterate through rooms the player was in and call 'leaveRoom' logic
@@ -161,7 +157,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('joinGame', async (data) => {
-      if (rooms[data.roomUniqueId] != null) {
+      if (rooms[data.roomUniqueId] != null && rooms[data.roomUniqueId].p2 == null) { // prevent joining a room where someone already joined!
         console.log('server received joinGame from console! ' + data.roomUniqueId)
         const cookies = socket.handshake.headers.cookie;
         var p2 = await createPlayer(cookies, socket.id);
@@ -385,8 +381,9 @@ function declareRoundWinner(roomUniqueId, socket) {
 // I don't like winString parameber, but it is tradeoff for not checking if() again for efficiency
 // alternatively, I could add that functionality outside this function but I wanted to keep it modular
 function declareGameWinner(socket, roomUniqueId, winner, loser, winString) {
-  // TODO - clear the room and restart stuff
   let eloCalc = eloCalculations(winner, loser);
+  // TODO - clear the room and restart stuff! Might be missing something here
+  delete rooms[roomUniqueId];
   socket.to(roomUniqueId).emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
   socket.emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
 }
@@ -506,8 +503,19 @@ function restartGame(socket, roomUniqueId) {
 }
 
 function printObjectProperties(obj, indentation = '') {
+  if (Object.keys(obj).length === 0) {
+    console.log('rooms dict is empty!!!');
+    return;
+  }
   for (let key in obj) {
-      if (typeof obj[key] === 'object' && obj[key] !== null) {
+      if (key == 'typesRemaining') {
+        let typeString = '';
+        for (let i = 0; i < obj[key].length; i++) {
+          typeString += obj[key][i] + ' ';
+        }
+        console.log(indentation + key + ": " + typeString);
+      }
+      else if (typeof obj[key] === 'object' && obj[key] !== null) {
           console.log(indentation + key + ": ");
           printObjectProperties(obj[key], indentation + '  ');
       } else {
