@@ -24,6 +24,8 @@ const colors = {
 	dark: '#705746',
 	steel: '#B7B7CE',
 	fairy: '#D685AD',
+    none: '#68a090',
+    random: '#68a090',
 };
 
 // parentObject is what we append the button to
@@ -37,6 +39,9 @@ function createTypeButton(type, parentObject, additionalClasses="") {
         button.classList.add(additionalClasses.split(" "));
     }
     button.textContent = type;
+    if (type == 'None' || type == 'Random') { // if no choice or random, we put '???'
+        button.textContent = '???';
+    }
     const color = colors[type.toLowerCase()]; // changing background color of button according to its type
     if (color) {
         button.style.backgroundColor = color;

@@ -144,7 +144,12 @@ socket.on('gameWon', (data) => {
         document.getElementById('roundWinnerArea').classList.remove('hidden');
         var textUpdate = document.getElementById("gameWhoWonRoundText");
         if ((isPlayer1 && data.winner == 'p1') || (!isPlayer1 && data.winner == 'p2')) { // if I won
-            textUpdate.innerHTML = "You won the game!"
+            if (data.disconnected) {
+                textUpdate.innerHTML = "Opponent disconnected. You won the game!"
+            }
+            else {
+                textUpdate.innerHTML = "You won the game!"
+            }
             textUpdate.style.color = "green";
             document.getElementById('eloDisplayOld').innerHTML = data.winnerOldELO;
             document.getElementById('eloDisplayNew').innerHTML = data.winnerELO;
@@ -159,7 +164,7 @@ socket.on('gameWon', (data) => {
             showPlayerChoices(data.loserTypeChoice, data.winnerTypeChoice);
         }
     }
-    else { // this is the disconnect case
+    else { // this is the disconnect case. Depracated
         var textUpdate = document.getElementById("gameWhoWonRoundText");
         textUpdate.innerHTML = "Opponent disconnected: You won the game!"
         textUpdate.style.color = "green";
@@ -338,7 +343,7 @@ function submitChoice() {
         roomUniqueId: roomUniqueId
     });
     // disable all type buttons except those for dispaly
-    const buttons = document.querySelectorAll('button.type-button:not(.display-only)');  // disabling normal buttons, and not the previous round choice ones which are market 'display-only'
+    const buttons = document.querySelectorAll('button.type-button:not(.display-only)');  // disabling normal buttons, and not the previous round choice ones which are marked 'display-only'
     buttons.forEach((button) => {
         hide(button);
     });

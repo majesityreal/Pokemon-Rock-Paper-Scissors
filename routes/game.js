@@ -20,10 +20,6 @@ class Player {
 
 // public games queue
 
-class MatchMaking {
-
-}
-
 // const testPlayer = new Player("Carson", 2000); 
 
 // console.log("running game.js!!!");

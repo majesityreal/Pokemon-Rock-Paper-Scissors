@@ -14,7 +14,6 @@ Lobbies
   Public you can be joined from quickmatch. Quickmatch pairs you up with an open lobby.
 
 // KNOWN BUGS
-// if you don't pick anything, it does not display the random pick on your client end (opponent works)
 // random function grabs any type, NEEDS TO BE FROM types remaining
 // when player disconnects, ELO does not get updated for winner/loser
 
@@ -111,12 +110,15 @@ io.on('connection', (socket) => {
 
         if (rooms[item] != null) {
           // io.to(item).emit('playerDisconnected'); // tell the other players that someone disconnected
-          io.to(item).emit('gameWon'); // sending gameWon with no data implies a disconnection; client handles as such
           // TOOD - handle the remaining disconnecting shit
-          // ELO calculation for player won!
-          
-          // now remove the game from the rooms dictionary:
-          delete rooms[item];
+          if (rooms[item].p1.socketId == socket.id) {
+            console.log('I disconnected and I am p1~!!!')
+            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p2, rooms[roomUniqueId].p1, 'p2DisconnectWin');
+          }
+          else if (rooms[item].p2.socketId == socket.id) {
+            console.log('I disconnected and I am p2~!!!')
+            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p1, rooms[roomUniqueId].p2, 'p1DisconnectWin');
+          }
           console.log("deleting room: " + item);
         }
       }
@@ -192,6 +194,7 @@ io.on('connection', (socket) => {
         var typesRemaining = rooms[data.roomUniqueId].typesRemaining;
         console.log('room unique id: ' + data.roomUniqueId);
         console.log('Room info:  ' + JSON.stringify(rooms[data.roomUniqueId]));
+        rooms[data.roomUniqueId].p1.typeChoice = typeChosen;
         // if they do not choose a type, they get a random one
         // last option: they sent a type that is not allowed, either a glitch or they cheated (modified client.js)
         if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
@@ -199,7 +202,6 @@ io.on('connection', (socket) => {
           p1Choice = typesRemaining[randI];
           rooms[data.roomUniqueId].p1.typeChoice = p1Choice; // now we set the game p1Choice
         }
-        rooms[data.roomUniqueId].p1.typeChoice = typeChosen;
         socket.to(data.roomUniqueId).emit('p1Choice'); // we only want to tell them that p1 made a choice, not the contents of the choice for security.
         // (if sent to client side, intelligent person could view results before sending their choice)
 
@@ -214,12 +216,12 @@ io.on('connection', (socket) => {
       console.log('room unique id: ' + data.roomUniqueId);
       console.log('Room info:  ' + JSON.stringify(rooms[data.roomUniqueId]));
       var typesRemaining = rooms[data.roomUniqueId].typesRemaining;
+      rooms[data.roomUniqueId].p2.typeChoice = typeChosen;
       if (typeChosen == "None" || typeChosen == null || !typesRemaining.includes(typeChosen)) { 
         var randI = randomInt(typesRemaining.length);
         p2Choice = typesRemaining[randI];
         rooms[data.roomUniqueId].p2.typeChoice = p2Choice; // now we set the game p1Choice
       }
-      rooms[data.roomUniqueId].p2.typeChoice = typeChosen;
       socket.to(data.roomUniqueId).emit('p2Choice');
       if(rooms[data.roomUniqueId].p1.typeChoice != null) {
         declareRoundWinner(data.roomUniqueId, socket);
@@ -353,8 +355,7 @@ function declareRoundWinner(roomUniqueId, socket) {
   else if (netScore < 0) {
     rooms[roomUniqueId].p2.wins += 1;
     winner = "p2";
-  }
-  else {
+  } else {
       console.log("It is a tie!");
       winner = "tie";
   }
@@ -384,6 +385,9 @@ function declareGameWinner(socket, roomUniqueId, winner, loser, winString) {
   let eloCalc = eloCalculations(winner, loser);
   // TODO - clear the room and restart stuff! Might be missing something here
   delete rooms[roomUniqueId];
+  if (winString == "p2DisconnectWin" || winString == "p1DisconnectWin") {
+
+  }
   socket.to(roomUniqueId).emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
   socket.emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
 }
