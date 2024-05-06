@@ -14,8 +14,6 @@ Lobbies
   Public you can be joined from quickmatch. Quickmatch pairs you up with an open lobby.
 
 // KNOWN BUGS
-// random function grabs any type, NEEDS TO BE FROM types remaining
-// when player disconnects, ELO does not get updated for winner/loser
 
 */
 
@@ -113,11 +111,11 @@ io.on('connection', (socket) => {
           // TOOD - handle the remaining disconnecting shit
           if (rooms[item].p1.socketId == socket.id) {
             console.log('I disconnected and I am p1~!!!')
-            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p2, rooms[roomUniqueId].p1, 'p2DisconnectWin');
+            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p1, rooms[roomUniqueId].p2, 'p1DisconnectWin');
           }
           else if (rooms[item].p2.socketId == socket.id) {
+            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p2, rooms[roomUniqueId].p1, 'p2DisconnectWin');
             console.log('I disconnected and I am p2~!!!')
-            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p1, rooms[roomUniqueId].p2, 'p1DisconnectWin');
           }
           console.log("deleting room: " + item);
         }
@@ -386,10 +384,15 @@ function declareGameWinner(socket, roomUniqueId, winner, loser, winString) {
   // TODO - clear the room and restart stuff! Might be missing something here
   delete rooms[roomUniqueId];
   if (winString == "p2DisconnectWin" || winString == "p1DisconnectWin") {
-
+    console.log('it is a disconnect win!');
+    socket.to(roomUniqueId).emit('gameWon', {disconnected: true, winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
+    socket.emit('gameWon', {disconnected: true, winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
   }
-  socket.to(roomUniqueId).emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
-  socket.emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
+  else {
+    socket.to(roomUniqueId).emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
+    socket.emit('gameWon', {winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
+  }
+  
 }
 
 function eloCalculations(winner, loser) {

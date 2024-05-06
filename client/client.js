@@ -143,13 +143,12 @@ socket.on('gameWon', (data) => {
     if (data && data.winner) {
         document.getElementById('roundWinnerArea').classList.remove('hidden');
         var textUpdate = document.getElementById("gameWhoWonRoundText");
-        if ((isPlayer1 && data.winner == 'p1') || (!isPlayer1 && data.winner == 'p2')) { // if I won
-            if (data.disconnected) {
-                textUpdate.innerHTML = "Opponent disconnected. You won the game!"
-            }
-            else {
-                textUpdate.innerHTML = "You won the game!"
-            }
+        if (data.disconnected) {
+            textUpdate.innerHTML = "Opponent disconnected. You won the game!"
+            textUpdate.style.color = "green";
+        }
+        else if ((isPlayer1 && data.winner == 'p1') || (!isPlayer1 && data.winner == 'p2')) { // if I won
+            textUpdate.innerHTML = "You won the game!"
             textUpdate.style.color = "green";
             document.getElementById('eloDisplayOld').innerHTML = data.winnerOldELO;
             document.getElementById('eloDisplayNew').innerHTML = data.winnerELO;
