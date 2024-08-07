@@ -13,13 +13,13 @@ var defaultGameArea; // used to reset the game area between rounds (if modified)
 function createGame() {
     isPlayer1 = true;
     console.log('creating game on client.js end!');
-    socket.emit('createGame')
+    socket.emit('createGame');
 }
 
 function joinGame() {
     console.log('Joining game on client.js end!');
     roomUniqueId = document.getElementById('roomUniqueId').value;
-    socket.emit('joinGame', {roomUniqueId: roomUniqueId})
+    socket.emit('joinGame', {roomUniqueId: roomUniqueId});
 }
 
 function matchmake() {
@@ -146,6 +146,8 @@ socket.on('gameWon', (data) => {
         if (data.disconnected) {
             textUpdate.innerHTML = "Opponent disconnected. You won the game!"
             textUpdate.style.color = "green";
+            document.getElementById('eloDisplayOld').innerHTML = data.winnerOldELO;
+            document.getElementById('eloDisplayNew').innerHTML = data.winnerELO;
         }
         else if ((isPlayer1 && data.winner == 'p1') || (!isPlayer1 && data.winner == 'p2')) { // if I won
             textUpdate.innerHTML = "You won the game!"

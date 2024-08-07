@@ -52,8 +52,8 @@ const pokemonTypes = [
   'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
   'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
 ]; // constant used between rounds timer
-const timeBetweenRounds = 3;
-const numRoundWinsToWin = 2;
+const timeBetweenRounds = 1;
+const numRoundWinsToWin = 1;
 const timeBeforeCheckingNeighboringBins = 5000; // in ms
 const timeBetweenCheckingMatchmaking = 1000; // in ms, checks queue every X for a potential match
 const maxTimeToMatchmake = 20000; // should not matchmake more than 20 seconds!
@@ -111,11 +111,11 @@ io.on('connection', (socket) => {
           // TOOD - handle the remaining disconnecting shit
           if (rooms[item].p1.socketId == socket.id) {
             console.log('I disconnected and I am p1~!!!')
-            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p1, rooms[roomUniqueId].p2, 'p1DisconnectWin');
+            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p2, rooms[roomUniqueId].p1,  'p1DisconnectWin');
           }
           else if (rooms[item].p2.socketId == socket.id) {
-            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p2, rooms[roomUniqueId].p1, 'p2DisconnectWin');
-            console.log('I disconnected and I am p2~!!!')
+            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p1, rooms[roomUniqueId].p2, 'p2DisconnectWin');
+            console.log('I disconnected and I am p2~!!!') 
           }
           console.log("deleting room: " + item);
         }
@@ -397,6 +397,7 @@ function declareGameWinner(socket, roomUniqueId, winner, loser, winString) {
 
 function eloCalculations(winner, loser) {
   // calculate ELO change
+  
   let winnerELO = elo.getNewRating(winner.elo, loser.elo, 1); // gets winner ELO
   let loserELO = elo.getNewRating(loser.elo, winner.elo, 0); // gets loser ELO
 
