@@ -19,6 +19,7 @@ Lobbies
 
 /*
 FOR PRODUCTION:
+Create production database and a dev database
 
 Next.js - minify TailwindCSS files to reduce bandwidth
 */
@@ -101,23 +102,33 @@ io.on('connection', (socket) => {
       console.log('rooms of socket DISCONNECTING: ' + socket.rooms);
       console.log('rooms of socket DISCONNECTING: ' + [...socket.rooms]);
 
-      for (const item of socket.rooms) {
-        if (item.length > socketIDLength) { // if it is not an ID we create for the game rooms, skip!
+      for (const socketId of socket.rooms) {
+        if (socketId.length > socketIDLength) { // if it is not an ID we create for the game rooms, skip!
           continue;
         }
 
-        if (rooms[item] != null) {
-          // io.to(item).emit('playerDisconnected'); // tell the other players that someone disconnected
+        if (rooms[socketId] != null) {
+          // io.to(socketId).emit('playerDisconnected'); // tell the other players that someone disconnected
           // TOOD - handle the remaining disconnecting shit
-          if (rooms[item].p1.socketId == socket.id) {
+          if (rooms[socketId].p1.socketId == socket.id) {
             console.log('I disconnected and I am p1~!!!')
-            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p2, rooms[roomUniqueId].p1,  'p1DisconnectWin');
+            if (rooms[socketId].p2) { // if both players in game, then declare win.
+              declareGameWinner(socket, socketId, rooms[socketId].p2, rooms[socketId].p1,  'p1DisconnectWin');
+            }
+            else {
+              // TODO - clear the room!!!!!!
+            }
           }
-          else if (rooms[item].p2.socketId == socket.id) {
-            declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p1, rooms[roomUniqueId].p2, 'p2DisconnectWin');
+          else if (rooms[socketId].p2.socketId == socket.id) {
             console.log('I disconnected and I am p2~!!!') 
+            if (rooms[socketId].p1) {
+              declareGameWinner(socket, socketId, rooms[socketId].p1, rooms[socketId].p2, 'p2DisconnectWin');
+            }
+            else {
+              // TODO - clear the room!!!!!!
+            }
           }
-          console.log("deleting room: " + item);
+          console.log("deleting room: " + socketId);
         }
       }
     });
@@ -384,7 +395,6 @@ function declareGameWinner(socket, roomUniqueId, winner, loser, winString) {
   // TODO - clear the room and restart stuff! Might be missing something here
   delete rooms[roomUniqueId];
   if (winString == "p2DisconnectWin" || winString == "p1DisconnectWin") {
-    console.log('it is a disconnect win!');
     socket.to(roomUniqueId).emit('gameWon', {disconnected: true, winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
     socket.emit('gameWon', {disconnected: true, winner: winString, winnerTypeChoice: winner.typeChoice, loserTypeChoice: loser.typeChoice, winnerELO: eloCalc.winnerELO, winnerOldELO: winner.elo, loserELO: eloCalc.loserELO, loserOldELO: loser.elo});
   }
@@ -397,7 +407,6 @@ function declareGameWinner(socket, roomUniqueId, winner, loser, winString) {
 
 function eloCalculations(winner, loser) {
   // calculate ELO change
-  
   let winnerELO = elo.getNewRating(winner.elo, loser.elo, 1); // gets winner ELO
   let loserELO = elo.getNewRating(loser.elo, winner.elo, 0); // gets loser ELO
 

@@ -17,17 +17,6 @@ db.on('error', () => {
     return; // FIXME we return, before it was throwing a double error so it might be connecting twice?
 });
 
-// Function to create a new user
-async function createUser(username, password) {
-    try {
-        const newUser = new User({ username, password });
-        await newUser.save();
-        console.log('User created successfully');
-    } catch (error) {
-        console.error('Error creating user:', error);
-    }
-}
-
 // Connect to the database
 connectToDatabase()
     .catch(console.error);

@@ -80,12 +80,6 @@ socket.on('playersConnected', (data) => {
         createTypeButton(type, buttonContainer);
     });
 });
-// this is not needed anymore, but leaving here just in case!
-// handle disconnection
-// socket.on('playerDisconnected', () => {
-//     console.log("received DISCONNECTED socket");
-//     hide(document.getElementById('gameArea'));
-// });
 
 socket.on('setP1', () => {
     console.log("setting myself to be p1!");
@@ -148,6 +142,8 @@ socket.on('gameWon', (data) => {
             textUpdate.style.color = "green";
             document.getElementById('eloDisplayOld').innerHTML = data.winnerOldELO;
             document.getElementById('eloDisplayNew').innerHTML = data.winnerELO;
+            var roundWinnerArea = document.getElementById("roundWinnerArea");
+            hide(roundWinnerArea);
         }
         else if ((isPlayer1 && data.winner == 'p1') || (!isPlayer1 && data.winner == 'p2')) { // if I won
             textUpdate.innerHTML = "You won the game!"
@@ -164,11 +160,6 @@ socket.on('gameWon', (data) => {
             document.getElementById('eloDisplayNew').innerHTML = data.loserELO;
             showPlayerChoices(data.loserTypeChoice, data.winnerTypeChoice);
         }
-    }
-    else { // this is the disconnect case. Depracated
-        var textUpdate = document.getElementById("gameWhoWonRoundText");
-        textUpdate.innerHTML = "Opponent disconnected: You won the game!"
-        textUpdate.style.color = "green";
     }
 });
 

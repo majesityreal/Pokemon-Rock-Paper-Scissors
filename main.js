@@ -2,6 +2,8 @@ require('dotenv').config(); // read .env file!
 const http = require('http');
 const express = require('express')
 const cookieParser = require('cookie-parser')
+const compression = require("compression");
+const helmet = require("helmet");
 const app = express();
 // cookieParser is what lets us to req.cookies to get cookies from requests in express
 app.use(cookieParser()); // it is very important it is in this order. Must use cookieParser() before creating the server!!!
@@ -36,10 +38,23 @@ app.get('/dashboard', userAuth, (req, res) => {
   res.send('Welcome to the dashboard');
 });
 
-// Serve static files from the 'client' directory
-app.use(express.static(path.join(__dirname, 'client')));
-// Serve static files from the 'node_modules' directory
-app.use('/socket.io', express.static(__dirname + '/node_modules/socket.io/client-dist'));
+// Add helmet to the middleware chain.
+// Set CSP headers to allow our Bootstrap and Jquery to be served.
+// ^^ this is copied from a tutorial, idk maybe add it later
+app.use(helmet());
+
+// Set up rate limiter: maximum of twenty requests per minute
+const RateLimit = require("express-rate-limit");
+const limiter = RateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 20,
+});
+// Apply rate limiter to all requests
+app.use(limiter);
+
+app.use(compression()); // Compress all routes
+app.use(express.static(path.join(__dirname, 'client'))); // Serve static files from the 'client' directory
+app.use('/socket.io', express.static(__dirname + '/node_modules/socket.io/client-dist')); // Serve static files from the 'node_modules' directory
 
 // Express middleware setup
 app.use(express.urlencoded({ extended: true }));
@@ -55,8 +70,6 @@ app.use(express.json()); // Parse JSON bodies (as sent by API clients)
 // routers in different files
 app.use('/auth', authRouter); // Mount the auth router at a specific path
 app.use('/game', gameRouter);
-
-
 
 // here we just need to tell the server to listen, the other .js files handle some of the routes
 httpServer.listen(3000, () => {
