@@ -54,7 +54,7 @@ const pokemonTypes = [
   'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
 ]; // constant used between rounds timer
 const timeBetweenRounds = 1;
-const numRoundWinsToWin = 1;
+const numRoundWinsToWin = 3;
 const timeBeforeCheckingNeighboringBins = 5000; // in ms
 const timeBetweenCheckingMatchmaking = 1000; // in ms, checks queue every X for a potential match
 const maxTimeToMatchmake = 20000; // should not matchmake more than 20 seconds!
