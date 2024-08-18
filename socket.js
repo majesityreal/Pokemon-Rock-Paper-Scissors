@@ -53,7 +53,7 @@ const pokemonTypes = [
   'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
   'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
 ]; // constant used between rounds timer
-const timeBetweenRounds = 1;
+const timeBetweenRounds = 5;
 const numRoundWinsToWin = 3;
 const timeBeforeCheckingNeighboringBins = 5000; // in ms
 const timeBetweenCheckingMatchmaking = 1000; // in ms, checks queue every X for a potential match
@@ -151,14 +151,16 @@ io.on('connection', (socket) => {
 
     socket.on('createGame', async () => {
       const roomUniqueId = makeid(socketIDLength);
-      rooms[roomUniqueId] = {};
-      rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
       // check the jwt if user is logged in, and then add cookie for session
       // Access cookies from the handshake object
       const cookies = socket.handshake.headers.cookie;
       console.log("room id created: " + roomUniqueId)
       // create player object
       var p1 = await createPlayer(cookies, socket.id);
+      removeFromMatchmaking(p1); // otherwise, funky stuff happens
+      // now we prep the room
+      rooms[roomUniqueId] = {};
+      rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
       rooms[roomUniqueId].p1 = p1;
       console.log('rooms of socket before: ' + [...socket.rooms]);
       socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
@@ -268,6 +270,8 @@ function matchmake(player) {
 }
 
 function removeFromMatchmaking(player) {
+  if (!player.socketId) return; // for some reason if player has no socket... you never know, with coding anything can happen
+  if (!matchmakingIntervals[player.socketId]) return; // if player was not matchmaking to begin with, do nothing
   // take player's socket out of the matchmaking dict. we do this first to minimize possible race conditions
   clearTimeout(matchmakingIntervals[player.socketId]);
   delete (matchmakingIntervals[player.socketId]); // lol i used to have this before clearTimeout... I wonder why THAT didn't work?????
