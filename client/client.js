@@ -35,6 +35,73 @@ function cancelMatchmake() {
     document.getElementById('matchmakeButton').style.display = 'flex';
 }
 
+function loadLeaderboard() {
+    socket.emit('loadLeaderboard');
+}
+
+socket.on('leaderboardData', (data) => {
+    console.log("we got the data!!!" + JSON.stringify(data)); 
+    // now we hide the button and display it in a table
+     // Hide the button
+    document.getElementById('loadLeaderboardButton').style.display = 'none';
+    // Create a table element
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+
+    // Create the table header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+
+    const headers = ['Rank', 'Username', 'ELO'];
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.appendChild(document.createTextNode(headerText));
+        th.style.border = '1px solid black';
+        th.style.padding = '8px';
+        th.style.backgroundColor = '#c7cfd9';
+        headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create the table body
+    const tbody = document.createElement('tbody');
+
+    data.forEach((player, index) => {
+        const row = document.createElement('tr');
+
+        // Rank cell
+        const rankCell = document.createElement('td');
+        rankCell.appendChild(document.createTextNode(index + 1));
+        rankCell.style.border = '1px solid black';
+        rankCell.style.padding = '8px';
+        row.appendChild(rankCell);
+
+        // Username cell
+        const usernameCell = document.createElement('td');
+        usernameCell.appendChild(document.createTextNode(player.username));
+        usernameCell.style.border = '1px solid black';
+        usernameCell.style.padding = '8px';
+        row.appendChild(usernameCell);
+
+        // ELO cell
+        const eloCell = document.createElement('td');
+        eloCell.appendChild(document.createTextNode(player.elo));
+        eloCell.style.border = '1px solid black';
+        eloCell.style.padding = '8px';
+        row.appendChild(eloCell);
+
+        tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+
+    // Insert the table into the container
+    document.getElementById('leaderboardContainer').appendChild(table);
+})
+
 socket.on('newGame', (data) => {
     document.getElementById('userProfileSection').classList.add('hidden'); // hide login/logout
     roomUniqueId = data.roomUniqueId;

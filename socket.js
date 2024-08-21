@@ -260,6 +260,24 @@ io.on('connection', (socket) => {
     socket.on('printRoomsInfo', () => {
       printObjectProperties(rooms);
     });
+
+    socket.on('loadLeaderboard', async () => {
+      // grab top ten and send back
+      try {
+        // Query to get top 10 players by ELO
+        const topPlayers = await User.find()
+          .sort({ elo: -1 }) // Sort by ELO descending
+          .limit(10)          // Limit to top 10
+          .select('username elo'); // Select only the fields you need
+    
+        // Send the top players' data back to the client
+        socket.emit('leaderboardData', topPlayers);
+      } catch (err) {
+        console.error("Failed to load leaderboard", err);
+        socket.emit('error', 'Failed to load leaderboard');
+      }
+    });
+    
 })
 
 ///////////////// HELPER FUNCTIONS HERE ///////////////////////////
