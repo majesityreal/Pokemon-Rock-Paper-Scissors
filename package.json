@@ -2,9 +2,11 @@
   "scripts": {
     "start": "node main.js",
     "dev": "nodemon main.js",
-    "tailwind": "npx tailwindcss -i ./client/style.css -o ./client/stylePlusTailwind.css && npm run dev"
+    "tailwind": "npx tailwindcss -i ./client/style.css -o ./client/stylePlusTailwind.css && npm run dev",
+    "test": "mocha"
   },
   "dependencies": {
+    "chai": "^5.1.1",
     "compression": "^1.7.4",
     "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.6",
@@ -16,12 +18,14 @@
     "express-session": "^1.18.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
+    "mocha": "^10.7.3",
     "mongodb": "^6.5.0",
     "mongoose": "^8.3.1",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "request": "^2.88.2",
     "socket.io": "^4.7.5",
     "timesync": "^1.0.11",
     "zapi-matchmaking": "^1.1.0"
