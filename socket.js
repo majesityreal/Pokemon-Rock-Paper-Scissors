@@ -28,15 +28,15 @@ Next.js - minify TailwindCSS files to reduce bandwidth
 // the socket.io stuff
 const dataFromMainJS = require('./main'); // grabbing the httpServer created in main.js in order to create our socket var io
 const io = dataFromMainJS.io;
-const pokeTypes = require('dismondb'); // pokemon type chart calc library
 const { randomInt } = require('crypto');
 const jwt = require('jsonwebtoken');
 const { getInfoFromJwt } = require('./routes/auth');
-const Player = require('./routes/game').Player;
+const Player = require('./routes/gameRoutes').Player;
 const { User, getElo, updateElo, getUserByUsername } = require('./models/User');
 const elo = require('./helpers/elo');
 const matchmaking = require('./helpers/matchmaking');
 const matchmakingSystem = new matchmaking.MatchmakingSystem();
+const { parseCookies, printObjectProperties, typeCalcs } = require('./helpers/helpers')
 // this makes it print out the matchmaking bins every second
 // setInterval(() => {
 //   matchmakingSystem.printAllBins();
@@ -53,7 +53,7 @@ const pokemonTypes = [
   'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
   'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
 ]; // constant used between rounds timer
-const timeBetweenRounds = 5;
+const timeBetweenRounds = 3;
 const numRoundWinsToWin = 3;
 const timeBeforeCheckingNeighboringBins = 5000; // in ms
 const timeBetweenCheckingMatchmaking = 1000; // in ms, checks queue every X for a potential match
@@ -159,6 +159,7 @@ io.on('connection', (socket) => {
       var p1 = await createPlayer(cookies, socket.id);
       removeFromMatchmaking(p1); // otherwise, funky stuff happens
       // now we prep the room
+      console.log(rooms);
       rooms[roomUniqueId] = {};
       rooms[roomUniqueId].typesRemaining = [...pokemonTypes]; // have to create a shallow copy of the array, arrays in JS are pass by reference
       rooms[roomUniqueId].p1 = p1;
@@ -166,6 +167,7 @@ io.on('connection', (socket) => {
       socket.join(roomUniqueId); // connect incoming client (socket) to this room (by roomUniqueId)
       console.log('rooms of socket after JSON: ' + [...socket.rooms]);
       console.log('rooms of socket after: ' + [...socket.rooms]);
+
       socket.emit("newGame", {roomUniqueId: roomUniqueId, typesRemaining: pokemonTypes}); // server returning newGame with data
     })
 
@@ -180,6 +182,22 @@ io.on('connection', (socket) => {
       }
       else {
         // TODO - log to client trying to join, room does not exist yet
+        // Retrieve the rooms the socket is in
+        const socketRooms = Array.from(socket.rooms);
+        // The socket is in its own room with its ID, so we need to filter that out
+        const filteredRooms = socketRooms.filter(room => room !== socket.id);
+        if (length(filteredRooms) > 1) {
+          console.error(`Filtered rooms is of length ${length(filteredRooms)} which is greater than one. Socket shoulnd not be in more than 1 room!`)
+        }
+        console.log(`Socket ${socket.id} is in rooms:`, filteredRooms);
+      }
+    })
+
+    // TODO ---
+    socket.on('startGame', async (data) => {
+      if (rooms[data.roomUniqueId] != null && rooms[data.roomUniqueId].p1 != null && rooms[data.roomUniqueId].p2 != null) { // prevent joining a room where someone already joined!
+        // start the game, do the shit from joinGame
+        io.to(roomUniqueId).emit('playersConnected', { roomUniqueId: roomUniqueId }); // this sends it ALL sockets in the room
       }
     })
 
@@ -457,51 +475,6 @@ function countdownAndRestartGame(amountOfTime, socket, roomUniqueId) {
   }, 1000);
 }
 
-// helper function to do type calcs
-// returns (int)netScore. (-) means p2 won, (+) means p1 won
-// also returns typeInteraction string, first letter is p1 second is p2
-// i.e. "0g" p1 no effect, p2 super effective
-function typeCalcs(p1Choice, p2Choice) {
-  let netScore = 0;
-  let typeInteraction = ""; // codes: {0: no effect, b: not very effective, g: super effectie, n: neutral hit}
-  const p1Type = pokeTypes.typedex(p1Choice, 4); // 4 is the typeDex API version.
-  const p2Type = pokeTypes.typedex(p2Choice, 4); // 4 is the typeDex API version.
-
-  // check p1 attacking onto p2 defending
-  if (p1Type.typemaps.gen6.attack.noEffect.includes(p2Choice)) { // p1 no effect on p2
-    netScore -= 2;
-    typeInteraction += "0"
-  }
-  else if (p1Type.typemaps.gen6.attack.notVeryEffective.includes(p2Choice)) { // p1 not very effective on p2
-    netScore -= 1;
-    typeInteraction += "b"
-  }
-  else if (p1Type.typemaps.gen6.attack.superEffective.includes(p2Choice)) { // p1 super effective on p2
-    netScore += 1;
-    typeInteraction += "g"
-  }
-  else {
-    typeInteraction += "n"
-  }
-  // p2 attacking p1 defending
-  if (p2Type.typemaps.gen6.attack.noEffect.includes(p1Choice)) { // p2 no effect on p1
-    netScore += 2;
-    typeInteraction += "0"
-  }
-  else if (p2Type.typemaps.gen6.attack.notVeryEffective.includes(p1Choice)) { // p2 not very effective on p1
-    netScore += 1;
-    typeInteraction += "b"
-  }
-  else if (p2Type.typemaps.gen6.attack.superEffective.includes(p1Choice)) { // p2 super effective on p1
-    netScore -= 1;
-    typeInteraction += "g"
-  }
-  else {
-    typeInteraction += "n"
-  }
-  return { score: netScore, typeInteraction: typeInteraction };
-}
-
 function restartGame(socket, roomUniqueId) {
   console.log("game restarted! room id: " + roomUniqueId);
   const currRoom = rooms[roomUniqueId];
@@ -521,41 +494,6 @@ function restartGame(socket, roomUniqueId) {
   const dataToEmit = { typesRemaining: currRoom.typesRemaining, p1Wins: currRoom.p1.wins, p2Wins: currRoom.p2.wins }
   socket.to(roomUniqueId).emit('restartGame', dataToEmit); // TODO - put in some data here
   socket.emit('restartGame', dataToEmit);
-}
-
-function printObjectProperties(obj, indentation = '') {
-  if (Object.keys(obj).length === 0) {
-    console.log('rooms dict is empty!!!');
-    return;
-  }
-  for (let key in obj) {
-      if (key == 'typesRemaining') {
-        let typeString = '';
-        for (let i = 0; i < obj[key].length; i++) {
-          typeString += obj[key][i] + ' ';
-        }
-        console.log(indentation + key + ": " + typeString);
-      }
-      else if (typeof obj[key] === 'object' && obj[key] !== null) {
-          console.log(indentation + key + ": ");
-          printObjectProperties(obj[key], indentation + '  ');
-      } else {
-          console.log(indentation + key + ": " + obj[key]);
-      }
-  }
-}
-// splits cookies into (key, value) pairs
-function parseCookies(cookieString) {
-  if (cookieString) {
-    return cookieString.split(';').reduce((cookies, cookie) => {
-      const [name, value] = cookie.trim().split('=');
-      cookies[name] = value;
-      return cookies;
-    }, {});
-  }
-  else {
-    return false;
-  }
 }
 
 module.exports = { rooms: rooms };

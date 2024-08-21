@@ -57,7 +57,7 @@ socket.on('newGame', (data) => {
     waitingText.classList.add('text-center', 'space-y-2');
     waitingText.innerHTML =`<div>Waiting for opponent to join room code: ${roomUniqueId}</div> <div>Share it with someone so they can join!</div>`;
     document.getElementById('waitingArea').appendChild(waitingText); 
-    document.getElementById('waitingArea').appendChild(copyButton);
+    document.getElementById('waitingArea').appendChild(copyButton); // TODO - convert this to pure HTML, saves processing client side
 });
 // sets up the game view client side!
 socket.on('playersConnected', (data) => {
@@ -67,7 +67,7 @@ socket.on('playersConnected', (data) => {
     if (data && data.roomUniqueId) {
         roomUniqueId = data.roomUniqueId;
     }
-    var textUpdate = document.getElementById("gameWhoWonRoundText");
+    var textUpdate = document.getElementById("gameUpdateText");
     textUpdate.classList.remove('hidden');
     textUpdate.innerHTML = "Pick a type"
     hide(document.getElementById('lobbyArea'));
@@ -103,10 +103,11 @@ socket.on('p2Choice', () => {
 socket.on('matchResults', (data) => { // when both players have made their choice
     console.log("winner: " + data.winner);
     console.log("type interactrion: " + data.typeInteraction)
-    // hide the gameArea
-    hide(ingameMakingChoice)
+    // hide the gameArea - no longer doing this, but could bring it back
+    //hide(ingameMakingChoice)
     // show the winnerArea
     ingameDisplayRoundWinner.classList.add('flex');
+    document.getElementById("opponentChoiceDiv").classList.add("hidden");
     document.getElementById('previousRoundText').innerHTML = ""; // hide this because it is misleading
     if (isPlayer1) {
         showPlayerChoices(data.p1Choice, data.p2Choice);
@@ -137,6 +138,9 @@ socket.on('gameWon', (data) => {
     if (data && data.winner) {
         document.getElementById('roundWinnerArea').classList.remove('hidden');
         var textUpdate = document.getElementById("gameWhoWonRoundText");
+        textUpdate.classList.remove("hidden");
+        var gameUpdate = document.getElementById("gameUpdateText");
+        gameUpdate.classList.add("hidden");
         if (data.disconnected) {
             textUpdate.innerHTML = "Opponent disconnected. You won the game!"
             textUpdate.style.color = "green";
@@ -176,7 +180,7 @@ socket.on('restartGame', (data) => {
     // clear the gameArea, replace with default content captured from beginning of game
     ingameMakingChoice.innerHTML = "";
     ingameMakingChoice.style.display = 'block';
-    var textUpdate = document.getElementById("gameWhoWonRoundText");
+    var textUpdate = document.getElementById("gameUpdateText");
     textUpdate.innerHTML = "Pick a type"
     document.getElementById('previousRoundText').innerHTML = "Previous Round:";
     console.log("html: " + defaultGameArea.innerHTML);
@@ -223,11 +227,15 @@ socket.on("session", ({ sessionID, userID }) => {
 
 // shows what each player chose, after round ends, while waiting for next round
 function showPlayerChoices(yourType, opponentType) {
-    var divToShowResult = document.getElementById("otherPlayerChoice");
-    divToShowResult.innerHTML = ""; // clearing the div
-    createTypeButton(opponentType, divToShowResult, 'display-only');
-    divToShowResult = document.getElementById("yourChoice");
+    var opponentChoiceDisplay = document.getElementById("opponentChoice");
+    opponentChoiceDisplay.innerHTML = ""; // clearing the div
+    createTypeButton(opponentType, opponentChoiceDisplay, 'display-only');
+    // previous round display:
+    var divToShowResult = document.getElementById("previousRoundYourChoice");
     divToShowResult.innerHTML = ""; // clearing the div again
+    createTypeButton(opponentType, divToShowResult, 'display-only');
+    divToShowResult = document.getElementById("previousRoundOpponentChoice");
+    divToShowResult.innerHTML = ""; // clearing the div again again
     console.log('PLAYER CHOICES! : ')
     createTypeButton(yourType, divToShowResult, 'display-only');
 }
@@ -282,6 +290,7 @@ function createTypeInteractionRow(firstType, secondType, typeInteraction, div) {
 
 function displayWhoWon(whoWon) {
     var textUpdate = document.getElementById("gameWhoWonRoundText");
+    textUpdate.classList.remove("hidden");
     if (whoWon == "tie") {
         textUpdate.innerHTML = "It was a tie!"
         textUpdate.style.color = "black";

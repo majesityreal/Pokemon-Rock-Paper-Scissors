@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Type Buttons</title>
+    <!-- <link rel="stylesheet" href="style.css">  -->
+    <link href="/stylePlusTailwind.css" rel="stylesheet" id="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <%- include('nav.ejs') %>
+    <%- include('loginPopup.ejs') %>
+
+    <login>
+        
+    </login>
+    <div class="hidden">
+        <button onclick="printRoomsInfo()" class="btn mx-auto">Print rooms info</button>
+        <button onclick="changeStylesheet()" class="btn">Change stylesheet</button>
+        <button onclick="location.href = 'http://127.0.0.1:3000/ingame'" class="btn">InGame View</button>
+    </div>
+    
+
+    
+    <div id="lobbyArea" class="max-w-sm mx-auto hidden">
+        <div></div>
+        <div class="bg-slate-200 rounded-xl shadow-lg space-x-4 my-4 pt-4 pb-6 flex flex-col justify-center items-center space-y-2">
+            <div></div>
+            <div id="matchmakeButton" style="display: flex">
+                <button onclick="matchmake()" class="btn btn-primary">Matchmake</button>
+            </div>
+            <div id="matchmakeLoadingButton" class="flex-col justify-center items-center space-y-2" style="display: none">
+                <button class="btn-faded flex items-center space-x-2">
+                    <div class="animate-spin rounded-full h-8 w-8 px-1">
+                        <img src="./images/Poké_Ball_icon.svg">
+                    </div>
+                    <p>Matchmaking...</p>
+                </button>
+                <button onclick="cancelMatchmake()" class="btn btn-primary">Cancel</button>
+            </div>
+
+
+        </div>
+        <div class="bg-slate-200 rounded-xl shadow-lg space-x-4 my-4 py-4 flex flex-col justify-center items-center space-y-2">
+            <div></div>
+            <button onclick="createGame()" class="btn btn-primary">Create Game</button>
+            <div>or</div>
+            <button onclick="joinGame()" class="btn btn-primary">Join Game</button>
+            <input type="text" name="" id="roomUniqueId" class="border border-slate-500"/>
+        </div>
+        
+    </div>
+
+    <div id="gamePlay" class="py-4" style="display: block;">
+        <div id="waitingArea" class="mx-2 my-6">
+
+        </div> <!-- This displays text when waiting for someone else to join -->
+        <div class="flex flex-col items-center pb-4"> <!-- This displays game info (score, if you win/lose) -->
+            <h1 class="text-3xl font-bold underline hidden" id="gameWhoWonRoundText">Enjoy the game!</h1>
+            <div class="flex flex-row pt-2">
+                <div id="gameScore" class="flex-grow pr-2"> </div>
+                <div id="timerDisplay" class="absolute right-0 mr-8 px-4 font-bold text-2xl bg-slate-400 rounded-md"></div>
+            </div>
+        </div>
+        <div id="gameArea" style="display: none;">
+            <div id="choiceDisplayWhileWaiting" class="flex-row flex-wrap justify-center max-w-2xl mx-auto" style="display: none;">
+                <div class="choice1 w-1/2 p-4">
+                    <p class="font-bold text-center sm:text-2xl text-lg">Your choice:</p>
+                    <div class="playerChoice"></div> <!--shows YOUR choice at end of match-->
+                </div>
+                <div class="choice2 w-1/2 p-4">
+                    <p class="font-bold text-center sm:text-2xl text-lg">Opponent's choice:</p>
+                    <div class="text-center">Waiting on choice...</div> <!--shows the other player's choice at end of match-->
+                </div>
+            </div>
+            <div class="button-container max-w-screen-xl mx-auto">
+            </div>
+            <div class="submit-container">
+                <button class="submit-button btn btn-pikachu text-black" onclick="submitChoice()">Submit</button>
+            </div>
+            <div class="flex flex-col max-w-md mx-auto my-4 bg-slate-300 items-center">
+                <p class="text-3xl font-bold">Opponent:</p>
+                <p id="opponentState" class="text-center">Waiting for Opponent</p>
+                <div> <!-- This is a div to hold the other div in, otherwise it overlaps the flex container-->
+                  
+                </div>
+            </div>
+
+        </div>
+        <div id="roundWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto hidden"> <!-- changes from 'hidden' to 'flex' when displayed! -->
+            <div id="previousRoundText" class="w-full font-bold text-xl text-center">Previous Round:</div>
+                <div class="choice1 w-1/2 p-4">
+                    <p class="font-bold text-center sm:text-2xl text-lg">Your choice:</p>
+                    <div id="previousRoundYourChoice" class=""></div> <!--shows YOUR choice at end of match-->
+                </div>
+                <div class="choice2 w-1/2 p-4">
+                    <p class="font-bold text-center sm:text-2xl text-lg">Opponent's choice:</p>
+                    <div id="previousRoundOpponentChoice" class=""></div> <!--shows the other player's choice at end of match-->
+                </div>
+        </div>
+        <div id="gameWinnerArea" class="flex-row flex-wrap justify-center max-w-2xl mx-auto my-4 hidden">
+            <div class="flex flex-col items-center">
+                <div class="font-bold"> updated ELO </div>
+                <div class="flex flex-row items-center">
+                    <div id="eloDisplayOld">1000</div>
+                    <p class="text-3xl pb-2 mx-2">→</p> <!-- right arrow emoji-->
+                    <div id="eloDisplayNew">1016</div>
+                </div>
+                <button class="btn btn-primary mt-4" onclick="returnToLobby()">Return to lobby</button>
+            </div>
+        </div>
+        <div id="roundWinnerAreaTypeExplanation" class="flex flex-col items-center mx-auto"></div>
+    </div>
+    <!-- These have to go at the end so they can get access to the html doc -->
+    <script src="/script.js"></script>
+    <script src="/client.js"></script>
+</body>
+</html>

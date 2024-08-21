@@ -22,4 +22,4 @@ connectToDatabase()
     .catch(console.error);
 
 module.exports = db;
-module.exports = { connectToDatabase }
+// module.exports = { connectToDatabase }

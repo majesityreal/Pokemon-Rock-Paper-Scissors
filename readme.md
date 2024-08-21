@@ -5,7 +5,10 @@ Issue bc if you click outside login popup, it closes it unless you click on thes
 
 # How to run!
 Put one foot in front of the other quickly, one foot always must be off the ground... Oh you meant running the project? Ok well for that, you need to:
-WIP TODO FIXME DO THIS SHIT LOLLLLLLLL
+node main.js
+^^ plain old vanilla way of running
+npm run dev
+^^ runs the dev environment. Replace with other environments.
 
 # Stuff this project uses, keywords and all that jazz
 Node.js backend, Express for the routes and stuff
@@ -24,6 +27,7 @@ dotenv - to read from .env file
 
 # TODO for production!!!!
 Set up separate testing and production mongoDB!!!!!!
+Fix hiding DOM elements. Either use: display: block and display: none or hidden class. Refactor everything to use the hidden class or not
 
 # Future developer:
 ## VSCode
@@ -31,6 +35,7 @@ Install PostCSS to read the stuff that Tailwind adds on compiling
 Also install _______________ for the EJS support
 
 # Subfolder explanation
+
 ## /views
 Handles the "views" or the client side display. A view can be an entirely separate page (i.e. index.ejs) or a smaller component (views/loginPopup.ejs)
 
@@ -49,3 +54,6 @@ matchmaking.js handles... well... matchmaking. I wrote it because I couldn't fin
 
 ## /models
 Database models for MongoDB
+
+# Website
+Currently hosted on https://pokemon-rock-paper-scissors-production.up.railway.app/
