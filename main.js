@@ -104,6 +104,10 @@ app.get('/privacyPolicy', (req, res) => {
   res.render('privacyPolicy');
 });
 
+app.get('/secret', (req, res) => {
+  res.render('secret');
+});
+
 app.get('/set-cookie', (req, res) => {
   // Set a cookie named 'myCookie' with value 'hello'
   res.cookie('testCookie', 'hello', { maxAge: 900000, httpOnly: true });
