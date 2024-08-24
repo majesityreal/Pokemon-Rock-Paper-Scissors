@@ -12,9 +12,12 @@
 
 </head>
 <body>
-    
-    <div>
-        Privacy Policy
+    <%- include('nav.ejs') %>
+    <%- include('loginPopup.ejs') %>
+
+    <button class="btn btn-primary mt-4 mx-4" onclick="window.location.href='/'">Return</button>
+    <div style="white-space: pre-wrap;" class="p-4 max-w-xl mx-auto">
+Privacy Policy
 
 Last Updated: 8/21/2024
 
@@ -24,28 +27,26 @@ By accessing or using the Site, you agree to the terms of this Privacy Policy. I
 
 1. Information We Collect
 We may collect the following types of information when you use our Site:
-
 a. Personal Information
 We may collect personal information that you voluntarily provide to us when you register, create an account, or interact with the Site. This may include:
-
 Username
 Any other information you choose to provide
 b. Non-Personal Information
 We may automatically collect non-personal information, such as:
-
 IP address
 Browser type
 Device information
 Pages viewed on our Site
 Date and time of visit
+
 2. How We Use Your Information
 We use your information for the following purposes:
-
 To provide and maintain the Site's functionality
 To personalize your experience on the Site
 To communicate with you, respond to inquiries, and provide customer support
 To improve the Site, analyze usage patterns, and enhance user experience
 To protect the security and integrity of our Site
+
 3. Cookies and Tracking Technologies
 We may use cookies and similar tracking technologies to collect information and enhance your experience on the Site. Cookies are small text files stored on your device that help us understand user behavior, remember preferences, and improve performance.
 
@@ -57,6 +58,7 @@ We do not sell, trade, or rent your personal information to third parties. We ma
 Service providers who assist us in operating the Site, such as hosting providers, analytics providers, or email service providers
 Law enforcement or government authorities, if required by law or to protect our legal rights
 Other users of the Site, to the extent that you voluntarily choose to share information in public forums or communities on the Site
+
 5. Data Security
 We take appropriate measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the Internet or electronic storage is completely secure, and we cannot guarantee absolute security.
 
@@ -68,7 +70,6 @@ Our Site is not intended for children under the age of 13. We do not knowingly c
 
 8. Your Choices and Rights
 You have the right to:
-
 Request that we limit the processing of your personal information
 Withdraw your consent to our use of your personal information at any time
 To exercise any of these rights, please contact us at realcarsonic@gmail.com.
@@ -78,10 +79,7 @@ We may update this Privacy Policy from time to time. Any changes will be posted 
 
 10. Contact Us
 If you have any questions or concerns about this Privacy Policy, please contact us at:
-
 realcarsonic@gmail.com
-
-        
     </div>
     
     <!-- These have to go at the end so they can get access to the html doc -->
