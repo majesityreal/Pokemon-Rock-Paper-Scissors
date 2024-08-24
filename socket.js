@@ -53,7 +53,7 @@ const pokemonTypes = [
   'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
   'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
 ]; // constant used between rounds timer
-const timeBetweenRounds = 3;
+const timeBetweenRounds = 0;
 const numRoundWinsToWin = 3;
 const timeBeforeCheckingNeighboringBins = 5000; // in ms
 const timeBetweenCheckingMatchmaking = 1000; // in ms, checks queue every X for a potential match
@@ -405,7 +405,6 @@ function declareRoundWinner(roomUniqueId, socket) {
     rooms[roomUniqueId].p2.wins += 1;
     winner = "p2";
   } else {
-      console.log("It is a tie!");
       winner = "tie";
   }
   console.log("winner: " + winner)
@@ -418,13 +417,16 @@ function declareRoundWinner(roomUniqueId, socket) {
     declareGameWinner(socket, roomUniqueId, rooms[roomUniqueId].p2, rooms[roomUniqueId].p1, 'p2');
   }
   else {
+    // check if all types have been used, reset if so
+    if (rooms[roomUniqueId].typesRemaining.length <= 4) { // 4 because after calling this function we remove the chosen types. So X+2 whatever desired amount of types X left
+      rooms[roomUniqueId].typesRemaining = [...pokemonTypes];
+    }
     countdownAndRestartGame(timeBetweenRounds, socket, roomUniqueId);
     // display to both clients the results!
     // we need both of these to send to both clients (.to() sends to other one, plain emit() sends to one we received from)
     socket.to(roomUniqueId).emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1.typeChoice, p2Choice: rooms[roomUniqueId].p2.typeChoice, p1Wins: rooms[roomUniqueId].p1.wins, p2Wins: rooms[roomUniqueId].p2.wins});
     socket.emit('matchResults', {winner: winner, typeInteraction: typeInteraction, p1Choice: rooms[roomUniqueId].p1.typeChoice, p2Choice: rooms[roomUniqueId].p2.typeChoice, p1Wins: rooms[roomUniqueId].p1.wins, p2Wins: rooms[roomUniqueId].p2.wins});
   }
-
 }
 
 // winner + loser are Player objects, send from declareRoundWinner, from the pXChoice socket
