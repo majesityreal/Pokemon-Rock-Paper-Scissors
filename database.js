@@ -4,6 +4,7 @@ const User = require("./models/User")
 // Connect to MongoDB
 async function connectToDatabase() {
     try {
+        console.log("MONGODB URL: " + process.env.MONGODB_URL)
         await mongoose.connect(process.env.MONGODB_URL);
         console.log("Connected to MongoDB");
     } catch (error) {

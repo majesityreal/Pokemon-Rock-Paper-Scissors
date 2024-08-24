@@ -57,11 +57,14 @@ app.use('/socket.io', express.static(__dirname + '/node_modules/socket.io/client
 
 // Express middleware setup
 app.use(express.urlencoded({ extended: true }));
-app.use(session({ // this is what establishes the session
-  secret: 'your_strong_secret_here', // Used for signing the session ID cookie
-  resave: false, // Don't resave unchanged sessions
-  saveUninitialized: false, // Don't save new sessions that have no data
-  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // Session expires in 1 week by default
+
+const MongoStore = require('connect-mongo');
+app.use(session({
+  secret: process.env.SESSION_KEY,
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URL }),
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: true }
 }));
 
 app.use(express.json()); // Parse JSON bodies (as sent by API clients)
@@ -71,8 +74,9 @@ app.use('/auth', authRouter); // Mount the auth router at a specific path
 app.use('/game', gameRouter);
 
 // here we just need to tell the server to listen, the other .js files handle some of the routes
-httpServer.listen(3000, () => {
-    console.log(`Server listening on port ${3000}`);
+const port = process.env.PORT || 3000;
+httpServer.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
   });
 
 console.log("Hello World!");
@@ -94,6 +98,10 @@ app.get('/', (req, res) => {
     res.render('index');
   }
   
+});
+
+app.get('/privacyPolicy', (req, res) => {
+  res.render('privacyPolicy');
 });
 
 app.get('/set-cookie', (req, res) => {
