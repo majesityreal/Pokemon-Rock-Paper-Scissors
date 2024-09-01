@@ -74,7 +74,7 @@ app.use('/auth', authRouter); // Mount the auth router at a specific path
 app.use('/game', gameRouter);
 
 // here we just need to tell the server to listen, the other .js files handle some of the routes
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 httpServer.listen(port, "0.0.0.0", () => {
     console.log(`Server listening on port ${port}`);
   });

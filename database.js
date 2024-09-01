@@ -14,7 +14,8 @@ async function connectToDatabase() {
 
 const db = mongoose.connection;
 db.on('error', () => {
-    console.error.bind(console, 'MongoDB connection error:')
+    console.error.bind(console, 'MongoDB connection error:');
+    console.log("Carsonic Mongo Error");
     return; // FIXME we return, before it was throwing a double error so it might be connecting twice?
 });
 
