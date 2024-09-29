@@ -131,6 +131,7 @@ class EloQueue {
         let pIndex = this.players.findIndex(p => p.socketId === player.socketId);
         // let pIndex = this.players.find(p => p.socketId === player.socketId);
         if (pIndex == -1) { // player not in queue!
+            console.log("Remove player did not work, Player not in queue");
             return false;
         }
         let removedPlayer = this.players.splice(pIndex, 1);

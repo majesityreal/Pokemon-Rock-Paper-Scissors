@@ -291,8 +291,7 @@ function matchmake(player) {
 
   var opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
   if (opponent) { // if opponent, I am the one who found a match. I am the second, opponent joined queue first
-    removeFromMatchmaking(opponent);
-    removeFromMatchmaking(player);
+    removeFromMatchmaking(player); // we only remove ourselves, because in finding the opponent it already removes from matchmaking
     createMatch(opponent, player);
     return;
   }
@@ -306,6 +305,7 @@ function matchmake(player) {
 }
 
 function removeFromMatchmaking(player) {
+  if (!player) return;
   if (!player.socketId) return; // for some reason if player has no socket... you never know, with coding anything can happen
   if (!matchmakingIntervals[player.socketId]) return; // if player was not matchmaking to begin with, do nothing
   // take player's socket out of the matchmaking dict. we do this first to minimize possible race conditions
@@ -347,6 +347,11 @@ function matchmakeExtended(player, intExtended) {
 }
 
 function createMatch(p1, p2) {
+  if (!p1 || !p2) { // error checking, cannot create a match if both players do not exist
+    console.error("Error! Tried creating match with p1: " + JSON.stringify(p1) 
+    + "and p2: " + JSON.stringify(p2) + " one of them is bad data");
+    return;
+  }
   delete matchmakingSystem.players[p1.socketId]
   delete matchmakingSystem.players[p2.socketId]
   // create room!
