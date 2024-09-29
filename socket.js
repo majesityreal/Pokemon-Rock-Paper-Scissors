@@ -292,6 +292,7 @@ function matchmake(player) {
   var opponent = matchmakingSystem.findMatchForPlayer(player, player.elo);
   if (opponent) { // if opponent, I am the one who found a match. I am the second, opponent joined queue first
     removeFromMatchmaking(player); // we only remove ourselves, because in finding the opponent it already removes from matchmaking
+    clearTimeout(matchmakingIntervals[opponent.socketId]); // we have to do this cuz we don't call removeFromMatchmaking on opponent, this clears the checking extended bins matchmaking call
     createMatch(opponent, player);
     return;
   }
